@@ -1,6 +1,6 @@
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
-DISABLE_AUTO_TITLE=true
+DISABLE_AUTO_TITLE=false
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
