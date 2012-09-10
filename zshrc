@@ -43,6 +43,9 @@ export PATH=/Users/patrikbjorklund/.rvm/gems/ruby-1.9.3-p0@rails31/bin:/Users/pa
 
 export EDITOR="vim"
 
+export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
 alias kod="cd ~//Kod/rails/"
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
