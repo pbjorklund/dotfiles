@@ -7,7 +7,7 @@
   type = cat-file -t
   dump = cat-file -p
 [user]
-	name = Patrik Björklund
+	name = p.bjorklund@gmail.com
 	email = p.bjorklund@gmail.com
 [color]
   branch = auto
@@ -20,3 +20,5 @@
 [github]
 	user = pbjorklund
   token = !security 2>&1 >/dev/null find-generic-password -gs github.token | ruby -e 'print $1 if STDIN.gets =~ /^password: \\\"(.*)\\\"$/'
+[credential]
+	helper = osxkeychain
