@@ -11,6 +11,7 @@ ZSH_THEME="robbyrussell"
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+alias gwc='git whatchanged -p --abbrev-commit --pretty=medium'
 
 # Set to this to use case-sensitive completion
 # CASE_SENSITIVE="true"
