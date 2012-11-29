@@ -36,7 +36,7 @@ plugins=(git bundler rvm brew gem zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
-export PATH=/Users/patrikbjorklund/.rvm/gems/ruby-1.9.3-p0@rails31/bin:/Users/patrikbjorklund/.rvm/gems/ruby-1.9.3-p0@global/bin:/Users/patrikbjorklund/.rvm/rubies/ruby-1.9.3-p0/bin:/Users/patrikbjorklund/.rvm/bin:/usr/local/bin:/usr/local/sbin:/opt/local/bin:/opt/local/sbin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11/bin
+export PATH=/Users/patrikbjorklund/.rvm/gems/ruby-1.9.3-p0@rails31/bin:/Users/patrikbjorklund/.rvm/gems/ruby-1.9.3-p0@global/bin:/Users/patrikbjorklund/.rvm/rubies/ruby-1.9.3-p0/bin:/Users/patrikbjorklund/.rvm/bin:/usr/local/bin:/usr/local/sbin:/opt/local/bin:/opt/local/sbin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11/bin:/usr/local/share/npm/bin
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session.
 
