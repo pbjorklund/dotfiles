@@ -99,3 +99,10 @@ source $OSH/oh-my-bash.sh
 # Example aliases
 # alias bashconfig="mate ~/.bashrc"
 # alias ohmybash="mate ~/.oh-my-bash"
+
+alias cc="find ./ -type d -name 'node_modules' -prune -o -type f -iname '*.ts*' -print0 | xargs -0 awk 'FNR==1{print FILENAME;print ""} {print}' | iconv -f UTF-8 -t UTF-16LE | clip.exe"
+
+
+ccfile() {
+	awk 'FNR==1{print FILENAME;print ""} {print}' "$1" | iconv -f UTF-8 -t UTF-16LE | clip.exe
+}
