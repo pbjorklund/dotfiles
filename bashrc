@@ -141,16 +141,16 @@ export PATH="$PATH:/home/vscode/.dotnet/tools"
 
 export WSL_UTF8=1
 
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+#export PYENV_ROOT="$HOME/.pyenv"
+#command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+#eval "$(pyenv init -)"
 
 # Restart your shell for the changes to take effect.
 
 # Load pyenv-virtualenv automatically by adding
 # the following to ~/.bashrc:
 
-eval "$(pyenv virtualenv-init -)"
+#eval "$(pyenv virtualenv-init -)"
 
 alias cc="find ./ -type d -name 'node_modules' -prune -o -type f -iname '*.ts*' -print0 | xargs -0 awk 'FNR==1{print FILENAME;print ""} {print}' | iconv -f UTF-8 -t UTF-16LE | clip.exe"
 
@@ -160,3 +160,5 @@ ccfile() {
 }
 
 alias devcontainer='docker exec -it -w /workspace --env-file="$(pwd)/.devcontainer/container.env" $(docker ps --filter "name=$(basename $(pwd))_devcontainer_app" --format "{{.ID}}") zsh'
+
+PATH="$HOME/.local/bin:$PATH"
