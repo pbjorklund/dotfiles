@@ -162,3 +162,9 @@ ccfile() {
 alias devcontainer='docker exec -it -w /workspace --env-file="$(pwd)/.devcontainer/container.env" $(docker ps --filter "name=$(basename $(pwd))_devcontainer_app" --format "{{.ID}}") zsh'
 
 PATH="$HOME/.local/bin:$PATH"
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+eval "$(ssh-agent -s)"
+. "$HOME/.cargo/env"
