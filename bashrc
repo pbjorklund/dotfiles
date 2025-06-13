@@ -2,6 +2,15 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+# NixOS Configuration Management Aliases
+alias nixedit="code ~/dotfiles/nixos"
+alias nixdeploy="~/dotfiles/nixos/deploy.sh"
+alias nixtest="sudo nixos-rebuild test --show-trace"
+alias nixswitch="sudo nixos-rebuild switch --show-trace"
+alias nixboot="sudo nixos-rebuild boot --show-trace"
+alias nixgc="sudo nix-collect-garbage -d"
+alias nixupdate="sudo nixos-rebuild switch --upgrade --show-trace"
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
@@ -167,4 +176,5 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 eval "$(ssh-agent -s)"
-. "$HOME/.cargo/env"
+# Load Rust/Cargo environment if it exists
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
