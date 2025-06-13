@@ -118,6 +118,7 @@
     vim
     teams-for-linux
     git
+    gh  # GitHub CLI
     htop
     xclip
     solaar

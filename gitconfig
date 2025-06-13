@@ -18,6 +18,8 @@
 	changed = green bold
 	untracked = blue bold
 [credential "https://github.com"]
-	helper = store
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
 [credential "https://gist.github.com"]
-	helper = store
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
