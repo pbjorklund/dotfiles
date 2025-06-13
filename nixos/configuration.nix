@@ -14,9 +14,12 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Make sure these kernel modules are loaded
-  boot.kernelModules = [ "evdi" "udl" ];
+  # Make sure these kernel modules are loaded for DisplayLink
+  boot.kernelModules = [ "evdi" "udl" "i2c-dev" ];
   boot.extraModulePackages = with config.boot.kernelPackages; [ evdi ];
+  
+  # Additional kernel parameters for DisplayLink
+  boot.kernelParams = [ "video=efifb:off" ];
 
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -126,9 +129,11 @@
     v4l-utils
     obs-studio
     displaylink
+    evdi  # DisplayLink kernel module userspace tools
     usbutils  # This provides lsusb
     pciutils  # This provides lspci
     xorg.xrandr  # Ensure xrandr is available
+    autorandr  # Automatic display configuration
     vscode
   ];
 
@@ -196,30 +201,49 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.05"; # Did you read the comment?
 
-  # Add DisplayLink service (add this section)
-  services.xserver.displayManager.sessionCommands = ''
-    ${pkgs.displaylink}/bin/displaylink-driver
-  '';
-
+  # DisplayLink configuration for ThinkPad X1 Carbon Gen 11 with USB-C docking
   services.xserver.displayManager.setupCommands = ''
-    ${pkgs.displaylink}/bin/DisplayLinkManager &
+    # Load the evdi module explicitly
+    ${pkgs.kmod}/bin/modprobe evdi
   '';
 
-  # Or alternatively, use this systemd service configuration:
+  # Enable DisplayLink service
   systemd.services.displaylink = {
     description = "DisplayLink Manager";
     wantedBy = [ "graphical-session.target" ];
-    after = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" "display-manager.service" ];
+    wants = [ "display-manager.service" ];
     serviceConfig = {
       Type = "simple";
+      ExecStartPre = [
+        "${pkgs.kmod}/bin/modprobe evdi"
+        "${pkgs.coreutils}/bin/sleep 3"
+      ];
       ExecStart = "${pkgs.displaylink}/bin/DisplayLinkManager";
       Restart = "always";
       RestartSec = 5;
       User = "root";
+      Environment = [ "DISPLAY=:0" ];
     };
-    environment = {
-      DISPLAY = ":0";
-    };
+  };
+
+  # udev rules for DisplayLink devices
+  services.udev.extraRules = ''
+    # DisplayLink devices
+    SUBSYSTEM=="usb", ATTR{idVendor}=="17e9", MODE="0666"
+    # Lenovo ThinkPad USB-C Dock Gen 2
+    SUBSYSTEM=="usb", ATTR{idVendor}=="17ef", ATTR{idProduct}=="3060", MODE="0666"
+    # Lenovo ThinkPad Thunderbolt 3 Dock
+    SUBSYSTEM=="usb", ATTR{idVendor}=="17ef", ATTR{idProduct}=="3062", MODE="0666"
+    # Generic DisplayLink devices
+    SUBSYSTEM=="usb", ATTR{idVendor}=="17e9", ATTR{idProduct}=="*", MODE="0666"
+  '';
+
+  # Additional hardware enablement
+  hardware.opengl = {
+    enable = true;
+    driSupport = true;
+    driSupport32Bit = true;
   };
 
 }
