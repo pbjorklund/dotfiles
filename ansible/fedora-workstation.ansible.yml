@@ -134,16 +134,6 @@
       become_user: "{{ original_user }}"
       when: not dotfiles_dir.stat.exists
 
-    - name: Update dotfiles repo if it already exists
-      ansible.builtin.git:
-        repo: https://github.com/pbjorklund/dotfiles.git
-        dest: "/home/{{ original_user }}/dotfiles"
-        version: main
-        update: true
-      become: true
-      become_user: "{{ original_user }}"
-      when: dotfiles_dir.stat.exists
-      changed_when: false
 
     - name: Run dotfiles install script to create symlinks
       ansible.builtin.command:
@@ -179,12 +169,13 @@
       become: true
       become_user: "{{ original_user }}"
       when: not ssh_key_check.stat.exists
+      changed_when: true
 
     - name: Set SSH key permissions
       ansible.builtin.file:
         path: "/home/{{ original_user }}/.ssh"
         state: directory
-        mode: '0700'
+        mode: "0700"
         owner: "{{ original_user }}"
         group: "{{ original_user }}"
       become: true
@@ -192,7 +183,7 @@
     - name: Set private key permissions
       ansible.builtin.file:
         path: "/home/{{ original_user }}/.ssh/id_ed25519"
-        mode: '0600'
+        mode: "0600"
         owner: "{{ original_user }}"
         group: "{{ original_user }}"
       become: true
@@ -201,7 +192,7 @@
     - name: Set public key permissions
       ansible.builtin.file:
         path: "/home/{{ original_user }}/.ssh/id_ed25519.pub"
-        mode: '0644'
+        mode: "0644"
         owner: "{{ original_user }}"
         group: "{{ original_user }}"
       become: true
@@ -214,6 +205,7 @@
       become: true
       become_user: "{{ original_user }}"
       when: not ssh_key_check.stat.exists
+      changed_when: false
 
     - name: Show SSH public key for GitHub
       ansible.builtin.debug:
