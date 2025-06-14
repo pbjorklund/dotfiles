@@ -2,7 +2,7 @@
 - name: Setup Fedora Workstation
   hosts: localhost
   connection: local
-  become: yes
+  become: true
   vars:
     user_home: "{{ ansible_env.HOME }}"
     regular_user: "{{ ansible_env.USER }}"
@@ -10,71 +10,117 @@
 
   tasks:
     - name: Import 1Password GPG key
-      rpm_key:
+      ansible.builtin.rpm_key:
         key: https://downloads.1password.com/linux/keys/1password.asc
         state: present
 
     - name: Add 1Password repository
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: 1password
         description: 1Password Stable Channel
         baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
-        enabled: yes
-        gpgcheck: yes
-        repo_gpgcheck: yes
+        enabled: true
+        gpgcheck: true
+        repo_gpgcheck: true
         gpgkey: https://downloads.1password.com/linux/keys/1password.asc
 
     - name: Add Google Chrome repository
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: google-chrome
         description: Google Chrome
         baseurl: http://dl.google.com/linux/chrome/rpm/stable/x86_64
-        enabled: yes
-        gpgcheck: yes
+        enabled: true
+        gpgcheck: true
         gpgkey: https://dl.google.com/linux/linux_signing_key.pub
 
     - name: Import Google Chrome GPG key
-      rpm_key:
+      ansible.builtin.rpm_key:
         key: https://dl.google.com/linux/linux_signing_key.pub
         state: present
 
     - name: Import Microsoft GPG key
-      rpm_key:
+      ansible.builtin.rpm_key:
         key: https://packages.microsoft.com/keys/microsoft.asc
         state: present
 
     - name: Add Visual Studio Code repository
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: vscode
         description: Visual Studio Code
         baseurl: https://packages.microsoft.com/yumrepos/vscode
-        enabled: yes
-        gpgcheck: yes
+        enabled: true
+        gpgcheck: true
         gpgkey: https://packages.microsoft.com/keys/microsoft.asc
 
-    - name: Install packages
-      dnf:
+    - name: Install desktop applications
+      ansible.builtin.dnf:
         name:
-          - 1password
-          - google-chrome-stable
-          - vim
-          - code
+          - 1password # Password manager
+          - google-chrome-stable # Web browser
+          - code # Visual Studio Code editor
+        state: present
+
+    - name: Install development tools
+      ansible.builtin.dnf:
+        name:
+          - git # Version control
+          - vim # Text editor
+          - neovim # Modern vim
+          - tmux # Terminal multiplexer
+          - nodejs # JavaScript runtime
+          - npm # Node package manager
+          - python3-pip # Python package manager
+          - ansible # Automation tool
+          - ansible-lint # Ansible linting
+          - yamllint # YAML linting
+          - openssh-clients # SSH tools (includes ssh-keygen)
+        state: present
+
+    - name: Install command line utilities
+      ansible.builtin.dnf:
+        name:
+          - curl # HTTP client
+          - wget # File downloader
+          - jq # JSON processor
+          - tree # Directory structure viewer
+          - htop # Process monitor
+          - ripgrep # Fast grep alternative
+          - fd-find # Fast find alternative
+          - bat # Cat with syntax highlighting
+          - fzf # Fuzzy finder
+          - zsh # Alternative shell
+          - unzip # Archive extraction
+        state: present
+
+    - name: Install containerization tools
+      ansible.builtin.dnf:
+        name:
+          - docker # Container runtime (includes compose)
         state: present
 
     - name: Remove Firefox
-      dnf:
+      ansible.builtin.dnf:
         name: firefox
         state: absent
 
     - name: Update all packages
-      dnf:
+      ansible.builtin.dnf:
         name: "*"
-        state: latest
+        state: present
+        update_only: true
+
+    - name: Check if dotfiles directory exists
+      ansible.builtin.stat:
+        path: "/home/{{ original_user }}/dotfiles"
+      register: dotfiles_dir
+      become: true
+      become_user: "{{ original_user }}"
 
     - name: Clone repo from GitHub to user home (as regular user)
-      git:
+      ansible.builtin.git:
         repo: https://github.com/pbjorklund/dotfiles.git
-        dest: "/home/{{ original_user  }}/dotfiles"
-        force: yes
+        dest: "/home/{{ original_user }}/dotfiles"
+        update: false
+      become: true
       become_user: "{{ original_user }}"
-      
+      when: not dotfiles_dir.stat.exists
