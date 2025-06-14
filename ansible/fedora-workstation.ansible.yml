@@ -95,6 +95,13 @@
       become: true
       become_user: "{{ original_user }}"
 
+    - name: Install Plexamp via Flatpak (music player for Plex media servers)
+      community.general.flatpak:
+        name: com.plexamp.Plexamp
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+
     - name: Install development tools
       ansible.builtin.dnf:
         name:
