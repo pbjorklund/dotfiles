@@ -120,7 +120,19 @@
       ansible.builtin.git:
         repo: https://github.com/pbjorklund/dotfiles.git
         dest: "/home/{{ original_user }}/dotfiles"
+        version: master
         update: false
       become: true
       become_user: "{{ original_user }}"
       when: not dotfiles_dir.stat.exists
+
+    - name: Update dotfiles repo if it already exists
+      ansible.builtin.git:
+        repo: https://github.com/pbjorklund/dotfiles.git
+        dest: "/home/{{ original_user }}/dotfiles"
+        version: main
+        update: true
+      become: true
+      become_user: "{{ original_user }}"
+      when: dotfiles_dir.stat.exists
+      changed_when: false
