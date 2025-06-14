@@ -2,20 +2,6 @@
 
 MANDATORY requirements for all Ansible files in this dotfiles repository.
 
-## YAML Syntax Requirements
-
-- **MUST** use exactly 2 spaces for indentation (no tabs)
-- **MUST** include descriptive task names using [`name:`](ansible/fedora-workstation.ansible.yml:1) field
-- **MUST** use [`become: true`](ansible/fedora-workstation.ansible.yml:1) for tasks requiring sudo privileges
-- **MUST** use [`become_user: "{{ ansible_env.SUDO_USER }}"`](ansible/fedora-workstation.ansible.yml:1) when switching back to regular user
-
-## Playbook Structure Requirements
-
-- **MUST** set [`hosts: localhost`](ansible/fedora-workstation.ansible.yml:1) and [`connection: local`](ansible/fedora-workstation.ansible.yml:1) for local machine setup
-- **MUST** define variables at playbook top using [`vars:`](ansible/fedora-workstation.ansible.yml:1) section
-- **MUST** group related tasks with comment headers using `# Section Name`
-- **MUST** order tasks: repositories → GPG keys → packages → services → configuration
-
 ## Package Management Requirements
 
 - **MUST** use [`ansible.builtin.dnf`](ansible/fedora-workstation.ansible.yml:1) module (FQCN required)
@@ -25,14 +11,6 @@ MANDATORY requirements for all Ansible files in this dotfiles repository.
 - **MUST** use Flatpak for desktop applications EXCEPT: Chrome, 1Password, VS Code (use native packages)
 - **MUST** group packages with comments explaining purpose
 - **MUST** include package descriptions: `# Package Name - Description of what it does`
-
-## Boolean and Value Requirements
-
-- **MUST** use [`true`](ansible/fedora-workstation.ansible.yml:1)/[`false`](ansible/fedora-workstation.ansible.yml:1) (never `yes`/`no`)
-- **MUST** use [`force: true`](ansible/fedora-workstation.ansible.yml:1) for git operations handling existing directories
-- **MUST** use [`update: false`](ansible/fedora-workstation.ansible.yml:1) for git clones to prevent unnecessary updates
-- **MUST** use HTTPS URLs for all repositories
-- **MUST** enable [`gpgcheck: true`](ansible/fedora-workstation.ansible.yml:1) and [`repo_gpgcheck: true`](ansible/fedora-workstation.ansible.yml:1)
 
 ## User Context Requirements
 
@@ -53,19 +31,18 @@ MANDATORY requirements for all Ansible files in this dotfiles repository.
 - **MUST** place all Ansible files in [`ansible/`](ansible/:1) directory
 - **MUST** use `.yml` extension (not `.yaml`)
 
+## Execution Requirements
+
+- **MUST** run playbooks with `ansible-playbook` (not `--ask-become-pass` or `sudo`)
+- **MUST** configure `become_ask_pass = False` in [`ansible.cfg`](ansible/ansible.cfg:1)
+- **MUST** verify idempotency by running playbook multiple times
+
 ## Quality Assurance Requirements
 
 - **MUST** pass `ansible-lint` with zero violations
 - **MUST** pass `ansible-playbook --syntax-check`
 - **MUST** be idempotent (safe to run multiple times)
 - **MUST** include package updates in playbook using [`state: latest`](ansible/fedora-workstation.ansible.yml:1)
-
-## Security Requirements
-
-- **MUST** verify all GPG keys before adding repositories
-- **MUST** use HTTPS URLs for all external resources
-- **SHALL NOT** include passwords, tokens, or sensitive data
-- **MUST** validate repository signatures
 
 ## Violation Consequences
 

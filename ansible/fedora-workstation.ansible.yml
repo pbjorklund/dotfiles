@@ -163,6 +163,19 @@
         groups: docker
         append: true
 
+    - name: Restart systemd user session to pick up new group membership
+      ansible.builtin.shell: "loginctl terminate-user {{ original_user }}"
+      ignore_errors: true
+
+    - name: Notify user about Docker group configuration
+      ansible.builtin.debug:
+        msg: |
+          ✅ Docker has been configured and user added to docker group.
+          🔄 Your systemd user session has been restarted to activate group membership.
+
+          Please log back in to your desktop session for the changes to take full effect.
+          After logging back in, 'docker ps' will work without sudo.
+
     - name: Check if SSH key exists
       ansible.builtin.stat:
         path: "/home/{{ original_user }}/.ssh/id_ed25519"
