@@ -67,6 +67,13 @@
       become: true
       become_user: "{{ original_user }}"
 
+    - name: Install Obsidian via Flatpak (note-taking and knowledge management)
+      community.general.flatpak:
+        name: md.obsidian.Obsidian
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+
     - name: Install development tools
       ansible.builtin.dnf:
         name:
