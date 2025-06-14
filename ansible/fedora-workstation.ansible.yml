@@ -52,13 +52,20 @@
         gpgcheck: true
         gpgkey: https://packages.microsoft.com/keys/microsoft.asc
 
-    - name: Install desktop applications
+    - name: Install desktop applications (native packages for system integration)
       ansible.builtin.dnf:
         name:
-          - 1password # Password manager
-          - google-chrome-stable # Web browser
-          - code # Visual Studio Code editor
+          - 1password # Password manager (needs system integration)
+          - google-chrome-stable # Web browser (needs system integration)
+          - code # Visual Studio Code (needs system integration)
         state: present
+
+    - name: Install teams-for-linux via Flatpak (unofficial Teams client)
+      community.general.flatpak:
+        name: com.github.IsmaelMartinez.teams_for_linux
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
 
     - name: Install development tools
       ansible.builtin.dnf:
@@ -136,3 +143,31 @@
       become_user: "{{ original_user }}"
       when: dotfiles_dir.stat.exists
       changed_when: false
+
+    - name: Run dotfiles install script to create symlinks
+      ansible.builtin.command:
+        cmd: ./install.sh
+        chdir: "/home/{{ original_user }}/dotfiles"
+      become: true
+      become_user: "{{ original_user }}"
+      register: install_result
+      changed_when: "'Creating symlink' in install_result.stdout"
+
+    - name: Start and enable Docker service
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: "{{ original_user }}"
+        groups: docker
+        append: true
+
+    - name: Enable focus-on-hover in GNOME
+      community.general.dconf:
+        key: "/org/gnome/desktop/wm/preferences/focus-mode"
+        value: "'sloppy'"
+      become: true
+      become_user: "{{ original_user }}"
