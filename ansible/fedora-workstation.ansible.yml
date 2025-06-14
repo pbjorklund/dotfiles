@@ -275,9 +275,164 @@
       become: true
       become_user: "{{ original_user }}"
 
-    - name: Enable Dash to Dock extension
+    # GNOME Desktop Configuration Section
+    - name: Enable multiple GNOME extensions
       community.general.dconf:
         key: "/org/gnome/shell/enabled-extensions"
-        value: "['dash-to-dock@micxgx.gmail.com']"
+        value: "['dash-to-dock@micxgx.gmail.com', 'appindicatorsupport@rgcjonas.gmail.com', 'sound-output-device-chooser@kgshank.net', 'system-monitor@paradoxxx.zero.gmail.com', 'blur-my-shell@aunetx', 'Vitals@CoreCoding.com']"
       become: true
       become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - position at bottom (macOS style)
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/dock-position"
+        value: "'BOTTOM'"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - fixed dock (macOS style)
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/dock-fixed"
+        value: "true"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - disable auto-hide (always visible)
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/autohide"
+        value: "false"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - windows above dock
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/extend-height"
+        value: "false"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - show trash (macOS style)
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/show-trash"
+        value: "true"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - show mounts (macOS style)
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/show-mounts"
+        value: "true"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - icon size (macOS style)
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/dash-max-icon-size"
+        value: "48"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - running indicator style (macOS style)
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/running-indicator-style"
+        value: "'DOTS'"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - transparency mode (macOS style)
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/transparency-mode"
+        value: "'DYNAMIC'"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Dash to Dock - hide applications button (macOS style)
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/dash-to-dock/show-show-apps-button"
+        value: "false"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Blur My Shell - enable dock blur
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/blur-my-shell/dash-to-dock/blur"
+        value: "true"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Blur My Shell - dock blur brightness
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/blur-my-shell/dash-to-dock/brightness"
+        value: "0.6"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Blur My Shell - dock blur sigma
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/blur-my-shell/dash-to-dock/sigma"
+        value: "30"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Blur My Shell - enable panel blur
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/blur-my-shell/panel/blur"
+        value: "true"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure Blur My Shell - enable overview blur
+      community.general.dconf:
+        key: "/org/gnome/shell/extensions/blur-my-shell/overview/blur"
+        value: "true"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Enable night light
+      community.general.dconf:
+        key: "/org/gnome/settings-daemon/plugins/color/night-light-enabled"
+        value: "true"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Set night light temperature
+      community.general.dconf:
+        key: "/org/gnome/settings-daemon/plugins/color/night-light-temperature"
+        value: "uint32 4000"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Configure power settings - never suspend on AC
+      community.general.dconf:
+        key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type"
+        value: "'nothing'"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Final notification about system setup
+      ansible.builtin.debug:
+        msg: |
+          🎉 Fedora Workstation setup completed successfully!
+
+          ✅ Security features enabled:
+          - Automatic security updates configured
+          - Firewall enabled with SSH/HTTP/HTTPS access
+          - Fail2ban protection active
+          - SELinux in enforcing mode
+
+          ✅ Performance optimizations applied:
+          - SSD TRIM scheduler enabled
+          - Memory management tuned
+          - I/O performance optimized
+
+          ✅ Applications installed:
+          - Development tools: Git, VS Code, Docker, Node.js
+          - Desktop apps: Chrome, 1Password, Teams, Obsidian
+          - Media tools: MPV, GIMP, Plexamp
+          - Backup: Pika Backup
+
+          ⚠️  Remember to:
+          1. Log out and back in for Docker group changes
+          2. Add SSH key to GitHub: ssh-add ~/.ssh/id_ed25519
+          3. Configure Pika Backup for your backup needs
+          4. Review GNOME extensions and customize as needed
