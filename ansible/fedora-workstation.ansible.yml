@@ -55,9 +55,9 @@
     - name: Install desktop applications (native packages for integration)
       ansible.builtin.dnf:
         name:
-          - 1password  # Password manager (needs system integration)
-          - google-chrome-stable  # Web browser (needs system integration)
-          - code  # Visual Studio Code (needs system integration)
+          - 1password # Password manager (needs system integration)
+          - google-chrome-stable # Web browser (needs system integration)
+          - code # Visual Studio Code (needs system integration)
         state: present
 
     - name: Install teams-for-linux via Flatpak (unofficial Teams client)
@@ -70,47 +70,47 @@
     - name: Install development tools
       ansible.builtin.dnf:
         name:
-          - git  # Version control
-          - vim  # Text editor
-          - neovim  # Modern vim
-          - tmux  # Terminal multiplexer
-          - nodejs  # JavaScript runtime
-          - npm  # Node package manager
-          - python3-pip  # Python package manager
-          - python3-psutil  # Python system utilities (required for dconf)
-          - ansible  # Automation tool
-          - ansible-lint  # Ansible linting
-          - yamllint  # YAML linting
-          - openssh-clients  # SSH tools (includes ssh-keygen)
-          - gh  # GitHub CLI
+          - git # Version control
+          - vim # Text editor
+          - neovim # Modern vim
+          - tmux # Terminal multiplexer
+          - nodejs # JavaScript runtime
+          - npm # Node package manager
+          - python3-pip # Python package manager
+          - python3-psutil # Python system utilities (required for dconf)
+          - ansible # Automation tool
+          - ansible-lint # Ansible linting
+          - yamllint # YAML linting
+          - openssh-clients # SSH tools (includes ssh-keygen)
+          - gh # GitHub CLI
         state: present
 
     - name: Install command line utilities
       ansible.builtin.dnf:
         name:
-          - curl  # HTTP client
-          - wget  # File downloader
-          - jq  # JSON processor
-          - tree  # Directory structure viewer
-          - htop  # Process monitor
-          - ripgrep  # Fast grep alternative
-          - fd-find  # Fast find alternative
-          - bat  # Cat with syntax highlighting
-          - fzf  # Fuzzy finder
-          - zsh  # Alternative shell
-          - unzip  # Archive extraction
+          - curl # HTTP client
+          - wget # File downloader
+          - jq # JSON processor
+          - tree # Directory structure viewer
+          - htop # Process monitor
+          - ripgrep # Fast grep alternative
+          - fd-find # Fast find alternative
+          - bat # Cat with syntax highlighting
+          - fzf # Fuzzy finder
+          - zsh # Alternative shell
+          - unzip # Archive extraction
         state: present
 
     - name: Install GNOME desktop utilities
       ansible.builtin.dnf:
         name:
-          - gnome-shell-extension-dash-to-dock  # Dash to Dock extension
+          - gnome-shell-extension-dash-to-dock # Dash to Dock extension
         state: present
 
     - name: Install containerization tools
       ansible.builtin.dnf:
         name:
-          - docker  # Container runtime (includes compose)
+          - docker # Container runtime (includes compose)
         state: present
 
     - name: Remove Firefox
@@ -141,7 +141,6 @@
       become_user: "{{ original_user }}"
       when: not dotfiles_dir.stat.exists
 
-
     - name: Run dotfiles install script to create symlinks
       ansible.builtin.command:
         cmd: ./install.sh
@@ -163,17 +162,14 @@
         groups: docker
         append: true
 
-    - name: Restart systemd user session to pick up new group membership
-      ansible.builtin.shell: "loginctl terminate-user {{ original_user }}"
-      ignore_errors: true
-
     - name: Notify user about Docker group configuration
       ansible.builtin.debug:
         msg: |
           ✅ Docker has been configured and user added to docker group.
-          🔄 Your systemd user session has been restarted to activate group membership.
 
-          Please log back in to your desktop session for the changes to take full effect.
+          ⚠️  IMPORTANT: You need to log out and log back in for group membership to take effect.
+          Until you do this, you'll need to use 'sudo docker' commands.
+
           After logging back in, 'docker ps' will work without sudo.
 
     - name: Check if SSH key exists
