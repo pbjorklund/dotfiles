@@ -1,0 +1,80 @@
+---
+- name: Setup Fedora Workstation
+  hosts: localhost
+  connection: local
+  become: yes
+  vars:
+    user_home: "{{ ansible_env.HOME }}"
+    regular_user: "{{ ansible_env.USER }}"
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    - name: Import 1Password GPG key
+      rpm_key:
+        key: https://downloads.1password.com/linux/keys/1password.asc
+        state: present
+
+    - name: Add 1Password repository
+      yum_repository:
+        name: 1password
+        description: 1Password Stable Channel
+        baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
+        enabled: yes
+        gpgcheck: yes
+        repo_gpgcheck: yes
+        gpgkey: https://downloads.1password.com/linux/keys/1password.asc
+
+    - name: Add Google Chrome repository
+      yum_repository:
+        name: google-chrome
+        description: Google Chrome
+        baseurl: http://dl.google.com/linux/chrome/rpm/stable/x86_64
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://dl.google.com/linux/linux_signing_key.pub
+
+    - name: Import Google Chrome GPG key
+      rpm_key:
+        key: https://dl.google.com/linux/linux_signing_key.pub
+        state: present
+
+    - name: Import Microsoft GPG key
+      rpm_key:
+        key: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: Add Visual Studio Code repository
+      yum_repository:
+        name: vscode
+        description: Visual Studio Code
+        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Install packages
+      dnf:
+        name:
+          - 1password
+          - google-chrome-stable
+          - vim
+          - code
+        state: present
+
+    - name: Remove Firefox
+      dnf:
+        name: firefox
+        state: absent
+
+    - name: Update all packages
+      dnf:
+        name: "*"
+        state: latest
+
+    - name: Clone repo from GitHub to user home (as regular user)
+      git:
+        repo: https://github.com/pbjorklund/dotfiles.git
+        dest: "/home/{{ original_user  }}/dotfiles"
+        force: yes
+      become_user: "{{ original_user }}"
+      

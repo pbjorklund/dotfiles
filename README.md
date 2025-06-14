@@ -1,6 +1,6 @@
 # Dotfiles
 
-My personal dotfiles configuration including shell setup, git configuration, and NixOS system management.
+My personal dotfiles configuration including shell setup, git configuration, and Fedora system management.
 
 ## Installation
 
@@ -10,33 +10,35 @@ cd ~/dotfiles
 ```
 
 This will:
+
 - Backup any existing dotfiles to `~/dotfiles_old/`
 - Create symlinks from your home directory to the files in this repo
-- Set up NixOS management aliases
+- Set up Fedora management aliases
 
 ## What's Included
 
 ### Shell Configuration
-- `bashrc` - Bash configuration with NixOS aliases and development environment
+
+- `bashrc` - Bash configuration with Fedora aliases and development environment
 
 ### Development Tools
+
 - `gitconfig` - Git aliases and configuration
 - `tmux.conf` - Tmux configuration
 
-### NixOS Configuration
-- `nixos/` - Complete NixOS system configuration
-- Built-in aliases for NixOS management (nixedit, nixdeploy, nixtest, etc.)
+### System Management
 
-## NixOS Workflow
+- `ansible/` - Ansible playbook for Fedora system setup
+- Built-in aliases for Fedora package management
 
-The bashrc includes these aliases for managing your NixOS configuration:
+## Ansible Setup
 
-- `nixedit` - Open NixOS configuration in VS Code
-- `nixtest` - Test configuration changes
-- `nixdeploy` - Deploy configuration to system
-- `nixswitch` - Switch to new configuration
-- `nixboot` - Set configuration for next boot
-- `nixgc` - Garbage collect old generations
-- `nixupdate` - Update and switch to latest packages
+Use the Ansible playbook to set up a new Fedora system:
 
-See `nixos/README.md` for detailed NixOS workflow.
+```bash
+cd ansible
+sudo dnf install ansible
+ansible-playbook setup-fedora.yml
+```
+
+See `ansible/README.md` for more details.
