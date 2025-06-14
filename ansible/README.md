@@ -1,46 +1,30 @@
 # Ansible Fedora Setup
 
-This directory contains an Ansible playbook for setting up a new Fedora workstation with essential applications and configurations.
+Automated Fedora workstation setup with essential development tools and applications.
+
+## Prerequisites
+
+- Fresh Fedora installation
+- Internet connection
 
 ## Installation
 
-First, install Ansible:
+Install Ansible and run the playbook:
 
 ```bash
-sudo dnf install ansible
+$ sudo dnf install ansible
+$ cd ~/dotfiles/ansible
+$ ansible-playbook fedora-workstation.ansible.yml
 ```
 
-## Running the Playbook
+## What's Included
 
-To set up your Fedora system:
+**Desktop Apps:** 1Password, Chrome, VS Code, Teams
+**Development:** Git, Node.js, Python, Docker, SSH tools
+**CLI Tools:** Vim, tmux, ripgrep, fzf, jq, htop
 
-```bash
-cd ~/dotfiles/ansible
-ansible-playbook setup-fedora.yml
-```
+## Post-Installation
 
-## What Gets Installed
-
-- **1Password** - Password manager
-- **Google Chrome** - Web browser (replaces Firefox)
-- **Visual Studio Code** - Code editor
-- **vim** - Terminal text editor
-
-## What Gets Configured
-
-- Removes Firefox (replaced by Chrome)
-- Updates all system packages
-- Adds necessary repositories and GPG keys
-- Clones dotfiles repository to user home directory
-
-## Manual Steps After Running
-
-1. Run the dotfiles installation:
-
-   ```bash
-   cd ~/dotfiles
-   ./install.sh
-   ```
-
-2. Configure 1Password and sign in
-3. Set up Visual Studio Code extensions and settings
+1. Add SSH key to GitHub (displayed after playbook completion)
+2. Configure 1Password and VS Code
+3. Restart session for Docker group membership

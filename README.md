@@ -1,44 +1,35 @@
 # Dotfiles
 
-My personal dotfiles configuration including shell setup, git configuration, and Fedora system management.
+Personal dotfiles for shell setup, development tools, and Fedora system management.
+
+## Prerequisites
+
+- Fedora Linux
+- Bash shell
 
 ## Installation
 
 ```bash
-cd ~/dotfiles
-./install.sh
+$ cd ~/dotfiles
+$ ./install.sh
 ```
 
-This will:
-
-- Backup any existing dotfiles to `~/dotfiles_old/`
-- Create symlinks from your home directory to the files in this repo
-- Set up Fedora management aliases
+Creates symlinks and backs up existing files to `~/dotfiles_old/`.
 
 ## What's Included
 
-### Shell Configuration
+**Shell:** [`bashrc`](bashrc) with Fedora aliases and development environment
+**Development:** [`gitconfig`](gitconfig), [`tmux.conf`](tmux.conf)
+**System:** [`ansible/`](ansible/) playbook for automated Fedora setup
 
-- `bashrc` - Bash configuration with Fedora aliases and development environment
+## Automated Setup
 
-### Development Tools
-
-- `gitconfig` - Git aliases and configuration
-- `tmux.conf` - Tmux configuration
-
-### System Management
-
-- `ansible/` - Ansible playbook for Fedora system setup
-- Built-in aliases for Fedora package management
-
-## Ansible Setup
-
-Use the Ansible playbook to set up a new Fedora system:
+For new Fedora systems, use the Ansible playbook:
 
 ```bash
-cd ansible
-sudo dnf install ansible
-ansible-playbook setup-fedora.yml
+$ cd ./ansible
+$ sudo dnf install ansible
+$ ansible-playbook fedora-workstation.ansible.yml
 ```
 
-See `ansible/README.md` for more details.
+See [`ansible/README.md`](ansible/README.md) for details.
