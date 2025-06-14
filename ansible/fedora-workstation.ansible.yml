@@ -74,6 +74,27 @@
       become: true
       become_user: "{{ original_user }}"
 
+    - name: Install Zotero via Flatpak (reference management and research tool)
+      community.general.flatpak:
+        name: org.zotero.Zotero
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Install OnlyOffice via Flatpak (office suite for documents, spreadsheets, presentations)
+      community.general.flatpak:
+        name: org.onlyoffice.desktopeditors
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Install Mailspring via Flatpak (modern email client with advanced features)
+      community.general.flatpak:
+        name: com.getmailspring.Mailspring
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+
     - name: Install development tools
       ansible.builtin.dnf:
         name:
