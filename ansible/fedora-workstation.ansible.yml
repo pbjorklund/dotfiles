@@ -102,6 +102,27 @@
       become: true
       become_user: "{{ original_user }}"
 
+    - name: Install Pika Backup via Flatpak (simple backup tool for GNOME)
+      community.general.flatpak:
+        name: org.gnome.World.PikaBackup
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Install GIMP via Flatpak (GNU Image Manipulation Program)
+      community.general.flatpak:
+        name: org.gimp.GIMP
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Install MPV via Flatpak (modern media player)
+      community.general.flatpak:
+        name: io.mpv.Mpv
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+
     - name: Install development tools
       ansible.builtin.dnf:
         name:
@@ -136,11 +157,22 @@
           - unzip # Archive extraction
         state: present
 
-    - name: Install GNOME desktop utilities
+    - name: Install GNOME desktop utilities and extensions
       ansible.builtin.dnf:
         name:
           - gnome-shell-extension-dash-to-dock # Dash to Dock extension
+          - gnome-tweaks # GNOME appearance and behavior customization
+          - gnome-extensions-app # Manage GNOME Shell extensions
+          - dconf-editor # Advanced configuration editor
         state: present
+
+    - name: Install GNOME extensions from repositories
+      ansible.builtin.dnf:
+        name:
+          - gnome-shell-extension-appindicator # App indicators support for notifications
+          - gnome-shell-extension-system-monitor-applet # System monitor extension
+        state: present
+        enablerepo: "*"
 
     - name: Install containerization tools
       ansible.builtin.dnf:
@@ -279,7 +311,12 @@
     - name: Enable multiple GNOME extensions
       community.general.dconf:
         key: "/org/gnome/shell/enabled-extensions"
-        value: "['dash-to-dock@micxgx.gmail.com', 'appindicatorsupport@rgcjonas.gmail.com', 'sound-output-device-chooser@kgshank.net', 'system-monitor@paradoxxx.zero.gmail.com', 'blur-my-shell@aunetx', 'Vitals@CoreCoding.com']"
+        value: >-
+          ['dash-to-dock@micxgx.gmail.com',
+           'appindicatorsupport@rgcjonas.gmail.com',
+           'sound-output-device-chooser@kgshank.net',
+           'system-monitor@paradoxxx.zero.gmail.com',
+           'Vitals@CoreCoding.com']
       become: true
       become_user: "{{ original_user }}"
 
@@ -350,41 +387,6 @@
       community.general.dconf:
         key: "/org/gnome/shell/extensions/dash-to-dock/show-show-apps-button"
         value: "false"
-      become: true
-      become_user: "{{ original_user }}"
-
-    - name: Configure Blur My Shell - enable dock blur
-      community.general.dconf:
-        key: "/org/gnome/shell/extensions/blur-my-shell/dash-to-dock/blur"
-        value: "true"
-      become: true
-      become_user: "{{ original_user }}"
-
-    - name: Configure Blur My Shell - dock blur brightness
-      community.general.dconf:
-        key: "/org/gnome/shell/extensions/blur-my-shell/dash-to-dock/brightness"
-        value: "0.6"
-      become: true
-      become_user: "{{ original_user }}"
-
-    - name: Configure Blur My Shell - dock blur sigma
-      community.general.dconf:
-        key: "/org/gnome/shell/extensions/blur-my-shell/dash-to-dock/sigma"
-        value: "30"
-      become: true
-      become_user: "{{ original_user }}"
-
-    - name: Configure Blur My Shell - enable panel blur
-      community.general.dconf:
-        key: "/org/gnome/shell/extensions/blur-my-shell/panel/blur"
-        value: "true"
-      become: true
-      become_user: "{{ original_user }}"
-
-    - name: Configure Blur My Shell - enable overview blur
-      community.general.dconf:
-        key: "/org/gnome/shell/extensions/blur-my-shell/overview/blur"
-        value: "true"
       become: true
       become_user: "{{ original_user }}"
 
