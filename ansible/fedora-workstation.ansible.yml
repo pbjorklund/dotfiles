@@ -60,6 +60,11 @@
           - code # Visual Studio Code (needs system integration)
         state: present
 
+    - name: Install 1Password CLI (for NAS credential management)
+      ansible.builtin.dnf:
+        name: 1password-cli # 1Password CLI for secure credential access
+        state: present
+
     - name: Install teams-for-linux via Flatpak (unofficial Teams client)
       community.general.flatpak:
         name: com.github.IsmaelMartinez.teams_for_linux
@@ -178,6 +183,204 @@
         name:
           - docker # Container runtime (includes compose)
         state: present
+
+    - name: Get lazydocker latest release info
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/jesseduffield/lazydocker/releases/latest
+        method: GET
+        return_content: true
+      register: lazydocker_release
+      tags: terminal_update
+
+    - name: Install lazydocker (terminal UI for Docker)
+      ansible.builtin.get_url:
+        url: "{{ lazydocker_release.json.assets | selectattr('name', 'match', '.*Linux_x86_64\\.tar\\.gz$') | map(attribute='browser_download_url') | first }}"
+        dest: /tmp/lazydocker.tar.gz
+        mode: "0644"
+      become: true
+      become_user: "{{ original_user }}"
+      tags: terminal_update
+
+    - name: Extract lazydocker
+      ansible.builtin.unarchive:
+        src: /tmp/lazydocker.tar.gz
+        dest: /tmp
+        remote_src: true
+      become: true
+      become_user: "{{ original_user }}"
+      tags: terminal_update
+
+    - name: Install lazydocker binary
+      ansible.builtin.copy:
+        src: /tmp/lazydocker
+        dest: /usr/local/bin/lazydocker
+        mode: "0755"
+        owner: root
+        group: root
+        remote_src: true
+      tags: terminal_update
+
+    - name: Clean up lazydocker installation files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/lazydocker.tar.gz
+        - /tmp/lazydocker
+      become: true
+      become_user: "{{ original_user }}"
+      tags: terminal_update
+
+    - name: Install CIFS utilities for SMB mounting
+      ansible.builtin.dnf:
+        name:
+          - cifs-utils # SMB/CIFS mounting utilities
+        state: present
+      tags: smb_setup
+
+    - name: Create mount directories for NAS shares
+      ansible.builtin.file:
+        path: "/mnt/{{ item }}"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      loop:
+        - backups
+        - media
+        - pictures
+      tags: smb_setup
+
+    - name: Test 1Password CLI basic functionality
+      ansible.builtin.command:
+        cmd: op account list
+      register: op_test
+      failed_when: false
+      changed_when: false
+      become: true
+      become_user: "{{ original_user }}"
+      tags: smb_setup
+
+    - name: Check if knuth item exists in 1Password
+      ansible.builtin.command:
+        cmd: op item get "knuth" --fields username
+      register: op_knuth_check
+      failed_when: false
+      changed_when: false
+      become: true
+      become_user: "{{ original_user }}"
+      when: op_test.rc == 0
+      tags: smb_setup
+
+    - name: Get NAS username from 1Password
+      ansible.builtin.command:
+        cmd: op item get "knuth" --fields username --reveal
+      register: op_username
+      failed_when: false
+      changed_when: false
+      become: true
+      become_user: "{{ original_user }}"
+      when: op_test.rc == 0 and op_knuth_check.rc == 0
+      tags: smb_setup
+
+    - name: Get NAS password from 1Password
+      ansible.builtin.command:
+        cmd: op item get "knuth" --fields password --reveal
+      register: op_password
+      failed_when: false
+      changed_when: false
+      become: true
+      become_user: "{{ original_user }}"
+      when: op_test.rc == 0 and op_knuth_check.rc == 0
+      tags: smb_setup
+
+    - name: Create temporary credentials file for mounting
+      ansible.builtin.tempfile:
+        state: file
+        suffix: .creds
+      register: temp_creds
+      when: op_test.rc == 0 and op_knuth_check.rc == 0 and op_username.rc == 0 and op_password.rc == 0
+      tags: smb_setup
+
+    - name: Write credentials to temp file
+      ansible.builtin.copy:
+        content: |
+          username={{ op_username.stdout }}
+          password={{ op_password.stdout }}
+        dest: "{{ temp_creds.path }}"
+        mode: "0600"
+      when: temp_creds is defined
+      tags: smb_setup
+
+    - name: Mount NAS shares using credentials file
+      ansible.builtin.shell: |
+        if ! mountpoint -q "/mnt/{{ item }}"; then
+          mount -t cifs "//192.168.1.35/{{ item }}" "/mnt/{{ item }}" \
+            -o "credentials={{ temp_creds.path }},uid=$(id -u {{ original_user }}),gid=$(id -g {{ original_user }}),iocharset=utf8,file_mode=0755,dir_mode=0755"
+          echo "Mounted {{ item }}"
+        else
+          echo "{{ item }} already mounted"
+        fi
+      register: mount_result
+      changed_when: "'Mounted' in mount_result.stdout"
+      loop:
+        - backups
+        - media
+        - pictures
+      when: temp_creds is defined
+      tags: smb_setup
+
+    - name: Clean up temporary credentials file
+      ansible.builtin.file:
+        path: "{{ temp_creds.path }}"
+        state: absent
+      when: temp_creds is defined
+      tags: smb_setup
+
+    - name: Display 1Password CLI setup instructions
+      ansible.builtin.debug:
+        msg: |
+          🔐 1Password CLI Setup Required
+
+          The 1Password CLI needs to be configured to access your credentials.
+          Please follow these steps:
+
+          1. Open and unlock the 1Password app
+          2. Select your account or collection at the top of the sidebar
+          3. Navigate to Settings > Security
+          4. Turn on "Unlock using system authentication"
+          5. Navigate to Settings > Developer
+          6. Select "Integrate with 1Password CLI"
+
+          After completing these steps, test with: op account list
+      when: op_test.rc != 0
+      tags: smb_setup
+
+    - name: Display knuth item setup instructions
+      ansible.builtin.debug:
+        msg: |
+          📝 Missing 'knuth' Item in 1Password
+
+          Please create a 'knuth' item in 1Password with:
+          - Title: knuth
+          - Username field: your Synology username
+          - Password field: your Synology password
+
+          After creating the item, re-run: ansible-playbook ansible/fedora-workstation.ansible.yml --tags smb_setup
+      when: op_test.rc == 0 and op_knuth_check.rc != 0
+      tags: smb_setup
+
+    - name: Display successful mount summary
+      ansible.builtin.debug:
+        msg: |
+          ✅ NAS Shares Successfully Mounted
+
+          Available mounts:
+          - /mnt/backups ({{ mount_result.results[0].stdout if mount_result.results is defined else 'already mounted' }})
+          - /mnt/media ({{ mount_result.results[1].stdout if mount_result.results is defined else 'already mounted' }})
+          - /mnt/pictures ({{ mount_result.results[2].stdout if mount_result.results is defined else 'already mounted' }})
+      when: temp_creds is defined
+      tags: smb_setup
 
     - name: Remove Firefox
       ansible.builtin.dnf:
