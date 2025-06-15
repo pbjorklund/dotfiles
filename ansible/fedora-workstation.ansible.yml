@@ -169,7 +169,9 @@
           - gnome-tweaks # GNOME appearance and behavior customization
           - gnome-extensions-app # Manage GNOME Shell extensions
           - dconf-editor # Advanced configuration editor
+          - alacritty # GPU-accelerated terminal emulator
         state: present
+      tags: terminal_update
 
     - name: Install containerization tools
       ansible.builtin.dnf:
@@ -200,6 +202,22 @@
       failed_when: >
         libreoffice_removal.failed and
         "not installed" not in libreoffice_removal.msg | default("")
+
+    - name: Remove GNOME Terminal (replaced with Alacritty)
+      ansible.builtin.dnf:
+        name: gnome-terminal
+        state: absent
+      tags: terminal_update
+
+    - name: Set neovim as default terminal editor
+      ansible.builtin.lineinfile:
+        path: "/home/{{ original_user }}/.bashrc"
+        line: "export EDITOR=nvim"
+        regexp: "^export EDITOR="
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+      tags: terminal_update
 
     - name: Update all packages
       ansible.builtin.dnf:
