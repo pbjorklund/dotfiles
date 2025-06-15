@@ -2,55 +2,55 @@
 applyTo: "**/{.*rc,.*conf,.*config}"
 ---
 
-# Configuration Files Instructions
+# Configuration Files Rules
 
-When working with dotfiles and configuration files in this repository:
+MANDATORY requirements for all dotfiles and configuration files in this repository.
 
-## General Philosophy
+## File Structure Requirements
 
-- Keep configurations minimal and focused
-- Use comments to explain non-obvious settings
-- Organize settings logically with clear sections
-- Prefer standard defaults with minimal customizations
+- **MUST** include comment header with file purpose and key features
+- **MUST** organize settings into clearly labeled sections using `# Section Name`
+- **MUST** place most critical settings at the top of each section
+- **MUST** separate sections with blank lines for readability
 
-## Bashrc Configuration
+## Cross-Platform Requirements
 
-- Set up useful aliases for common commands
-- Configure shell history settings
-- Set up environment variables
-- Include conditional loading for different systems
+- **MUST** use OS detection: `case "$(uname -s)" in Darwin|Linux|CYGWIN*)`
+- **MUST** check command existence: `command -v cmd >/dev/null 2>&1 && cmd`
+- **MUST** provide fallback values for missing tools
+- **MUST** document OS-specific sections with comments
 
-## Git Configuration
+## Security Requirements
 
-- Set up user identity (name and email)
-- Configure useful aliases for common git operations
-- Set up proper line ending handling
-- Configure merge and diff tools
+- **SHALL NOT** include real usernames, emails, or personal data in public configs
+- **SHALL NOT** include tokens, passwords, API keys, or secrets
+- **MUST** use `chmod 600` for sensitive config files
+- **MUST** use environment variables: `${HOME}`, `${USER}` instead of hardcoded paths
+- **MUST** use placeholder values: `user.name = "Your Name"`, `user.email = "your.email@example.com"`
 
-## Tmux Configuration
+## Comment Requirements
 
-- Use intuitive key bindings
-- Configure status bar with useful information
-- Set up mouse support
-- Configure colors and themes
+- **MUST** explain non-obvious settings with inline comments
+- **MUST** include purpose comments for custom functions or aliases
+- **MUST** document keybindings and shortcuts
+- **MUST** include URL references for complex configurations
 
-## Cross-Platform Considerations
+## Validation Requirements
 
-- Use conditional statements for OS-specific settings
-- Provide fallbacks for missing tools
-- Test configurations on different systems
-- Document any platform-specific requirements
+- **MUST** validate syntax before committing (shell: `bash -n file`, tmux: `tmux source file`)
+- **MUST** test configurations on clean system before deploying
+- **MUST** verify all referenced files and commands exist
+- **MUST** ensure configurations are compatible with target systems
 
-## Security
+## Violation Consequences
 
-- Never commit sensitive information (tokens, passwords)
-- Use environment variables for sensitive data
-- Set appropriate file permissions
-- Avoid exposing personal information in public configs
+- Files with syntax errors **WILL BE REJECTED**
+- Files containing real personal data **WILL BE REJECTED**
+- Files without proper comments **WILL BE REJECTED**
+- Files failing validation **WILL BE REJECTED**
 
-## Maintenance
+## Applies To
 
-- Keep configurations up to date with tool versions
-- Remove deprecated settings
-- Document any custom modifications
-- Test changes before committing
+- `**/{.*rc,.*conf,.*config}`
+- Configuration files like `bashrc`, `gitconfig`, `tmux.conf`
+- Hidden configuration files and directories

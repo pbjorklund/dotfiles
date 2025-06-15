@@ -2,49 +2,65 @@
 applyTo: "**/{README,CHANGELOG,LICENSE,*.md}"
 ---
 
-# Documentation Instructions
+# Documentation Rules
 
-When working with documentation files in this dotfiles repository:
+MANDATORY requirements for all documentation files in this dotfiles repository.
 
-## README Files
+## Structure Requirements
 
-- Start with a clear project description
-- Include installation and usage instructions
-- Document prerequisites and dependencies
-- Provide troubleshooting section
-- Include examples of common use cases
+- **MUST** start with clear one-sentence project description
+- **MUST** include table of contents for files longer than 50 lines
+- **MUST** use consistent heading hierarchy (H1 for title, H2 for sections, H3 for subsections)
+- **MUST** separate sections with exactly one blank line
+- **MUST** end files with newline character
 
-## Structure
+## Content Requirements
 
-- Use clear headings and subheadings
-- Keep paragraphs concise and focused
-- Use bullet points for lists
-- Include code blocks with proper syntax highlighting
+- **MUST** include "Prerequisites" section listing required software/versions
+- **MUST** include "Installation" section with copy-pastable commands
+- **MUST** include "Usage" section with concrete examples
+- **MUST** write in present tense and active voice
+- **MUST** target audience: users with basic command-line knowledge
 
-## Installation Documentation
+## Code Block Requirements
 
-- Provide step-by-step instructions
-- Include commands that can be copy-pasted
-- Document both automated and manual installation methods
-- Explain what each step accomplishes
+- **MUST** use triple backticks with language specification: `bash, `yaml, ```json
+- **MUST** include `$` prompt for shell commands that users should run
+- **MUST** exclude `$` prompt for command output examples
+- **MUST** use relative paths starting with `./` when referencing repository files
+- **MUST** test all commands before documenting them
 
-## Usage Examples
+## Formatting Requirements
 
-- Show common workflows
-- Include expected output when helpful
-- Provide troubleshooting for common issues
-- Document any customization options
+- **MUST** use **bold** for UI elements, filenames, and important terms
+- **MUST** use `inline code` for commands, variables, and code snippets
+- **MUST** use > blockquotes for warnings and important notes
+- **MUST** limit lines to 100 characters maximum
+- **MUST** use numbered lists for sequential steps, bullet lists for options
 
-## Maintenance Notes
+## Error Prevention Requirements
 
-- Keep documentation current with code changes
-- Update version requirements
-- Remove outdated information
-- Test documented procedures periodically
+- **MUST** include common troubleshooting section for complex installations
+- **MUST** document known limitations and workarounds
+- **MUST** specify supported operating systems and versions
+- **MUST** include rollback instructions for destructive operations
 
-## Best Practices
+## Maintenance Requirements
 
-- Write for users who are new to the project
-- Use consistent formatting throughout
-- Include links to external documentation when relevant
-- Keep language clear and concise
+- **MUST** update documentation immediately when code changes affect usage
+- **MUST** remove outdated information rather than leaving deprecated content
+- **MUST** use consistent terminology throughout all documentation
+- **MUST** validate markdown syntax before committing
+
+## Violation Consequences
+
+- Files with broken links **WILL BE REJECTED**
+- Files without proper code block formatting **WILL BE REJECTED**
+- Files with untested commands **WILL BE REJECTED**
+- Files exceeding line length limits **WILL BE REJECTED**
+
+## Applies To
+
+- `**/{README,CHANGELOG,LICENSE,*.md}`
+- Documentation files like `README.md`
+- Markdown files and documentation

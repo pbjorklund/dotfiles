@@ -2,70 +2,61 @@
 applyTo: "**/*.ansible.yml"
 ---
 
-# Ansible Instructions
+# Ansible Rules
 
-When working with Ansible files in this dotfiles repository:
+MANDATORY requirements for all Ansible files in this dotfiles repository.
 
-## General Guidelines
+## Package Management Requirements
 
-- Use YAML syntax with 2-space indentation
-- Always include descriptive task names
-- Use `become: yes` for tasks requiring sudo privileges
-- Use `become_user: "{{ original_user }}"` when performing actions as the regular user
+- **MUST** use `ansible.builtin.dnf` module (FQCN required)
+- **MUST** add repositories BEFORE installing packages from them
+- **MUST** import GPG keys BEFORE adding repositories
+- **MUST** explicitly specify `state: present` or `state: latest`
+- **MUST** use Flatpak for desktop applications EXCEPT: Chrome, 1Password, VS Code (use native packages)
+- **MUST** group packages with comments explaining purpose
+- **MUST** include package descriptions: `# Package Name - Description of what it does`
 
-## Playbook Structure
+## User Context Requirements
 
-- Target `hosts: localhost` with `connection: local` for local machine setup
-- Use variables for user paths and common values
-- Group related tasks logically with comments
+- **MUST** use `{{ ansible_env.SUDO_USER }}` for original user who ran sudo
+- **MUST** use `{{ ansible_env.USER }}` for current execution context
+- **MUST** use `{{ ansible_env.HOME }}` for home directory paths
+- **MUST** clone dotfiles to user home as regular user (not root)
 
-## Package Management
+## Service Management Requirements
 
-- Use `dnf` module for Fedora package installation
-- Add external repositories before installing packages from them
-- Import GPG keys before adding repositories
-- Always specify `state: present` or `state: latest` explicitly
-- **Desktop applications via Flatpak**: Use Flatpak for desktop apps UNLESS they need system integration
-- **System integration exceptions**: Chrome, 1Password, and VS Code should use native packages for better system integration
-- Use FQCN (Fully Qualified Collection Names) for all modules (e.g., `ansible.builtin.dnf`)
-- Group packages logically by purpose (desktop apps, dev tools, CLI utilities, etc.)
-- Add comments explaining what each package does
+- **MUST** enable services using `enabled: true`
+- **MUST** start services using `state: started`
+- **MUST** add users to required groups (e.g., docker group for Docker)
 
-## Best Practices
+## File Naming Requirements
 
-- Remove unwanted default packages (like Firefox) if installing alternatives
-- Clone dotfiles repository to user home directory as the regular user
-- Use `force: yes` for git operations to handle existing directories
-- Include package updates in the playbook
-- Use `true`/`false` instead of `yes`/`no` for boolean values
-- Make tasks idempotent where possible
-- Use `update: false` for git operations to prevent unnecessary updates
-- Enable and start services like Docker after installation
-- Add users to appropriate groups (e.g., docker group for Docker usage)
-- Configure GNOME settings via dconf when needed
+- **MUST** include `ansible` in filename (e.g., `fedora-workstation.ansible.yml`)
+- **MUST** place all Ansible files in `ansible/` directory
+- **MUST** use `.yml` extension (not `.yaml`)
 
-## Security
+## Execution Requirements
 
-- Always verify GPG keys for external repositories
-- Use HTTPS URLs for repositories when available
-- Enable `gpgcheck` and `repo_gpgcheck` for all repositories
+- **MUST** run playbooks with `ansible-playbook` (not `--ask-become-pass` or `sudo`)
+- **MUST** configure `become_ask_pass = False` in `ansible.cfg`
+- **MUST** verify idempotency by running playbook multiple times
 
-## User Context
+## Quality Assurance Requirements
 
-- Use `{{ ansible_env.SUDO_USER }}` for the original user who ran sudo
-- Use `{{ ansible_env.USER }}` for the current user context
-- Use `{{ ansible_env.HOME }}` for home directory paths
+- **MUST** pass `ansible-lint` with zero violations
+- **MUST** pass `ansible-playbook --syntax-check`
+- **MUST** be idempotent (safe to run multiple times)
+- **MUST** include package updates in playbook using `state: latest`
 
-## File Naming
+## Violation Consequences
 
-- Use descriptive names that include `ansible` in the filename (e.g., `fedora-workstation.ansible.yml`)
-- This ensures GitHub Copilot auto-attaches the ansible.instructions.md file
-- Place all Ansible files in the `ansible/` directory
+- Files failing ansible-lint **WILL BE REJECTED**
+- Non-idempotent tasks **WILL BE REJECTED**
+- Missing FQCN **WILL BE REJECTED**
+- Boolean yes/no usage **WILL BE REJECTED**
 
-## Linting and Quality
+## Applies To
 
-- **MUST respect ALL ansible linting rules** - no exceptions
-- Always run `ansible-lint` to ensure best practices
-- Fix ALL linting errors before committing - zero tolerance for linting violations
-- Use `ansible-playbook --syntax-check` to verify syntax
-- Run linting after every change to catch issues early
+- `**/*.ansible.yml`
+- `**/*.yml` files in `ansible/` directory
+- `ansible.cfg` configuration files
