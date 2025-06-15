@@ -68,7 +68,7 @@
           # Use router as primary DNS, fallback to public DNS for redundancy
           DNS={{ router_ip }} 1.1.1.1 8.8.8.8
           # Search common local domains automatically
-          Domains=~local ~lan ~home
+          Domains=local ~local ~lan ~home
           # Enable LLMNR for local network discovery (Windows/Linux interop)
           LLMNR=true
           # Enable multicast DNS for .local domain (macOS/Linux interop)
@@ -77,6 +77,10 @@
           Cache=true
           # Allow DNS over TLS for external queries
           DNSOverTLS=opportunistic
+          # Prevent DHCP from overriding DNS settings
+          DNSStubListener=true
+          # Use global DNS settings for all interfaces
+          FallbackDNS={{ router_ip }} 1.1.1.1 8.8.8.8
       notify: restart_systemd_resolved
 
     - name: Ensure systemd-resolved service is enabled and started
