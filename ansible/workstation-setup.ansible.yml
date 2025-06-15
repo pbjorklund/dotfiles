@@ -1,41 +1,42 @@
 ---
-- name: Complete Fedora Workstation Setup
+# Complete Fedora Workstation Setup - orchestrates all component playbooks
+
+- name: Run base system setup
+  import_playbook: base-system.ansible.yml
+  tags: base
+
+- name: Install applications
+  import_playbook: applications.ansible.yml
+  tags: apps
+
+- name: Configure services
+  import_playbook: services.ansible.yml
+  tags: services
+
+- name: Apply personal configuration
+  import_playbook: personal-config.ansible.yml
+  tags: config
+
+- name: Configure local DNS (optional)
+  import_playbook: configure-local-dns.ansible.yml
+  tags: dns
+  when: configure_dns | default(false)
+
+- name: Install DisplayLink drivers (optional)
+  import_playbook: hardware-displaylink.ansible.yml
+  tags: displaylink
+  when: install_displaylink | default(false)
+
+- name: Configure NAS storage (optional)
+  import_playbook: storage-nas.ansible.yml
+  tags: nas
+  when: configure_nas | default(false)
+
+- name: Display setup completion summary
   hosts: localhost
   connection: local
   gather_facts: false
-
   tasks:
-    - name: Run base system setup
-      ansible.builtin.import_playbook: base-system.ansible.yml
-      tags: base
-
-    - name: Install applications
-      ansible.builtin.import_playbook: applications.ansible.yml
-      tags: apps
-
-    - name: Configure services
-      ansible.builtin.import_playbook: services.ansible.yml
-      tags: services
-
-    - name: Apply personal configuration
-      ansible.builtin.import_playbook: personal-config.ansible.yml
-      tags: config
-
-    - name: Configure local DNS (optional)
-      ansible.builtin.import_playbook: configure-local-dns.ansible.yml
-      tags: dns
-      when: configure_dns | default(false)
-
-    - name: Install DisplayLink drivers (optional)
-      ansible.builtin.import_playbook: hardware-displaylink.ansible.yml
-      tags: displaylink
-      when: install_displaylink | default(false)
-
-    - name: Configure NAS storage (optional)
-      ansible.builtin.import_playbook: storage-nas.ansible.yml
-      tags: nas
-      when: configure_nas | default(false)
-
     - name: Display setup completion summary
       ansible.builtin.debug:
         msg: |

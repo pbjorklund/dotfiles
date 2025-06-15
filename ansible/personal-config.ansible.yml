@@ -33,7 +33,6 @@
       register: install_result
       changed_when: "'Creating symlink' in install_result.stdout"
 
-
     # GNOME Configuration
     - name: Enable focus-on-hover in GNOME
       community.general.dconf:
@@ -46,13 +45,6 @@
       community.general.dconf:
         key: "/org/gnome/desktop/input-sources/xkb-options"
         value: "['caps:ctrl_modifier']"
-      become: true
-      become_user: "{{ original_user }}"
-
-    - name: Enable GNOME extensions
-      community.general.dconf:
-        key: "/org/gnome/shell/enabled-extensions"
-        value: "['dash-to-dock@micxgx.gmail.com', 'appindicatorsupport@rgcjonas.gmail.com']"
       become: true
       become_user: "{{ original_user }}"
 
