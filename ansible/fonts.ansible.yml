@@ -1,0 +1,52 @@
+---
+# Font Installation Playbook
+# Installs fonts via Fedora system packages for GNOME desktop
+- name: Install Fonts for GNOME
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    # Install fonts from Fedora repositories
+    - name: Install system font packages
+      ansible.builtin.dnf:
+        name:
+          - fontconfig                    # Font configuration library
+          - rsms-inter-fonts              # Inter font family - modern UI typeface
+          - google-noto-color-emoji-fonts # Noto Color Emoji - colored emoji support
+          - google-noto-emoji-fonts       # Noto Emoji - black and white emoji
+          - dejavu-sans-fonts             # DejaVu Sans - excellent Unicode coverage
+          - dejavu-serif-fonts            # DejaVu Serif - serif font family
+          - dejavu-sans-mono-fonts        # DejaVu Sans Mono - monospace coding font
+          - liberation-fonts-common       # Liberation fonts common files
+          - liberation-sans-fonts         # Liberation Sans - Arial alternative
+          - liberation-serif-fonts        # Liberation Serif - Times New Roman alternative
+          - liberation-mono-fonts         # Liberation Mono - Courier New alternative
+          - abattis-cantarell-fonts       # Cantarell - GNOME default UI font
+        state: present
+
+    # Update font cache for immediate availability
+    - name: Update font cache
+      ansible.builtin.command:
+        cmd: fc-cache -fv
+      become: true
+      become_user: "{{ original_user }}"
+      changed_when: true
+
+    # Display installation completion
+    - name: Display font installation completion
+      ansible.builtin.debug:
+        msg: |
+          Font installation complete for GNOME on Fedora!
+          
+          Installed font families:
+          - Inter - Modern UI typeface designed for computer screens
+          - Noto Emoji - Google's comprehensive emoji support
+          - DejaVu (Sans, Serif, Mono) - Excellent Unicode coverage
+          - Liberation (Sans, Serif, Mono) - Metric-compatible alternatives
+          - Cantarell - GNOME's default UI font
+          
+          These fonts are now available in all GNOME applications.
+          Configure default fonts in GNOME Settings > Appearance > Fonts.
