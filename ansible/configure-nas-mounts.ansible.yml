@@ -51,28 +51,3 @@
       ansible.builtin.systemd:
         daemon_reload: true
       when: fstab_cleanup.changed or fstab_updates.changed
-
-    - name: Display fstab update summary
-      ansible.builtin.debug:
-        msg: |
-          ✅ fstab Configuration Updated
-
-          Changes made:
-          - Removed old /home/{{ original_user }}/synology mount entries
-          - Added new /mnt mount entries for NAS shares
-          - Created /mnt mount directories
-          - Reloaded systemd daemon
-
-          The Gnome file manager should now show the correct /mnt mount points
-          instead of the non-existent synology directories.
-
-          To verify changes: cat /etc/fstab
-      when: fstab_cleanup.changed or fstab_updates.changed
-
-    - name: Display no changes message
-      ansible.builtin.debug:
-        msg: |
-          ℹ️  No fstab changes needed
-
-          The fstab file already has the correct configuration.
-      when: not (fstab_cleanup.changed or fstab_updates.changed)
