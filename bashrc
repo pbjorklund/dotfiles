@@ -35,6 +35,7 @@ export MANPAGER='cat'                  # Use cat for manual pages
 alias systemctl='systemctl --no-pager' # Force systemctl to not use pager
 alias journalctl='journalctl --no-pager' # Force journalctl to not use pager
 
+
 # Conditional Loading
 # Load additional configurations if they exist
 [[ -f ~/.bash_aliases ]] && source ~/.bash_aliases

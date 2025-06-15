@@ -1,0 +1,65 @@
+---
+- name: Complete Fedora Workstation Setup
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Run base system setup
+      ansible.builtin.import_playbook: base-system.ansible.yml
+      tags: base
+
+    - name: Install applications
+      ansible.builtin.import_playbook: applications.ansible.yml
+      tags: apps
+
+    - name: Configure services
+      ansible.builtin.import_playbook: services.ansible.yml
+      tags: services
+
+    - name: Apply personal configuration
+      ansible.builtin.import_playbook: personal-config.ansible.yml
+      tags: config
+
+    - name: Configure local DNS (optional)
+      ansible.builtin.import_playbook: configure-local-dns.ansible.yml
+      tags: dns
+      when: configure_dns | default(false)
+
+    - name: Install DisplayLink drivers (optional)
+      ansible.builtin.import_playbook: hardware-displaylink.ansible.yml
+      tags: displaylink
+      when: install_displaylink | default(false)
+
+    - name: Configure NAS storage (optional)
+      ansible.builtin.import_playbook: storage-nas.ansible.yml
+      tags: nas
+      when: configure_nas | default(false)
+
+    - name: Display setup completion summary
+      ansible.builtin.debug:
+        msg: |
+          🎉 Fedora Workstation Setup Complete!
+
+          ✅ Completed Components:
+          - Base system configuration
+          - Application installation
+          - Service configuration
+          - Personal dotfiles and settings
+
+          📋 Optional Components Available:
+          - DNS configuration: --extra-vars "configure_dns=true"
+          - DisplayLink drivers: --extra-vars "install_displaylink=true"
+          - NAS storage: --extra-vars "configure_nas=true"
+
+          🚀 Next Steps:
+          1. Log out and back in for group changes
+          2. Restart for kernel modules (if DisplayLink installed)
+          3. Configure any remaining personal preferences
+
+          📚 Individual playbooks can be run separately:
+          - ansible-playbook ansible/applications.ansible.yml (update apps)
+          - ansible-playbook ansible/personal-config.ansible.yml (update dotfiles)
+          - ansible-playbook ansible/hardware-displaylink.ansible.yml (DisplayLink)
+          - ansible-playbook ansible/storage-nas.ansible.yml (NAS mounts)
+      tags: always

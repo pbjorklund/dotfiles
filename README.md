@@ -6,7 +6,7 @@ Personal configuration files for Linux development environment with automatic lo
 
 - **Shell Configuration**: Enhanced bash configuration with useful aliases and environment setup
 - **Git Configuration**: Streamlined git settings with helpful aliases
-- **Tmux Configuration**: Productive terminal multiplexer setup
+- **Tmux Configuration**: Terminal multiplexer setup for productivity
 - **Local DNS Resolution**: Automatic hostname resolution for local network devices
 
 ## Quick Start
@@ -71,14 +71,24 @@ ping knuth
 
 ### Using Ansible
 
-For automated deployment across multiple systems:
+The Ansible configuration is now modular for better maintainability:
 
 ```bash
-# Configure DNS using Ansible
-ansible-playbook ansible/configure-local-dns.ansible.yml
+# Complete workstation setup (recommended)
+ansible-playbook ansible/workstation-setup.ansible.yml
 
-# Run with verbose output
-ansible-playbook ansible/configure-local-dns.ansible.yml -v
+# With optional components
+ansible-playbook ansible/workstation-setup.ansible.yml \
+  --extra-vars "configure_dns=true install_displaylink=true configure_nas=true"
+
+# Individual components (can be run separately)
+ansible-playbook ansible/base-system.ansible.yml        # Base system packages
+ansible-playbook ansible/applications.ansible.yml       # Install/update applications
+ansible-playbook ansible/services.ansible.yml           # Configure services
+ansible-playbook ansible/personal-config.ansible.yml    # Dotfiles and GNOME settings
+ansible-playbook ansible/hardware-displaylink.ansible.yml # DisplayLink drivers
+ansible-playbook ansible/storage-nas.ansible.yml        # NAS mounts
+ansible-playbook ansible/configure-local-dns.ansible.yml # DNS configuration
 ```
 
 ## File Structure
@@ -86,14 +96,20 @@ ansible-playbook ansible/configure-local-dns.ansible.yml -v
 ```
 ├── bashrc                              # Bash shell configuration
 ├── gitconfig                           # Git configuration with aliases
-├── tmux.conf                           # Tmux configuration
+├── tmux.conf                           # Tmux terminal multiplexer configuration
 ├── install.sh                          # Main installation script
 ├── scripts/
 │   └── setup-local-dns.sh              # DNS configuration script
 └── ansible/
     ├── ansible.cfg                     # Ansible configuration
-    ├── configure-local-dns.ansible.yml # DNS setup playbook
-    └── fedora-workstation.ansible.yml  # Workstation setup playbook
+    ├── workstation-setup.ansible.yml   # Master orchestration playbook
+    ├── base-system.ansible.yml         # Core system packages and SSH
+    ├── applications.ansible.yml        # Desktop apps and development tools
+    ├── services.ansible.yml            # System service configuration
+    ├── personal-config.ansible.yml     # Dotfiles and GNOME settings
+    ├── hardware-displaylink.ansible.yml # DisplayLink driver installation
+    ├── storage-nas.ansible.yml         # NAS storage configuration
+    └── configure-local-dns.ansible.yml # DNS setup playbook
 ```
 
 ## Requirements

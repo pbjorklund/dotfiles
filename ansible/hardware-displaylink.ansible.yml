@@ -1,0 +1,146 @@
+---
+- name: Install DisplayLink Drivers
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    - name: Install DisplayLink build dependencies and Secure Boot tools
+      ansible.builtin.dnf:
+        name:
+          - kernel-devel # Kernel development headers for building modules
+          - kernel-headers # Kernel headers required for module compilation
+          - dkms # Dynamic Kernel Module Support for automatic rebuilds
+          - gcc # C compiler for building kernel modules
+          - make # Build tool required for compilation
+          - wget # Download tool for getting official driver
+          - mokutil # Machine Owner Key utilities for Secure Boot
+        state: present
+
+    - name: Check Secure Boot status
+      ansible.builtin.command:
+        cmd: mokutil --sb-state
+      register: secure_boot_status
+      failed_when: false
+      changed_when: false
+
+    - name: Display Secure Boot status
+      ansible.builtin.debug:
+        msg: |
+          🔒 Secure Boot Status: {{ secure_boot_status.stdout | default('Unable to determine') }}
+          {{ secure_boot_message }}
+      vars:
+        secure_boot_message: >-
+          {{ 'Secure Boot is ENABLED - MOK enrollment will be required' if 'enabled' in secure_boot_status.stdout | lower
+             else 'Secure Boot is disabled - MOK enrollment not required' if secure_boot_status.rc == 0
+             else 'Could not determine Secure Boot status' }}
+
+    - name: Get current Fedora version
+      ansible.builtin.slurp:
+        src: /etc/fedora-release
+      register: fedora_release_raw
+
+    - name: Extract Fedora version number
+      ansible.builtin.set_fact:
+        fedora_version: "{{ fedora_release_raw.content | b64decode | regex_search('\\d+') }}"
+
+    - name: Get latest DisplayLink release info
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/displaylink-rpm/displaylink-rpm/releases/latest
+        method: GET
+        return_content: true
+        timeout: 30
+      register: displaylink_release
+
+    - name: Build DisplayLink RPM search pattern
+      ansible.builtin.set_fact:
+        rpm_pattern: "fedora-{{ fedora_version }}-displaylink.*\\.x86_64\\.rpm$"
+
+    - name: Find DisplayLink RPM for current Fedora version
+      ansible.builtin.set_fact:
+        displaylink_rpm_asset: "{{ displaylink_release.json.assets | selectattr('name', 'match', rpm_pattern) | list | first }}"
+      failed_when: displaylink_rpm_asset is not defined or displaylink_rpm_asset == []
+
+    - name: Display found DisplayLink package info
+      ansible.builtin.debug:
+        msg: |
+          📦 Found DisplayLink package for Fedora {{ fedora_version }}:
+          Package: {{ displaylink_rpm_asset.name }}
+          Size: {{ (displaylink_rpm_asset.size / 1024 / 1024) | round(1) }} MB
+
+    - name: Download DisplayLink RPM package
+      ansible.builtin.get_url:
+        url: "{{ displaylink_rpm_asset.browser_download_url }}"
+        dest: "/tmp/{{ displaylink_rpm_asset.name }}"
+        mode: "0644"
+        timeout: 300
+        force: false
+
+    - name: Install DisplayLink RPM package
+      ansible.builtin.dnf:
+        name: "/tmp/{{ displaylink_rpm_asset.name }}"
+        state: present
+        disable_gpg_check: true
+
+    - name: Check if DKMS MOK key exists
+      ansible.builtin.stat:
+        path: /var/lib/dkms/mok.pub
+      register: dkms_mok_key
+
+    - name: Generate DKMS MOK key if needed
+      ansible.builtin.command:
+        cmd: dkms install-mok
+      register: mok_generation
+      failed_when: false
+      changed_when: mok_generation.rc == 0
+      when: not dkms_mok_key.stat.exists
+
+    - name: Check if MOK key needs enrollment
+      ansible.builtin.set_fact:
+        mok_enrollment_needed: "{{ 'enabled' in secure_boot_status.stdout | lower and dkms_mok_key.stat.exists }}"
+
+    - name: Try to enable DisplayLink services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - displaylink-driver
+        - dlm.service
+        - displaylink.service
+      register: service_result
+      failed_when: false
+
+    - name: Clean up DisplayLink RPM file
+      ansible.builtin.file:
+        path: "/tmp/{{ displaylink_rpm_asset.name }}"
+        state: absent
+
+    - name: Display DisplayLink installation summary
+      ansible.builtin.debug:
+        msg: |
+          🖥️  DisplayLink Installation Complete
+
+          Package: {{ displaylink_rpm_asset.name }}
+          Fedora version: {{ fedora_version }}
+          Secure Boot: {{ secure_boot_status.stdout | default('Unknown') }}
+
+          {% if mok_enrollment_needed | default(false) %}
+          🔒 SECURE BOOT DETECTED - Action Required:
+
+          1. Import the DKMS MOK key:
+             sudo mokutil --import /var/lib/dkms/mok.pub
+
+          2. Set a password when prompted
+          3. Reboot and enroll the key during boot
+          4. After reboot, run: sudo dkms autoinstall
+          {% else %}
+          ✅ Ready to use after reboot
+          {% endif %}
+
+          Verification commands:
+          - Check DKMS status: sudo dkms status
+          - Check module: lsmod | grep evdi
+          - List USB devices: lsusb | grep DisplayLink

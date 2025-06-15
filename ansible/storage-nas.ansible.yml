@@ -1,0 +1,138 @@
+---
+- name: Configure NAS Storage Mounts
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+    nas_ip: "192.168.1.35"
+    nas_shares:
+      - backups
+      - media
+      - pictures
+
+  tasks:
+    - name: Install CIFS utilities for SMB mounting
+      ansible.builtin.dnf:
+        name:
+          - cifs-utils # SMB/CIFS mounting utilities
+        state: present
+
+    - name: Create mount directories for NAS shares
+      ansible.builtin.file:
+        path: "/mnt/{{ item }}"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      loop: "{{ nas_shares }}"
+
+    - name: Test 1Password CLI functionality
+      ansible.builtin.command:
+        cmd: op account list
+      register: op_test
+      failed_when: false
+      changed_when: false
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Check if NAS credentials exist in 1Password
+      ansible.builtin.command:
+        cmd: op item get "knuth" --fields username
+      register: op_knuth_check
+      failed_when: false
+      changed_when: false
+      become: true
+      become_user: "{{ original_user }}"
+      when: op_test.rc == 0
+
+    - name: Get NAS credentials from 1Password
+      ansible.builtin.command:
+        cmd: op item get "knuth" --fields {{ item }} --reveal
+      register: op_credentials
+      failed_when: false
+      changed_when: false
+      become: true
+      become_user: "{{ original_user }}"
+      loop:
+        - username
+        - password
+      when: op_test.rc == 0 and op_knuth_check.rc == 0
+
+    - name: Create temporary credentials file
+      ansible.builtin.tempfile:
+        state: file
+        suffix: .creds
+      register: temp_creds
+      when: op_test.rc == 0 and op_knuth_check.rc == 0 and op_credentials.results[0].rc == 0
+
+    - name: Write credentials to temp file
+      ansible.builtin.copy:
+        content: |
+          username={{ op_credentials.results[0].stdout }}
+          password={{ op_credentials.results[1].stdout }}
+        dest: "{{ temp_creds.path }}"
+        mode: "0600"
+      when: temp_creds is defined
+
+    - name: Mount NAS shares
+      ansible.builtin.shell: |
+        if ! mountpoint -q "/mnt/{{ item }}"; then
+          mount -t cifs "//{{ nas_ip }}/{{ item }}" "/mnt/{{ item }}" \
+            -o "credentials={{ temp_creds.path }},uid=$(id -u {{ original_user }}),gid=$(id -g {{ original_user }}),iocharset=utf8,file_mode=0755,dir_mode=0755"
+          echo "Mounted {{ item }}"
+        else
+          echo "{{ item }} already mounted"
+        fi
+      register: mount_result
+      changed_when: "'Mounted' in mount_result.stdout"
+      loop: "{{ nas_shares }}"
+      when: temp_creds is defined
+
+    - name: Clean up credentials file
+      ansible.builtin.file:
+        path: "{{ temp_creds.path }}"
+        state: absent
+      when: temp_creds is defined
+
+    - name: Display 1Password setup instructions
+      ansible.builtin.debug:
+        msg: |
+          🔐 1Password CLI Setup Required
+
+          The 1Password CLI needs configuration:
+
+          1. Open and unlock 1Password app
+          2. Go to Settings > Security
+          3. Enable "Unlock using system authentication"
+          4. Go to Settings > Developer
+          5. Select "Integrate with 1Password CLI"
+
+          Test with: op account list
+      when: op_test.rc != 0
+
+    - name: Display missing credentials instructions
+      ansible.builtin.debug:
+        msg: |
+          📝 Missing 'knuth' Item in 1Password
+
+          Create a 'knuth' item with:
+          - Title: knuth
+          - Username: your Synology username
+          - Password: your Synology password
+
+          Then re-run: ansible-playbook ansible/storage-nas.ansible.yml
+      when: op_test.rc == 0 and op_knuth_check.rc != 0
+
+    - name: Display successful mount summary
+      ansible.builtin.debug:
+        msg: |
+          ✅ NAS Shares Successfully Mounted
+
+          Available mounts:
+          {% for share in nas_shares %}
+          - /mnt/{{ share }} ({{ mount_result.results[loop.index0].stdout if mount_result.results is defined else 'already mounted' }})
+          {% endfor %}
+
+          NAS IP: {{ nas_ip }}
+      when: temp_creds is defined

@@ -1,0 +1,96 @@
+---
+- name: Setup Base Fedora System
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    - name: Update all packages to latest
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+        update_only: true
+
+    - name: Install essential system packages
+      ansible.builtin.dnf:
+        name:
+          - curl # HTTP client
+          - wget # File downloader
+          - unzip # Archive extraction
+          - git # Version control
+          - openssh-clients # SSH tools (includes ssh-keygen)
+          - cifs-utils # SMB/CIFS mounting utilities
+        state: present
+
+    - name: Install Python development packages
+      ansible.builtin.dnf:
+        name:
+          - python3-pip # Python package manager
+          - python3-psutil # Python system utilities (required for dconf)
+        state: present
+
+    - name: Install build tools
+      ansible.builtin.dnf:
+        name:
+          - gcc # C compiler
+          - make # Build tool
+          - kernel-devel # Kernel development headers
+          - kernel-headers # Kernel headers
+          - dkms # Dynamic Kernel Module Support
+        state: present
+
+    - name: Start and enable essential services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - systemd-resolved
+        - NetworkManager
+
+    - name: Create standard mount directories
+      ansible.builtin.file:
+        path: "/mnt/{{ item }}"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      loop:
+        - backups
+        - media
+        - pictures
+        - external
+
+    - name: Generate SSH key if not exists
+      ansible.builtin.command:
+        cmd: >-
+          ssh-keygen -t ed25519 -f /home/{{ original_user }}/.ssh/id_ed25519
+          -N "" -C "{{ original_user }}@{{ ansible_hostname }}"
+      become: true
+      become_user: "{{ original_user }}"
+      register: ssh_key_result
+      changed_when: ssh_key_result.rc == 0
+      failed_when: false
+
+    - name: Set SSH directory permissions
+      ansible.builtin.file:
+        path: "/home/{{ original_user }}/.ssh"
+        state: directory
+        mode: "0700"
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+      become: true
+
+    - name: Set SSH key permissions
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+      become: true
+      loop:
+        - { path: "/home/{{ original_user }}/.ssh/id_ed25519", mode: "0600" }
+        - { path: "/home/{{ original_user }}/.ssh/id_ed25519.pub", mode: "0644" }
+      when: ssh_key_result.rc == 0

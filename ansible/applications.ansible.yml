@@ -1,0 +1,197 @@
+---
+- name: Install Applications and Development Tools
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    # Third-party repositories
+    - name: Import 1Password GPG key
+      ansible.builtin.rpm_key:
+        key: https://downloads.1password.com/linux/keys/1password.asc
+        state: present
+
+    - name: Add 1Password repository
+      ansible.builtin.yum_repository:
+        name: 1password
+        description: 1Password Stable Channel
+        baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
+        enabled: true
+        gpgcheck: true
+        repo_gpgcheck: true
+        gpgkey: https://downloads.1password.com/linux/keys/1password.asc
+
+    - name: Import Google Chrome GPG key
+      ansible.builtin.rpm_key:
+        key: https://dl.google.com/linux/linux_signing_key.pub
+        state: present
+
+    - name: Add Google Chrome repository
+      ansible.builtin.yum_repository:
+        name: google-chrome
+        description: Google Chrome
+        baseurl: http://dl.google.com/linux/chrome/rpm/stable/x86_64
+        enabled: true
+        gpgcheck: true
+        gpgkey: https://dl.google.com/linux/linux_signing_key.pub
+
+    - name: Import Microsoft GPG key
+      ansible.builtin.rpm_key:
+        key: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: Add Visual Studio Code repository
+      ansible.builtin.yum_repository:
+        name: vscode
+        description: Visual Studio Code
+        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        enabled: true
+        gpgcheck: true
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+
+
+    # Native packages with system integration
+    - name: Install desktop applications (native packages)
+      ansible.builtin.dnf:
+        name:
+          - 1password # Password manager (needs system integration)
+          - 1password-cli # 1Password CLI for secure credential access
+          - google-chrome-stable # Web browser (needs system integration)
+          - code # Visual Studio Code (needs system integration)
+        state: present
+
+    # Development tools
+    - name: Install development tools
+      ansible.builtin.dnf:
+        name:
+          - vim # Text editor
+          - neovim # Modern vim
+          - nodejs # JavaScript runtime
+          - npm # Node package manager
+          - ansible # Automation tool
+          - ansible-lint # Ansible linting
+          - yamllint # YAML linting
+          - gh # GitHub CLI
+        state: present
+
+    # Command line utilities
+    - name: Install command line utilities
+      ansible.builtin.dnf:
+        name:
+          - jq # JSON processor
+          - tree # Directory structure viewer
+          - htop # Process monitor
+          - ripgrep # Fast grep alternative
+          - fd-find # Fast find alternative
+          - bat # Cat with syntax highlighting
+          - fzf # Fuzzy finder
+          - zsh # Alternative shell
+          - tmux # Terminal multiplexer
+        state: present
+
+    # GNOME desktop utilities
+    - name: Install GNOME desktop utilities and extensions
+      ansible.builtin.dnf:
+        name:
+          - gnome-shell-extension-dash-to-dock # Dash to Dock extension
+          - gnome-tweaks # GNOME appearance and behavior customization
+          - gnome-extensions-app # Manage GNOME Shell extensions
+          - dconf-editor # Advanced configuration editor
+          - alacritty # GPU-accelerated terminal emulator
+        state: present
+
+    # Containerization tools
+    - name: Install containerization tools
+      ansible.builtin.dnf:
+        name:
+          - docker # Container runtime (includes compose)
+        state: present
+
+    # Flatpak applications
+    - name: Install Flatpak applications
+      community.general.flatpak:
+        name: "{{ item }}"
+        state: present
+      become: true
+      become_user: "{{ original_user }}"
+      loop:
+        - com.github.IsmaelMartinez.teams_for_linux # Teams client
+        - md.obsidian.Obsidian # Note-taking and knowledge management
+        - org.zotero.Zotero # Reference management and research tool
+        - org.onlyoffice.desktopeditors # Office suite
+        - com.plexamp.Plexamp # Music player for Plex
+        - org.gnome.World.PikaBackup # Simple backup tool for GNOME
+        - org.gimp.GIMP # GNU Image Manipulation Program
+        - io.mpv.Mpv # Modern media player
+
+    # Remove unwanted packages
+    - name: Remove Firefox (replaced with Chrome)
+      ansible.builtin.dnf:
+        name: firefox
+        state: absent
+
+    - name: Remove LibreOffice packages (replaced with OnlyOffice)
+      ansible.builtin.dnf:
+        name:
+          - libreoffice*
+          - unoconv
+        state: absent
+        autoremove: true
+
+    - name: Remove LibreOffice from Flatpak
+      community.general.flatpak:
+        name: org.libreoffice.LibreOffice
+        state: absent
+      become: true
+      become_user: "{{ original_user }}"
+      failed_when: false
+
+    - name: Remove GNOME Terminal (replaced with Alacritty)
+      ansible.builtin.dnf:
+        name: gnome-terminal
+        state: absent
+
+    # GitHub tools (lazydocker)
+    - name: Get lazydocker latest release info
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/jesseduffield/lazydocker/releases/latest
+        method: GET
+        return_content: true
+      register: lazydocker_release
+
+    - name: Install lazydocker (terminal UI for Docker)
+      ansible.builtin.get_url:
+        url: "{{ lazydocker_release.json.assets | selectattr('name', 'match', '.*Linux_x86_64\\.tar\\.gz$') | map(attribute='browser_download_url') | first }}"
+        dest: /tmp/lazydocker.tar.gz
+        mode: "0644"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Extract lazydocker
+      ansible.builtin.unarchive:
+        src: /tmp/lazydocker.tar.gz
+        dest: /tmp
+        remote_src: true
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Install lazydocker binary
+      ansible.builtin.copy:
+        src: /tmp/lazydocker
+        dest: /usr/local/bin/lazydocker
+        mode: "0755"
+        owner: root
+        group: root
+        remote_src: true
+
+    - name: Clean up lazydocker installation files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/lazydocker.tar.gz
+        - /tmp/lazydocker
+      become: true
+      become_user: "{{ original_user }}"
