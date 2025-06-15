@@ -27,7 +27,12 @@
     - name: Add new /mnt mount entries to fstab
       ansible.builtin.lineinfile:
         path: /etc/fstab
-        line: "//{{ nas_ip }}/{{ item }} /mnt/{{ item }} cifs username=$(op item get 'knuth' --fields username),password=$(op item get 'knuth' --fields password),uid={{ original_user }},gid={{ original_user }},iocharset=utf8,file_mode=0755,dir_mode=0755,noauto,user 0 0"
+        line: >-
+          //{{ nas_ip }}/{{ item }} /mnt/{{ item }} cifs
+          username=$(op item get 'knuth' --fields username),
+          password=$(op item get 'knuth' --fields password),
+          uid={{ original_user }},gid={{ original_user }},
+          iocharset=utf8,file_mode=0755,dir_mode=0755,noauto,user 0 0
         state: present
         backup: true
       loop: "{{ mount_shares }}"
