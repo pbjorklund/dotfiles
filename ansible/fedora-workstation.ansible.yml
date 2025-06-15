@@ -333,10 +333,7 @@
     - name: Enable multiple GNOME extensions
       community.general.dconf:
         key: "/org/gnome/shell/enabled-extensions"
-        value: >-
-          ['dash-to-dock@micxgx.gmail.com',
-           'appindicatorsupport@rgcjonas.gmail.com',
-           ]
+        value: "['dash-to-dock@micxgx.gmail.com', 'appindicatorsupport@rgcjonas.gmail.com']"
       become: true
       become_user: "{{ original_user }}"
 
