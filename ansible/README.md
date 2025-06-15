@@ -1,30 +1,56 @@
-# Ansible Fedora Setup
+# Ansible Playbooks
 
-Automated Fedora workstation setup with essential development tools and applications.
+Modular Fedora workstation setup automation.
 
-## Prerequisites
-
-- Fresh Fedora installation
-- Internet connection
-
-## Installation
-
-Install Ansible and run the playbook:
+## Quick Start
 
 ```bash
-$ sudo dnf install ansible
-$ cd ~/dotfiles/ansible
-$ ansible-playbook fedora-workstation.ansible.yml
+# Complete setup (recommended)
+ansible-playbook workstation-setup.ansible.yml
+
+# With optional components
+ansible-playbook workstation-setup.ansible.yml \
+  --extra-vars "configure_dns=true install_displaylink=true configure_nas=true"
 ```
 
-## What's Included
+## Playbooks
 
-**Desktop Apps:** 1Password, Chrome, VS Code, Teams
-**Development:** Git, Node.js, Python, Docker, SSH tools
-**CLI Tools:** Vim, tmux, ripgrep, fzf, jq, htop
+### Core Components
+- **[`workstation-setup.ansible.yml`](workstation-setup.ansible.yml)** - Master orchestrator
+- **[`base-system.ansible.yml`](base-system.ansible.yml)** - Core packages and SSH (run once)
+- **[`applications.ansible.yml`](applications.ansible.yml)** - Desktop apps and dev tools
+- **[`services.ansible.yml`](services.ansible.yml)** - System service configuration
+- **[`personal-config.ansible.yml`](personal-config.ansible.yml)** - Dotfiles and GNOME settings
 
-## Post-Installation
+### Optional Components
+- **[`hardware-displaylink.ansible.yml`](hardware-displaylink.ansible.yml)** - DisplayLink drivers
+- **[`storage-nas.ansible.yml`](storage-nas.ansible.yml)** - NAS storage mounts
+- **[`configure-local-dns.ansible.yml`](configure-local-dns.ansible.yml)** - Local DNS resolution
 
-1. Add SSH key to GitHub (displayed after playbook completion)
-2. Configure 1Password and VS Code
-3. Restart session for Docker group membership
+## Individual Usage
+
+```bash
+# Update applications only
+ansible-playbook applications.ansible.yml
+
+# Apply personal config changes
+ansible-playbook personal-config.ansible.yml
+
+# Install DisplayLink drivers
+ansible-playbook hardware-displaylink.ansible.yml
+
+# Configure NAS mounts
+ansible-playbook storage-nas.ansible.yml
+```
+
+## Benefits
+
+- **Focused responsibility** - Each playbook has a single purpose
+- **Selective execution** - Run only what needs updating
+- **Reduced risk** - Base system changes separated from app updates
+- **Environment flexibility** - Optional components for different setups
+
+## Requirements
+
+- Fedora Linux with sudo access
+- Ansible installed (`dnf install ansible`)
