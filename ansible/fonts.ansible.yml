@@ -1,7 +1,7 @@
 ---
-# Font Installation Playbook
-# Installs fonts via Fedora system packages for GNOME desktop
-- name: Install Fonts for GNOME
+# Font Installation and Configuration Playbook
+# Installs fonts and configures GNOME to use Inter for UI and Fira Code for terminals
+- name: Install and Configure Fonts for GNOME
   hosts: localhost
   connection: local
   become: true
@@ -15,6 +15,7 @@
         name:
           - fontconfig                    # Font configuration library
           - rsms-inter-fonts              # Inter font family - modern UI typeface
+          - fira-code-fonts               # Fira Code - programming font with ligatures
           - google-noto-color-emoji-fonts # Noto Color Emoji - colored emoji support
           - google-noto-emoji-fonts       # Noto Emoji - black and white emoji
           - dejavu-sans-fonts             # DejaVu Sans - excellent Unicode coverage
@@ -35,18 +36,55 @@
       become_user: "{{ original_user }}"
       changed_when: true
 
+    # Configure GNOME to use Inter for UI and Fira Code for monospace
+    - name: Set Inter as default interface font
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/font-name"
+        value: "'Inter 11'"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Set Inter as default document font
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/document-font-name"
+        value: "'Inter 11'"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Set Fira Code as default monospace font
+      community.general.dconf:
+        key: "/org/gnome/desktop/interface/monospace-font-name"
+        value: "'Fira Code 10'"
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Set Inter as window title font
+      community.general.dconf:
+        key: "/org/gnome/desktop/wm/preferences/titlebar-font"
+        value: "'Inter Bold 11'"
+      become: true
+      become_user: "{{ original_user }}"
+
     # Display installation completion
     - name: Display font installation completion
       ansible.builtin.debug:
         msg: |
-          Font installation complete for GNOME on Fedora!
+          Font installation and configuration complete for GNOME on Fedora!
           
           Installed font families:
           - Inter - Modern UI typeface designed for computer screens
+          - Fira Code - Programming font with ligatures
           - Noto Emoji - Google's comprehensive emoji support
           - DejaVu (Sans, Serif, Mono) - Excellent Unicode coverage
           - Liberation (Sans, Serif, Mono) - Metric-compatible alternatives
           - Cantarell - GNOME's default UI font
           
-          These fonts are now available in all GNOME applications.
+          GNOME font configuration applied:
+          - Interface font: Inter 11
+          - Document font: Inter 11
+          - Monospace font: Fira Code 10 (terminals, IDEs)
+          - Window title font: Inter Bold 11
+          
+          These settings are active immediately. You can adjust font sizes in
+          GNOME Settings > Appearance > Fonts if needed.
           Configure default fonts in GNOME Settings > Appearance > Fonts.
