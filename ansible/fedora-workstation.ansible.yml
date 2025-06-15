@@ -150,6 +150,18 @@
           - unzip # Archive extraction
         state: present
 
+    - name: Enable Zellij COPR repository
+      ansible.builtin.command:
+        cmd: dnf copr enable varlad/zellij -y
+      register: copr_result
+      changed_when: "'Repository successfully enabled' in copr_result.stdout"
+      failed_when: copr_result.rc != 0 and 'already enabled' not in copr_result.stderr
+
+    - name: Install Zellij terminal multiplexer
+      ansible.builtin.dnf:
+        name: zellij # Modern terminal multiplexer
+        state: present
+
     - name: Install GNOME desktop utilities and extensions
       ansible.builtin.dnf:
         name:
