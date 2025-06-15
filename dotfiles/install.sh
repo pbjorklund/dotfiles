@@ -6,8 +6,8 @@
 
 ########## Variables
 
-dir=~/dotfiles        # dotfiles directory
-olddir=~/dotfiles_old # old dotfiles backup directory
+dir=~/dotfiles/dotfiles  # dotfiles directory
+olddir=~/dotfiles_old    # old dotfiles backup directory
 # List of files to symlink in homedir (excluding directories and install script)
 files="bashrc gitconfig tmux.conf"
 

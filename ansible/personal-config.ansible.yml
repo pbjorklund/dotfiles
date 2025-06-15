@@ -26,7 +26,7 @@
 
     - name: Run dotfiles install script
       ansible.builtin.command:
-        cmd: ./install.sh
+        cmd: ./dotfiles/install.sh
         chdir: "/home/{{ original_user }}/dotfiles"
       become: true
       become_user: "{{ original_user }}"

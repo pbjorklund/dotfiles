@@ -1,77 +1,34 @@
-# Dotfiles
+# Development Environment Setup
 
-Personal configuration files for Linux development environment with automatic local DNS resolution.
+Automated setup for Linux development environment with modular Ansible playbooks and personal dotfiles.
 
-## Features
+## Components
 
-- **Shell Configuration**: Enhanced bash configuration with useful aliases and environment setup
-- **Git Configuration**: Streamlined git settings with helpful aliases
-- **Tmux Configuration**: Terminal multiplexer setup for productivity
-- **Local DNS Resolution**: Automatic hostname resolution for local network devices
+- **[Dotfiles](dotfiles/)**: Personal configuration files (bashrc, gitconfig, tmux.conf)
+- **[Ansible Playbooks](ansible/)**: Modular system setup and application installation
+- **[Scripts](scripts/)**: Utility scripts for DNS and system configuration
 
 ## Quick Start
 
+### Complete Workstation Setup
+
 ```bash
-git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
+git clone https://github.com/pbjorklund/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+ansible-playbook ansible/workstation-setup.ansible.yml
+```
+
+### Dotfiles Only
+
+```bash
+git clone https://github.com/pbjorklund/dotfiles.git ~/dotfiles
+cd ~/dotfiles/dotfiles
 ./install.sh
 ```
 
-This will:
-1. Install dotfiles (bashrc, gitconfig, tmux.conf)
-2. Configure DNS to resolve local hostnames like `knuth` instead of IP addresses
+## Ansible Playbooks
 
-## Installation Options
-
-```bash
-# Install everything (dotfiles + DNS configuration)
-./install.sh
-
-# Install only dotfiles
-./install.sh --dotfiles-only
-
-# Configure only DNS resolution
-./install.sh --dns-only
-
-# Show help
-./install.sh --help
-```
-
-## Local DNS Resolution
-
-The DNS configuration enables you to ping devices by hostname instead of IP address:
-
-```bash
-# Instead of this:
-ping 192.168.1.35
-
-# You can do this:
-ping knuth
-```
-
-### How It Works
-
-- **Automatic Router Detection**: Detects your router's IP automatically
-- **All Network Interfaces**: Works for WiFi, Ethernet, and other connections
-- **No Hardcoded Mappings**: Uses your router's DNS/DHCP for hostname resolution
-- **Fallback DNS**: Maintains external DNS resolution with public servers
-
-### Manual DNS Configuration
-
-```bash
-# Configure DNS resolution
-./scripts/setup-local-dns.sh --configure
-
-# Check current status
-./scripts/setup-local-dns.sh --status
-
-# Restore original configuration
-./scripts/setup-local-dns.sh --restore
-```
-
-### Using Ansible
-
-The Ansible configuration is now modular for better maintainability:
+The Ansible configuration is modular for better maintainability:
 
 ```bash
 # Complete workstation setup (recommended)
@@ -91,16 +48,43 @@ ansible-playbook ansible/storage-nas.ansible.yml        # NAS mounts
 ansible-playbook ansible/configure-local-dns.ansible.yml # DNS configuration
 ```
 
+## Local DNS Resolution
+
+The DNS configuration enables you to ping devices by hostname instead of IP address:
+
+```bash
+# Instead of this:
+ping 192.168.1.35
+
+# You can do this:
+ping knuth
+```
+
+### Manual DNS Configuration
+
+```bash
+# Configure DNS resolution
+./scripts/setup-local-dns.sh --configure
+
+# Check current status
+./scripts/setup-local-dns.sh --status
+
+# Restore original configuration
+./scripts/setup-local-dns.sh --restore
+```
+
 ## File Structure
 
 ```
-├── bashrc                              # Bash shell configuration
-├── gitconfig                           # Git configuration with aliases
-├── tmux.conf                           # Tmux terminal multiplexer configuration
-├── install.sh                          # Main installation script
+├── dotfiles/                           # Personal configuration files
+│   ├── README.md                       # Dotfiles documentation
+│   ├── bashrc                          # Bash shell configuration
+│   ├── gitconfig                       # Git configuration with aliases
+│   ├── tmux.conf                       # Tmux terminal multiplexer configuration
+│   └── install.sh                      # Dotfiles installation script
 ├── scripts/
 │   └── setup-local-dns.sh              # DNS configuration script
-└── ansible/
+└── ansible/                            # Automated system setup
     ├── ansible.cfg                     # Ansible configuration
     ├── workstation-setup.ansible.yml   # Master orchestration playbook
     ├── base-system.ansible.yml         # Core system packages and SSH
@@ -116,7 +100,7 @@ ansible-playbook ansible/configure-local-dns.ansible.yml # DNS configuration
 
 - **Operating System**: Linux with systemd-resolved (Ubuntu 18.04+, Fedora 30+, etc.)
 - **Network**: Local router with DNS/DHCP services
-- **Permissions**: sudo access for DNS configuration
+- **Permissions**: sudo access for system configuration
 
 ## Troubleshooting
 
