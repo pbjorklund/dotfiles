@@ -412,15 +412,6 @@
         state: absent
       tags: terminal_update
 
-    - name: Set neovim as default terminal editor
-      ansible.builtin.lineinfile:
-        path: "/home/{{ original_user }}/.bashrc"
-        line: "export EDITOR=nvim"
-        regexp: "^export EDITOR="
-        state: present
-      become: true
-      become_user: "{{ original_user }}"
-      tags: terminal_update
 
     - name: Update all packages
       ansible.builtin.dnf:
