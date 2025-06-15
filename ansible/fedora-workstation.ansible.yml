@@ -88,13 +88,6 @@
       become: true
       become_user: "{{ original_user }}"
 
-    - name: Install Mailspring via Flatpak (modern email client with advanced features)
-      community.general.flatpak:
-        name: com.getmailspring.Mailspring
-        state: present
-      become: true
-      become_user: "{{ original_user }}"
-
     - name: Install Plexamp via Flatpak (music player for Plex media servers)
       community.general.flatpak:
         name: com.plexamp.Plexamp
@@ -170,7 +163,6 @@
       ansible.builtin.dnf:
         name:
           - gnome-shell-extension-appindicator # App indicators support for notifications
-          - gnome-shell-extension-system-monitor-applet # System monitor extension
         state: present
         enablerepo: "*"
 
@@ -184,6 +176,26 @@
       ansible.builtin.dnf:
         name: firefox
         state: absent
+
+    - name: Remove LibreOffice and related packages (DNF)
+      ansible.builtin.dnf:
+        name:
+          - libreoffice* # Remove all LibreOffice packages
+          - unoconv # Document converter that depends on LibreOffice
+        state: absent
+        autoremove: true
+
+
+    - name: Remove LibreOffice from Flatpak
+      community.general.flatpak:
+        name: org.libreoffice.LibreOffice
+        state: absent
+      become: true
+      become_user: "{{ original_user }}"
+      register: libreoffice_removal
+      failed_when: >
+        libreoffice_removal.failed and
+        "not installed" not in libreoffice_removal.msg | default("")
 
     - name: Update all packages
       ansible.builtin.dnf:
@@ -307,6 +319,13 @@
       become: true
       become_user: "{{ original_user }}"
 
+    - name: Remap Caps Lock to Ctrl (productivity enhancement)
+      community.general.dconf:
+        key: "/org/gnome/desktop/input-sources/xkb-options"
+        value: "['caps:ctrl_modifier']"
+      become: true
+      become_user: "{{ original_user }}"
+
     # GNOME Desktop Configuration Section
     - name: Enable multiple GNOME extensions
       community.general.dconf:
@@ -314,9 +333,7 @@
         value: >-
           ['dash-to-dock@micxgx.gmail.com',
            'appindicatorsupport@rgcjonas.gmail.com',
-           'sound-output-device-chooser@kgshank.net',
-           'system-monitor@paradoxxx.zero.gmail.com',
-           'Vitals@CoreCoding.com']
+           'system-monitor@paradoxxx.zero.gmail.com']
       become: true
       become_user: "{{ original_user }}"
 
