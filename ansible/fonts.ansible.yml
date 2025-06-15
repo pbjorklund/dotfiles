@@ -13,19 +13,19 @@
     - name: Install system font packages
       ansible.builtin.dnf:
         name:
-          - fontconfig                    # Font configuration library
-          - rsms-inter-fonts              # Inter font family - modern UI typeface
-          - fira-code-fonts               # Fira Code - programming font with ligatures
+          - fontconfig # Font configuration library
+          - rsms-inter-fonts # Inter font family - modern UI typeface
+          - fira-code-fonts # Fira Code - programming font with ligatures
           - google-noto-color-emoji-fonts # Noto Color Emoji - colored emoji support
-          - google-noto-emoji-fonts       # Noto Emoji - black and white emoji
-          - dejavu-sans-fonts             # DejaVu Sans - excellent Unicode coverage
-          - dejavu-serif-fonts            # DejaVu Serif - serif font family
-          - dejavu-sans-mono-fonts        # DejaVu Sans Mono - monospace coding font
-          - liberation-fonts-common       # Liberation fonts common files
-          - liberation-sans-fonts         # Liberation Sans - Arial alternative
-          - liberation-serif-fonts        # Liberation Serif - Times New Roman alternative
-          - liberation-mono-fonts         # Liberation Mono - Courier New alternative
-          - abattis-cantarell-fonts       # Cantarell - GNOME default UI font
+          - google-noto-emoji-fonts # Noto Emoji - black and white emoji
+          - dejavu-sans-fonts # DejaVu Sans - excellent Unicode coverage
+          - dejavu-serif-fonts # DejaVu Serif - serif font family
+          - dejavu-sans-mono-fonts # DejaVu Sans Mono - monospace coding font
+          - liberation-fonts-common # Liberation fonts common files
+          - liberation-sans-fonts # Liberation Sans - Arial alternative
+          - liberation-serif-fonts # Liberation Serif - Times New Roman alternative
+          - liberation-mono-fonts # Liberation Mono - Courier New alternative
+          - abattis-cantarell-fonts # Cantarell - GNOME default UI font
         state: present
 
     # Update font cache for immediate availability
@@ -70,7 +70,7 @@
       ansible.builtin.debug:
         msg: |
           Font installation and configuration complete for GNOME on Fedora!
-          
+
           Installed font families:
           - Inter - Modern UI typeface designed for computer screens
           - Fira Code - Programming font with ligatures
@@ -78,13 +78,13 @@
           - DejaVu (Sans, Serif, Mono) - Excellent Unicode coverage
           - Liberation (Sans, Serif, Mono) - Metric-compatible alternatives
           - Cantarell - GNOME's default UI font
-          
+
           GNOME font configuration applied:
           - Interface font: Inter 11
           - Document font: Inter 11
           - Monospace font: Fira Code 10 (terminals, IDEs)
           - Window title font: Inter Bold 11
-          
+
           These settings are active immediately. You can adjust font sizes in
           GNOME Settings > Appearance > Fonts if needed.
           Configure default fonts in GNOME Settings > Appearance > Fonts.

@@ -10,31 +10,42 @@ case $- in
 esac
 
 # History Configuration
-shopt -s histappend                    # Append to history file, don't overwrite
-HISTSIZE=10000                         # Commands in memory
-HISTFILESIZE=20000                     # Commands in history file
-shopt -s checkwinsize                  # Update window size after each command
+shopt -s histappend   # Append to history file, don't overwrite
+HISTSIZE=10000        # Commands in memory
+HISTFILESIZE=20000    # Commands in history file
+shopt -s checkwinsize # Update window size after each command
 
 # Editor Configuration
-export EDITOR=nvim                     # Use neovim as default editor
+export EDITOR=nvim # Use neovim as default editor
 
-# Prompt Configuration
-PS1='\u@\h:\w\$ '                     # Simple user@host:path$ prompt
+# Git branch detection function for prompt
+git_branch() {
+    local branch
+    if branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
+        if [[ $branch == "HEAD" ]]; then
+            branch=$(git rev-parse --short HEAD 2>/dev/null)
+        fi
+        echo " ($branch)"
+    fi
+}
+
+# Prompt Configuration - colorized with git integration
+# Colors: cyan user@host, blue path, green git branch, white prompt
+PS1='\[\e[0;36m\]\u@\h\[\e[0m\]:\[\e[0;34m\]\w\[\e[0;32m\]$(git_branch)\[\e[0m\]\$ '
 
 # Essential Aliases
-alias ll='ls -alF'                     # Long listing with file types
-alias la='ls -A'                       # All files except . and ..
-alias l='ls -CF'                       # Compact listing with file types
-alias grep='grep --color=auto'         # Colorized grep output
-alias ls='ls --color=auto'             # Colorized ls output
+alias ll='ls -alF'             # Long listing with file types
+alias la='ls -A'               # All files except . and ..
+alias l='ls -CF'               # Compact listing with file types
+alias grep='grep --color=auto' # Colorized grep output
+alias ls='ls --color=auto'     # Colorized ls output
 
 # Disable pagers for better agent interaction
-export SYSTEMD_PAGER=''                # Disable pager for systemctl
-export PAGER='cat'                     # Use cat instead of less/more
-export MANPAGER='cat'                  # Use cat for manual pages
-alias systemctl='systemctl --no-pager' # Force systemctl to not use pager
+export SYSTEMD_PAGER=''                  # Disable pager for systemctl
+export PAGER='cat'                       # Use cat instead of less/more
+export MANPAGER='cat'                    # Use cat for manual pages
+alias systemctl='systemctl --no-pager'   # Force systemctl to not use pager
 alias journalctl='journalctl --no-pager' # Force journalctl to not use pager
-
 
 # Conditional Loading
 # Load additional configurations if they exist
