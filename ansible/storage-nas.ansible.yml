@@ -27,6 +27,16 @@
         group: root
       loop: "{{ nas_shares }}"
 
+    - name: Remove broken fstab entries with shell command substitution
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: >-
+          ^//{{ nas_ip }}/{{ item }}\s+/mnt/{{ item }}\s+cifs.*\$\(op item get.*
+        state: absent
+        backup: true
+      loop: "{{ nas_shares }}"
+      register: fstab_cleanup
+
     - name: Test 1Password CLI functionality
       ansible.builtin.command:
         cmd: op account list
@@ -57,40 +67,69 @@
       loop:
         - username
         - password
-      when: op_test.rc == 0 and op_knuth_check.rc == 0
+      when: >-
+        op_test.rc == 0 and op_knuth_check.rc == 0
 
-    - name: Create temporary credentials file
-      ansible.builtin.tempfile:
-        state: file
-        suffix: .creds
-      register: temp_creds
-      when: op_test.rc == 0 and op_knuth_check.rc == 0 and op_credentials.results[0].rc == 0
-
-    - name: Write credentials to temp file
+    - name: Create CIFS credentials file
       ansible.builtin.copy:
         content: |
           username={{ op_credentials.results[0].stdout }}
           password={{ op_credentials.results[1].stdout }}
-        dest: "{{ temp_creds.path }}"
+        dest: /etc/cifs-credentials
         mode: "0600"
-      when: temp_creds is defined
+        owner: root
+        group: root
+      when: >-
+        op_test.rc == 0 and op_knuth_check.rc == 0 and
+        op_credentials.results[0].rc == 0
 
-    - name: Mount NAS shares
-      ansible.builtin.shell: |
-        if ! mountpoint -q "/mnt/{{ item }}"; then
-          mount -t cifs "//{{ nas_ip }}/{{ item }}" "/mnt/{{ item }}" \
-            -o "credentials={{ temp_creds.path }},uid=$(id -u {{ original_user }}),gid=$(id -g {{ original_user }}),iocharset=utf8,file_mode=0755,dir_mode=0755"
-          echo "Mounted {{ item }}"
-        else
-          echo "{{ item }} already mounted"
-        fi
-      register: mount_result
-      changed_when: "'Mounted' in mount_result.stdout"
+    - name: Add proper fstab entries for NAS shares
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        line: >-
+          //{{ nas_ip }}/{{ item }} /mnt/{{ item }} cifs
+          credentials=/etc/cifs-credentials,uid={{ original_user }},
+          gid={{ original_user }},iocharset=utf8,file_mode=0755,
+          dir_mode=0755,noauto,user 0 0
+        create: true
+        backup: true
+        mode: "0644"
       loop: "{{ nas_shares }}"
-      when: temp_creds is defined
+      when: >-
+        op_test.rc == 0 and op_knuth_check.rc == 0 and
+        op_credentials.results[0].rc == 0
+      register: fstab_updates
 
-    - name: Clean up credentials file
-      ansible.builtin.file:
-        path: "{{ temp_creds.path }}"
-        state: absent
-      when: temp_creds is defined
+    - name: Reload systemd daemon to update mount units
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when: fstab_cleanup.changed or fstab_updates.changed
+
+    - name: Display mount instructions
+      ansible.builtin.debug:
+        msg: |
+          NAS mount configuration complete. To mount shares:
+          sudo mount /mnt/{{ item }}
+
+          To mount all configured shares:
+          sudo mount -a -t cifs
+      loop: "{{ nas_shares }}"
+      when: >-
+        op_test.rc == 0 and op_knuth_check.rc == 0 and
+        op_credentials.results[0].rc == 0
+
+    - name: Display 1Password CLI setup instructions
+      ansible.builtin.debug:
+        msg: |
+          1Password CLI not available or not configured.
+          Please install and configure 1Password CLI first:
+
+          1. Install: sudo dnf install 1password-cli
+          2. Sign in: op account add
+          3. Authenticate: op signin
+          4. Verify: op account list
+
+          Then re-run this playbook.
+      when: >-
+        op_test.rc != 0 or op_knuth_check.rc != 0 or
+        op_credentials.results[0].rc != 0

@@ -51,7 +51,6 @@
         gpgcheck: true
         gpgkey: https://packages.microsoft.com/keys/microsoft.asc
 
-
     # Native packages with system integration
     - name: Install desktop applications (native packages)
       ansible.builtin.dnf:
@@ -89,6 +88,7 @@
           - fzf # Fuzzy finder
           - zsh # Alternative shell
           - tmux # Terminal multiplexer
+          - aerc # Terminal-based email client
         state: present
 
     # GNOME desktop utilities
