@@ -199,3 +199,71 @@
       become: true
       become_user: "{{ original_user }}"
       when: lazydocker_release is defined
+
+    # Rust development environment
+    - name: Remove Fedora packaged Rust/Cargo (conflicts with rustup)
+      ansible.builtin.dnf:
+        name:
+          - rust # Fedora's outdated Rust package
+          - cargo # Fedora's outdated Cargo package
+        state: absent
+
+    - name: Check if rustup is already installed
+      ansible.builtin.stat:
+        path: "/home/{{ original_user }}/.cargo/bin/rustup"
+      register: rustup_installed
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Download rustup installer
+      ansible.builtin.get_url:
+        url: "https://sh.rustup.rs"
+        dest: "/tmp/rustup-init.sh"
+        mode: "0755"
+      become: false
+      become_user: "{{ original_user }}"
+      when: not rustup_installed.stat.exists
+
+    - name: Install rustup (official Rust toolchain installer)
+      ansible.builtin.command: "/tmp/rustup-init.sh -y --default-toolchain stable"
+      args:
+        creates: "/home/{{ original_user }}/.cargo/bin/rustup"
+      become: false
+      become_user: "{{ original_user }}"
+      when: not rustup_installed.stat.exists
+
+    - name: Remove rustup installer
+      ansible.builtin.file:
+        path: "/tmp/rustup-init.sh"
+        state: absent
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Add cargo bin to PATH in bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ original_user }}/.bashrc"
+        line: 'export PATH="$HOME/.cargo/bin:$PATH"'
+        regexp: '^export PATH=.*\.cargo/bin.*'
+        state: present
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Add cargo bin to PATH in zshrc (if exists)
+      ansible.builtin.lineinfile:
+        path: "/home/{{ original_user }}/.zshrc"
+        line: 'export PATH="$HOME/.cargo/bin:$PATH"'
+        regexp: '^export PATH=.*\.cargo/bin.*'
+        state: present
+      become: false
+      become_user: "{{ original_user }}"
+      failed_when: false
+
+    - name: Install essential Rust components
+      ansible.builtin.command: "/home/{{ original_user }}/.cargo/bin/rustup component add clippy rustfmt"
+      args:
+        creates: "/home/{{ original_user }}/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/clippy-driver"
+      environment:
+        PATH: "/home/{{ original_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+      become: false
+      become_user: "{{ original_user }}"
+      when: not rustup_installed.stat.exists

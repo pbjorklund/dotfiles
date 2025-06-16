@@ -54,3 +54,5 @@ alias journalctl='journalctl --no-pager' # Force journalctl to not use pager
 
 # Created by `pipx` on 2025-06-16 12:33:17
 export PATH="$PATH:/home/pbjorklund/.local/bin"
+. "$HOME/.cargo/env"
+export PATH="$HOME/.cargo/bin:$PATH"
