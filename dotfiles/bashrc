@@ -51,3 +51,6 @@ alias journalctl='journalctl --no-pager' # Force journalctl to not use pager
 # Load additional configurations if they exist
 [[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
 [[ -f ~/.bash_local ]] && source ~/.bash_local
+
+# Created by `pipx` on 2025-06-16 12:33:17
+export PATH="$PATH:/home/pbjorklund/.local/bin"

@@ -88,7 +88,6 @@
           - fzf # Fuzzy finder
           - zsh # Alternative shell
           - tmux # Terminal multiplexer
-          - aerc # Terminal-based email client
         state: present
 
     # GNOME desktop utilities
@@ -100,6 +99,7 @@
           - gnome-extensions-app # Manage GNOME Shell extensions
           - dconf-editor # Advanced configuration editor
           - alacritty # GPU-accelerated terminal emulator
+          - thunderbird # Mozilla email client
         state: present
 
     # Containerization tools
@@ -168,6 +168,7 @@
         mode: "0644"
       become: true
       become_user: "{{ original_user }}"
+      when: lazydocker_release is defined
 
     - name: Extract lazydocker
       ansible.builtin.unarchive:
@@ -176,6 +177,7 @@
         remote_src: true
       become: true
       become_user: "{{ original_user }}"
+      when: lazydocker_release is defined
 
     - name: Install lazydocker binary
       ansible.builtin.copy:
@@ -185,6 +187,7 @@
         owner: root
         group: root
         remote_src: true
+      when: lazydocker_release is defined
 
     - name: Clean up lazydocker installation files
       ansible.builtin.file:
@@ -195,3 +198,4 @@
         - /tmp/lazydocker
       become: true
       become_user: "{{ original_user }}"
+      when: lazydocker_release is defined
