@@ -99,7 +99,6 @@
           - gnome-extensions-app # Manage GNOME Shell extensions
           - dconf-editor # Advanced configuration editor
           - alacritty # GPU-accelerated terminal emulator
-          - thunderbird # Mozilla email client
         state: present
 
     # Containerization tools
