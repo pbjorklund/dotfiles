@@ -11,6 +11,7 @@ Personal configuration files for development environment.
 - **[`.config/hypr/hyprland.conf`](.config/hypr/hyprland.conf)** - Hyprland wayland compositor configuration
 - **[`.config/waybar/config.jsonc`](.config/waybar/config.jsonc)** - Waybar status bar configuration
 - **[`.config/waybar/style.css`](.config/waybar/style.css)** - Waybar CSS styling
+- **[`.config/zellij/config.kdl`](.config/zellij/config.kdl)** - Zellij terminal multiplexer configuration
 - **[`.config/Code/User/settings.json`](.config/Code/User/settings.json)** - VS Code user settings and preferences
 
 ## Installation
@@ -28,6 +29,7 @@ This will create symlinks from your home directory to these configuration files:
 - `~/.inputrc` → `~/dotfiles/dotfiles/inputrc`
 - `~/.config/hypr/` → `~/dotfiles/dotfiles/.config/hypr/`
 - `~/.config/waybar/` → `~/dotfiles/dotfiles/.config/waybar/`
+- `~/.config/zellij/` → `~/dotfiles/dotfiles/.config/zellij/`
 - `~/.config/Code/User/settings.json` → `~/dotfiles/dotfiles/.config/Code/User/settings.json`
 
 > **Note:** Existing configuration files are backed up to `/tmp/dotfiles-backup-YYYYMMDD-HHMMSS/`
@@ -55,6 +57,16 @@ This will create symlinks from your home directory to these configuration files:
 - Activity monitoring
 - Automatic window renaming disabled
 - Custom color scheme (Solarized-inspired)
+
+### Zellij Configuration
+
+- Custom keybindings with vim-style navigation (hjkl)
+- Tmux-compatible bindings for easy migration
+- Nord theme for consistent visual appearance
+- Wayland clipboard integration (`wl-copy`)
+- Clear default mode switching with modal interface
+- Floating panes and layout management
+- Session management and plugin integration
 
 ### Hyprland Configuration
 

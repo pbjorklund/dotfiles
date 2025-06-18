@@ -12,7 +12,7 @@ backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)" # temporary backup with
 # List of files to symlink in homedir (excluding directories and install script)
 files="bashrc gitconfig tmux.conf inputrc"
 # List of .config subdirectories to symlink
-config_dirs="hypr waybar"
+config_dirs="hypr waybar zellij"
 # VS Code settings file (user settings location)
 vscode_settings_file=".config/Code/User/settings.json"
 
