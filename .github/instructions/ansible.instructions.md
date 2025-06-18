@@ -9,7 +9,6 @@ MANDATORY requirements for all Ansible files in this dotfiles repository.
 ## Package Management Requirements
 
 - **MUST** use `ansible.builtin.dnf` module (FQCN required)
-- **MUST** explicitly specify `state: present` or `state: latest`
 - **MUST** use Flatpak for desktop applications EXCEPT: Chrome, 1Password, VS Code (use native packages)
 - **MUST** group packages with comments explaining purpose
 - **MUST** include package descriptions: `# Package Name - Description of what it does`
@@ -34,7 +33,6 @@ MANDATORY requirements for all Ansible files in this dotfiles repository.
 ## Quality Assurance Requirements
 
 - **MUST** be idempotent (safe to run multiple times)
-- **MUST** include package updates in playbook using `state: latest`
 
 ## Output Formatting Requirements
 
