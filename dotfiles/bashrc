@@ -56,3 +56,7 @@ alias journalctl='journalctl --no-pager' # Force journalctl to not use pager
 export PATH="$PATH:/home/pbjorklund/.local/bin"
 . "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
+
+if [ -z "$WAYLAND_DISPLAY" ] || [ "$WAYLAND_DISPLAY" = "wayland-0" ]; then
+    export WAYLAND_DISPLAY=wayland-1
+fi

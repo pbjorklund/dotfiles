@@ -1,0 +1,55 @@
+// Waybar Configuration for Hyprland
+// Features: Workspaces, clock, system monitoring (CPU, temperature, battery, audio)
+// JSON with Comments format for better documentation
+{
+  "height": 30,
+  "spacing": 8,
+  "modules-left": ["hyprland/workspaces"],
+  "modules-center": ["clock"],
+  "modules-right": ["pulseaudio", "cpu", "temperature", "battery"],
+
+  "hyprland/workspaces": {
+    "disable-scroll": false,
+    "all-outputs": false,
+    "format": "{name}"
+  },
+
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%Y-%m-%d}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+
+  "cpu": {
+    "format": "{usage}%",
+    "tooltip": false
+  },
+
+  "temperature": {
+    "critical-threshold": 60,
+    "format": "{temperatureC}°C",
+    "format-critical": "{temperatureC}°C !"
+  },
+
+  "battery": {
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{capacity}%",
+    "format-charging": "{capacity}% ↑",
+    "format-plugged": "{capacity}% ⚡"
+  },
+
+  "pulseaudio": {
+    "format": "{volume}%",
+    "format-muted": "muted",
+    "on-click": "pavucontrol",
+    "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+    "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
+    "scroll-step": 5,
+    "tooltip": true,
+    "tooltip-format": "Volume: {volume}%"
+  }
+}

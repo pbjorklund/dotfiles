@@ -22,11 +22,11 @@ MANDATORY requirements for all dotfiles and configuration files in this reposito
 
 ## Security Requirements
 
-- **SHALL NOT** include real usernames, emails, or personal data in public configs
 - **SHALL NOT** include tokens, passwords, API keys, or secrets
 - **MUST** use `chmod 600` for sensitive config files
 - **MUST** use environment variables: `${HOME}`, `${USER}` instead of hardcoded paths
-- **MUST** use placeholder values: `user.name = "Your Name"`, `user.email = "your.email@example.com"`
+- **MAY** include personal usernames, emails, and device names in configuration files
+- **MUST** ensure personal data inclusion is intentional for repository maintainer
 
 ## Comment Requirements
 

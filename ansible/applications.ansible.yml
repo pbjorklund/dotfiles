@@ -59,6 +59,8 @@
           - 1password-cli # 1Password CLI for secure credential access
           - google-chrome-stable # Web browser (needs system integration)
           - code # Visual Studio Code (needs system integration)
+          - hyprland # Tiling wm
+          - kitty # Modern term
         state: present
 
     # Development tools
@@ -87,7 +89,7 @@
           - bat # Cat with syntax highlighting
           - fzf # Fuzzy finder
           - zsh # Alternative shell
-          - tmux # Terminal multiplexer
+          - zellij # Terminal multiplexer
         state: present
 
     # GNOME desktop utilities
@@ -98,7 +100,6 @@
           - gnome-tweaks # GNOME appearance and behavior customization
           - gnome-extensions-app # Manage GNOME Shell extensions
           - dconf-editor # Advanced configuration editor
-          - alacritty # GPU-accelerated terminal emulator
         state: present
 
     # Containerization tools

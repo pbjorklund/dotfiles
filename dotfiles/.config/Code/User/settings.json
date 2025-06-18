@@ -1,0 +1,81 @@
+// VS Code User Settings
+// Features: Editor appearance, formatting, file handling, git integration, extensions
+// Location: ~/.config/Code/User/settings.json
+{
+  "editor.fontFamily": "'Fira Code', 'Inter', monospace",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 12,
+  "editor.lineHeight": 1.4,
+  "editor.fontWeight": "400",
+  "editor.cursorBlinking": "smooth",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.smoothScrolling": true,
+  "editor.minimap.enabled": false,
+  "editor.renderWhitespace": "boundary",
+  "editor.rulers": [80, 120],
+  "editor.wordWrap": "bounded",
+  "editor.wordWrapColumn": 120,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.occurrencesHighlight": "off",
+  "editor.renderLineHighlight": "gutter",
+  "editor.glyphMargin": false,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "workbench.colorTheme": "Default Dark Modern",
+  "workbench.iconTheme": "vscode-icons",
+  "workbench.startupEditor": "welcomePage",
+  "workbench.tree.indent": 20,
+  "workbench.activityBar.location": "bottom",
+  "workbench.panel.defaultLocation": "left",
+  "workbench.sideBar.location": "left",
+  "window.menuBarVisibility": "toggle",
+  "breadcrumbs.enabled": false,
+  "workbench.statusBar.visible": true,
+  "terminal.integrated.fontFamily": "'Fira Code', 'Inter', monospace",
+  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmDelete": false,
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "extensions.autoUpdate": true,
+  "update.mode": "manual",
+  "telemetry.telemetryLevel": "off",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  },
+  "dotfiles.repository": "pbjorklund/dotfiles",
+  "dotfiles.targetPath": "/home/vscode/dotfiles",
+  "dotfiles.installCommand": "/home/vscode/dotfiles/install.sh",
+  "git.enableSmartCommit": true,
+  "chat.editing.confirmEditRequestRetry": false,
+  "chat.editing.confirmEditRequestRemoval": false,
+  "chat.tools.autoApprove": true,
+  "inlineChat.enableV2": true,
+  "roo-cline.allowedCommands": [
+    "npm test",
+    "npm install",
+    "tsc",
+    "git log",
+    "git diff",
+    "git show",
+    "*"
+  ],
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "vim.useCtrlKeys": false
+}

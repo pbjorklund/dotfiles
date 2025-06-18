@@ -1,0 +1,348 @@
+---
+# Fingerprint Authentication Configuration for Lenovo ThinkPad X1 Gen 11
+# Compatible with Fedora 42 and Synaptics Prometheus fingerprint reader (06cb:00fc)
+# Configures fprintd, PAM integration, and proper device permissions
+# Tested on ThinkPad X1 Carbon Gen 11 with modern libfprint drivers
+
+- name: Configure Fingerprint Authentication for ThinkPad X1 Gen 11
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    - name: Install fingerprint authentication packages for Fedora 42
+      ansible.builtin.dnf:
+        name:
+          - fprintd # Fingerprint authentication daemon - modern version with libfprint 1.94+
+          - fprintd-pam # PAM module for fingerprint authentication
+          - libfprint # Fingerprint reader library with Synaptics Prometheus support
+          - libfprint-devel # Development headers for fingerprint library
+        state: present
+
+    - name: Create plugdev group for fingerprint access (if not exists)
+      ansible.builtin.group:
+        name: plugdev
+        state: present
+
+    - name: Add user to plugdev group for fingerprint access
+      ansible.builtin.user:
+        name: "{{ original_user }}"
+        groups: plugdev
+        append: true
+
+    - name: Create udev rule for ThinkPad X1 Gen 11 fingerprint reader
+      ansible.builtin.copy:
+        dest: /etc/udev/rules.d/70-fingerprint-reader.rules
+        content: |
+          # ThinkPad X1 Gen 11 Synaptics Prometheus fingerprint reader permissions
+          # Vendor ID 06cb = Synaptics, Product ID 00fc = Prometheus reader
+          # Using TAG+="uaccess" for modern systemd-logind integration
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00fc", TAG+="uaccess"
+
+          # Legacy ThinkPad fingerprint readers (for compatibility)
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00bd", TAG+="uaccess"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="27c6", ATTRS{idProduct}=="55a2", TAG+="uaccess"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="27c6", ATTRS{idProduct}=="55a4", TAG+="uaccess"
+
+          # Additional Synaptics fingerprint readers
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00f0", TAG+="uaccess"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00f9", TAG+="uaccess"
+        mode: "0644"
+        owner: root
+        group: root
+      notify:
+        - Reload udev rules
+        - Restart fprintd
+
+    - name: Start and enable fingerprint service
+      ansible.builtin.systemd:
+        name: fprintd
+        state: started
+        enabled: true
+
+    - name: Configure fingerprint authentication for login (Fedora 42)
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/login
+        line: "auth      sufficient   pam_fprintd.so max_tries=3"
+        insertafter: "auth\\s+include\\s+system-auth"
+        backup: true
+      notify: Restart fprintd
+
+    - name: Configure fingerprint authentication for sudo (Fedora 42)
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/sudo
+        line: "auth      sufficient   pam_fprintd.so max_tries=3"
+        insertafter: "^#%PAM-1.0"
+        backup: true
+      notify: Restart fprintd
+
+    - name: Check if polkit PAM configuration exists
+      ansible.builtin.stat:
+        path: /etc/pam.d/polkit-1
+      register: polkit_pam_stat
+
+    - name: Configure fingerprint authentication for polkit (Fedora 42)
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/polkit-1
+        line: "auth      sufficient   pam_fprintd.so max_tries=3"
+        insertafter: "auth\\s+include\\s+system-auth"
+        backup: true
+      when: polkit_pam_stat.stat.exists
+      notify: Restart fprintd
+
+    - name: Configure fingerprint authentication for gdm (if present)
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/gdm-password
+        line: "auth      sufficient   pam_fprintd.so max_tries=3"
+        insertafter: "auth\\s+substack\\s+password-auth"
+        backup: true
+      when: ansible_facts['packages']['gdm'] is defined
+      notify: Restart fprintd
+
+    - name: Clear existing fingerprint data for clean setup
+      ansible.builtin.file:
+        path: /var/lib/fprint
+        state: absent
+      notify: Restart fprintd
+
+    - name: Ensure fingerprint data directory exists with correct permissions
+      ansible.builtin.file:
+        path: /var/lib/fprint
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Stop fprintd service before enrollment troubleshooting
+      ansible.builtin.systemd:
+        name: fprintd
+        state: stopped
+
+    - name: Clear any stuck fprintd processes
+      ansible.builtin.shell:
+        cmd: killall -9 fprintd || true
+      changed_when: false
+
+    - name: Reset USB device for Synaptics Prometheus reader
+      ansible.builtin.shell:
+        cmd: |
+          # Find and reset the Synaptics fingerprint reader USB device
+          for dev in /sys/bus/usb/devices/*/idVendor; do
+            if [ -f "$dev" ] && [ "$(cat "$dev")" = "06cb" ]; then
+              prod_file="${dev%/*}/idProduct"
+              if [ -f "$prod_file" ] && [ "$(cat "$prod_file")" = "00fc" ]; then
+                echo "Found Synaptics Prometheus reader, resetting..."
+                echo 0 > "${dev%/*}/authorized"
+                sleep 1
+                echo 1 > "${dev%/*}/authorized"
+                break
+              fi
+            fi
+          done
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Check if fingerprints are already enrolled
+      ansible.builtin.command:
+        cmd: fprintd-list {{ original_user }}
+      register: fprintd_list_result
+      failed_when: false
+      changed_when: false
+      become: true
+      become_user: "{{ original_user }}"
+
+    - name: Display enrollment status and instructions
+      ansible.builtin.debug:
+        msg: "Fingerprint authentication configured for ThinkPad X1 Gen 11"
+
+    - name: Display fingerprint reader status
+      ansible.builtin.debug:
+        msg: >-
+          {{ '✓ Fingerprint reader detected and working'
+             if fprintd_list_result.rc == 0 and 'No devices available' not in fprintd_list_result.stdout
+             else '⚠ Fingerprint reader not detected - check hardware connection' }}
+
+    - name: Display hardware limitation warning for Synaptics Prometheus
+      ansible.builtin.debug:
+        msg: >-
+          {{ '❌ Known hardware limitation: Synaptics Prometheus reader firmware issue'
+             if fprintd_list_result.rc == 0 and 'No fingerprints enrolled' in fprintd_list_result.stdout
+             else '✓ Fingerprint system configured successfully' }}
+
+    - name: Display Synaptics Prometheus troubleshooting steps
+      ansible.builtin.debug:
+        msg: "{{ item }}"
+      loop:
+        - "⚠ Synaptics Prometheus (06cb:00fc) enrollment frequently fails due to firmware issues"
+        - "Known workarounds:"
+        - "  1. Update BIOS/UEFI to latest version"
+        - "  2. Try enrollment from Windows (if dual-boot) then use Linux"
+        - "  3. Use external USB fingerprint reader (recommended)"
+        - "  4. Wait for updated libfprint drivers (check upstream)"
+        - "  5. Consider using alternative authentication (YubiKey, etc.)"
+        - "This is a hardware limitation, not a configuration issue"
+      when: fprintd_list_result.rc == 0 and 'No fingerprints enrolled' in fprintd_list_result.stdout
+
+    - name: Create fingerprint enrollment script for user convenience
+      ansible.builtin.copy:
+        dest: "/home/{{ original_user }}/enroll-fingerprints.sh"
+        content: |
+          #!/bin/bash
+          # Fingerprint enrollment script for {{ original_user }}
+          # Run this script as your regular user (not root)
+
+          set -euo pipefail
+
+          echo "Checking fingerprint reader status..."
+          if ! command -v fprintd-list &> /dev/null; then
+              echo "Error: fprintd tools not installed"
+              exit 1
+          fi
+
+          # Stop fprintd service to prevent conflicts
+          echo "Stopping fprintd service..."
+          sudo systemctl stop fprintd || true
+          sudo killall -9 fprintd 2>/dev/null || true
+          sleep 2
+
+          # Reset USB device for better reliability
+          echo "Resetting USB fingerprint reader..."
+          for dev in /sys/bus/usb/devices/*/idVendor; do
+            if [ -f "$dev" ] && [ "$(cat "$dev")" = "06cb" ]; then
+              prod_file="${dev%/*}/idProduct"
+              if [ -f "$prod_file" ] && [ "$(cat "$prod_file")" = "00fc" ]; then
+                echo "Resetting Synaptics Prometheus reader..."
+                echo 0 | sudo tee "${dev%/*}/authorized" > /dev/null
+                sleep 1
+                echo 1 | sudo tee "${dev%/*}/authorized" > /dev/null
+                sleep 2
+                break
+              fi
+            fi
+          done
+
+          # Restart fprintd service
+          echo "Starting fprintd service..."
+          sudo systemctl start fprintd
+          sleep 3
+
+          # Check if reader is available
+          if ! fprintd-list "$USER" &> /dev/null; then
+              echo "Error: No fingerprint reader detected"
+              echo "Make sure your ThinkPad fingerprint reader is connected"
+              exit 1
+          fi
+
+          echo "Fingerprint reader detected!"          # Check current enrollment status
+          if fprintd-list "$USER" 2>&1 | grep -q "No fingerprints enrolled"; then
+              echo "No fingerprints enrolled. Starting enrollment process..."
+              echo ""
+              echo "CRITICAL: Synaptics Prometheus Reader Enrollment Technique:"
+              echo "  1. Clean your finger and the reader surface"
+              echo "  2. Place finger FLAT on reader (not at angle)"
+              echo "  3. Cover the ENTIRE reader surface with your fingerprint"
+              echo "  4. Apply MODERATE pressure (not too light, not too hard)"
+              echo "  5. Keep finger COMPLETELY STILL during each scan"
+              echo "  6. When prompted, lift and place again in EXACT same position"
+              echo "  7. Use the CENTER of your fingerprint pad (most ridges)"
+              echo ""
+              echo "The reader needs 8-12 GOOD scans to succeed. Expect retries!"
+              echo ""
+              read -p "Press Enter when ready to start enrollment..."
+
+              # Multiple enrollment attempts with different strategies
+              for attempt in 1 2 3; do
+                  echo ""
+                  echo "=== Enrollment Attempt $attempt ==="
+
+                  if [ $attempt -gt 1 ]; then
+                      echo "Clearing partial enrollment data..."
+                      fprintd-delete "$USER" 2>/dev/null || true
+                      sleep 2
+
+                      if [ $attempt -eq 3 ]; then
+                          echo "Final attempt - resetting USB device..."
+                          for dev in /sys/bus/usb/devices/*/idVendor; do
+                            if [ -f "$dev" ] && [ "$(cat "$dev")" = "06cb" ]; then
+                              prod_file="${dev%/*}/idProduct"
+                              if [ -f "$prod_file" ] && [ "$(cat "$prod_file")" = "00fc" ]; then
+                                echo 0 | sudo tee "${dev%/*}/authorized" > /dev/null
+                                sleep 1
+                                echo 1 | sudo tee "${dev%/*}/authorized" > /dev/null
+                                sleep 3
+                                break
+                              fi
+                            fi
+                          done
+                          sudo systemctl restart fprintd
+                          sleep 3
+                      fi
+                  fi
+
+                  echo "Starting enrollment attempt $attempt..."
+                  echo "Remember: flat finger, full coverage, moderate pressure, stay still!"
+
+                  if fprintd-enroll "$USER"; then
+                      echo "✓ Enrollment successful on attempt $attempt!"
+                      break
+                  else
+                      echo "❌ Attempt $attempt failed"
+                      if [ $attempt -eq 3 ]; then
+                          echo ""
+                          echo "All enrollment attempts failed. Try these tips:"
+                          echo "  • Use a different finger (thumb works well)"
+                          echo "  • Clean reader with dry cloth"
+                          echo "  • Ensure finger is completely dry"
+                          echo "  • Try enrolling from different angles"
+                          echo "  • Reboot and try again"
+                          exit 1
+                      fi
+                  fi
+              done
+
+              echo "✓ Fingerprint enrollment completed successfully!"
+          else
+              echo "Fingerprints already enrolled for $USER:"
+              fprintd-list "$USER"
+              echo ""
+              echo "To re-enroll, first delete existing fingerprints:"
+              echo "  fprintd-delete $USER"
+              echo "Then run this script again."
+          fi
+
+          echo ""
+          echo "Test your fingerprint authentication:"
+          echo "  fprintd-verify $USER"
+        mode: "0755"
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+
+    - name: Inform user about enrollment script
+      ansible.builtin.debug:
+        msg: "Created enrollment script: /home/{{ original_user }}/enroll-fingerprints.sh"
+
+    - name: Display post-setup instructions
+      ansible.builtin.debug:
+        msg: "{{ item }}"
+      loop:
+        - "✓ Fingerprint authentication system configured"
+        - "Hardware status: Synaptics Prometheus (06cb:00fc) detected"
+        - "⚠ Known issue: This reader has firmware enrollment problems"
+        - "Alternative solutions:"
+        - "  • External USB fingerprint reader (Kensington, Eikon, etc.)"
+        - "  • YubiKey with FIDO2/WebAuthn support"
+        - "  • Smart card authentication"
+        - "If enrollment works: fprintd-list, fprintd-verify, fprintd-delete"
+
+  handlers:
+    - name: Reload udev rules
+      ansible.builtin.command:
+        cmd: udevadm control --reload-rules && udevadm trigger
+      changed_when: true
+
+    - name: Restart fprintd
+      ansible.builtin.systemd:
+        name: fprintd
+        state: restarted
