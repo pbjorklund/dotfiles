@@ -1,13 +1,15 @@
 #!/bin/bash
+set -euo pipefail
 ############################
 # install.sh
 # This script creates symlinks from the home directory to any desired dotfiles in ~/dotfiles
-# Features: Dotfiles symlinks, .config directory management, backup creation
+# Features: Dotfiles symlinks, .config directory management, system config files, backup creation
 ############################
 
 ########## Variables
 
 dir=~/dotfiles/dotfiles                                  # dotfiles directory
+repo_root=~/dotfiles                                     # repository root directory
 backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)" # temporary backup with timestamp
 # List of files to symlink in homedir (excluding directories and install script)
 files="bashrc gitconfig tmux.conf inputrc"
@@ -61,6 +63,24 @@ if [ -f ~/.config/Code/User/settings.json ]; then
 fi
 echo "Creating symlink to VS Code settings.json"
 ln -sf "$dir/$vscode_settings_file" ~/.config/Code/User/settings.json
+
+# Handle system configuration files (requires sudo)
+echo "Setting up system configuration files"
+
+# Timeshift configuration
+if [[ -f "$repo_root/timeshift.json" ]]; then
+    echo "Setting up Timeshift configuration"
+    sudo mkdir -p /etc/timeshift
+    if [[ -f /etc/timeshift/timeshift.json ]]; then
+        echo "Moving existing Timeshift config to $backup_dir"
+        sudo cp /etc/timeshift/timeshift.json "$backup_dir/"
+    fi
+    echo "Installing Timeshift configuration"
+    sudo cp "$repo_root/timeshift.json" /etc/timeshift/timeshift.json
+    sudo chmod 644 /etc/timeshift/timeshift.json
+else
+    echo "⚠ Warning: timeshift.json not found in repository root"
+fi
 
 echo ""
 echo "Dotfiles installation complete!"

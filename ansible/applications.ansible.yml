@@ -88,7 +88,51 @@
           - fzf # Fuzzy finder
           - zsh # Alternative shell
           - zellij # Terminal multiplexer
+          - wl-clipboard # Wayland clipboard utilities (wl-copy, wl-paste)
         state: present
+
+    # GitHub tools (cliphist)
+    - name: Get cliphist latest release info
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/sentriz/cliphist/releases/latest"
+        return_content: true
+      register: cliphist_release
+
+    - name: Install cliphist (clipboard history manager for Wayland)
+      ansible.builtin.get_url:
+        url: "{{ cliphist_release.json.assets | selectattr('name', 'match', '.*linux-amd64') | map(attribute='browser_download_url') | first }}"
+        dest: "/tmp/cliphist"
+        mode: "0755"
+      become: true
+      become_user: "{{ original_user }}"
+      when: cliphist_release is defined
+
+    - name: Install cliphist binary
+      ansible.builtin.copy:
+        src: "/tmp/cliphist"
+        dest: "/usr/local/bin/cliphist"
+        mode: "0755"
+        remote_src: true
+      when: cliphist_release is defined
+
+    - name: Clean up cliphist installation file
+      ansible.builtin.file:
+        path: "/tmp/cliphist"
+        state: absent
+      become: true
+      become_user: "{{ original_user }}"
+      when: cliphist_release is defined
+
+    # System backup and restore tools
+    - name: Install system backup tools
+      ansible.builtin.dnf:
+        name:
+          - timeshift # System restore utility (like macOS Time Machine)
+          - rsync # Efficient file transfer and sync
+          - rclone # Cloud storage sync tool (for S3 compatible storage)
+        state: present
+      # Note: PikaBackup (Flatpak) provides personal file backup with versioning
+      # Timeshift provides system snapshots for full system restore
 
     # GNOME desktop utilities
     - name: Install GNOME desktop utilities and extensions
@@ -265,3 +309,10 @@
       become: false
       become_user: "{{ original_user }}"
       when: not rustup_installed.stat.exists
+
+    - name: Configure Timeshift for system backups
+      ansible.builtin.debug:
+        msg: >-
+          ✓ Timeshift available for system snapshots.
+          Run ./dotfiles/install.sh to configure dotfiles.
+          Configure backup location: sudo timeshift --list-devices and sudo timeshift --snapshot-device /dev/sdX

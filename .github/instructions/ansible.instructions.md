@@ -29,6 +29,7 @@ MANDATORY requirements for all Ansible files in this dotfiles repository.
 ## Execution Requirements
 
 - **MUST** run playbooks with `ansible-playbook` (not `--ask-become-pass` or `sudo`)
+- **MUST NOT** run playbooks with `sudo`
 
 ## Quality Assurance Requirements
 
