@@ -17,6 +17,10 @@
   import_playbook: personal-config.ansible.yml
   tags: config
 
+- name: Configure Hyprland desktop environment
+  import_playbook: hyprland-desktop.ansible.yml
+  tags: hyprland
+
 - name: Configure local DNS (optional)
   import_playbook: configure-local-dns.ansible.yml
   tags: dns
@@ -47,6 +51,7 @@
           - Application installation
           - Service configuration
           - Personal dotfiles and settings
+          - Hyprland desktop environment setup
 
           📋 Optional Components Available:
           - DNS configuration: --extra-vars "configure_dns=true"
@@ -61,6 +66,7 @@
           📚 Individual playbooks can be run separately:
           - ansible-playbook ansible/applications.ansible.yml (update apps)
           - ansible-playbook ansible/personal-config.ansible.yml (update dotfiles)
+          - ansible-playbook ansible/hyprland-desktop.ansible.yml (Hyprland setup)
           - ansible-playbook ansible/hardware-displaylink.ansible.yml (DisplayLink)
           - ansible-playbook ansible/storage-nas.ansible.yml (NAS mounts)
       tags: always

@@ -60,3 +60,19 @@ export PATH="$HOME/.cargo/bin:$PATH"
 if [ -z "$WAYLAND_DISPLAY" ] || [ "$WAYLAND_DISPLAY" = "wayland-0" ]; then
     export WAYLAND_DISPLAY=wayland-1
 fi
+# BEGIN ANSIBLE MANAGED BLOCK - Hyprland Environment
+# Hyprland/Wayland environment variables
+export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=Hyprland
+export XDG_SESSION_DESKTOP=Hyprland
+
+# Qt applications on Wayland
+export QT_QPA_PLATFORM=wayland
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+
+# GTK applications on Wayland
+export GDK_BACKEND=wayland,x11
+
+# Electron applications on Wayland
+export ELECTRON_OZONE_PLATFORM_HINT=wayland
+# END ANSIBLE MANAGED BLOCK - Hyprland Environment

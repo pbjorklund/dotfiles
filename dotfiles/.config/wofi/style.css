@@ -1,0 +1,51 @@
+/*
+ * Wofi application launcher styling
+ * Based on Nordic color scheme
+ */
+
+window {
+margin: 0px;
+border: 1px solid #5e81ac;
+background-color: #2e3440;
+border-radius: 8px;
+}
+
+#input {
+margin: 5px;
+border: none;
+color: #eceff4;
+background-color: #3b4252;
+border-radius: 4px;
+}
+
+#inner-box {
+margin: 5px;
+border: none;
+background-color: #2e3440;
+}
+
+#outer-box {
+margin: 5px;
+border: none;
+background-color: #2e3440;
+}
+
+#scroll {
+margin: 0px;
+border: none;
+}
+
+#text {
+margin: 5px;
+border: none;
+color: #eceff4;
+}
+
+#entry:selected {
+background-color: #434c5e;
+border-radius: 4px;
+}
+
+#text:selected {
+color: #88c0d0;
+}

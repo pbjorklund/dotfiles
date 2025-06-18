@@ -59,8 +59,6 @@
           - 1password-cli # 1Password CLI for secure credential access
           - google-chrome-stable # Web browser (needs system integration)
           - code # Visual Studio Code (needs system integration)
-          - hyprland # Tiling wm
-          - kitty # Modern term
         state: present
 
     # Development tools

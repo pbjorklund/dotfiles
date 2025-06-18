@@ -1,0 +1,148 @@
+---
+# Hyprland Desktop Environment Setup
+# Installs packages and configures system-level settings for Hyprland
+# NOTE: Dotfiles are deployed separately using dotfiles/install.sh
+
+- name: "Configure Hyprland Desktop Environment"
+  hosts: localhost
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id) }}"
+    user_home: "/home/{{ original_user }}"
+
+  tasks:
+    # Enable COPR repository for Hyprland ecosystem packages
+    - name: "Enable scottames/hypr COPR repository for hyprpaper"
+      ansible.builtin.command:
+        cmd: dnf copr enable -y scottames/hypr
+      become: true
+      changed_when: false
+
+    # Core Hyprland packages
+    - name: "Install Hyprland core packages"
+      ansible.builtin.dnf:
+        name:
+          - hyprland # Tiling window manager
+          - hyprutils # Hyprland utilities library (updated from COPR)
+          - hyprpaper # Wallpaper daemon for Hyprland
+          - waybar # Status bar for Wayland
+          - wofi # Application launcher
+          - mako # Notification daemon
+          - swaylock # Screen locker
+          - swayidle # Idle management daemon
+          - wl-clipboard # Clipboard utilities for Wayland
+          - grim # Screenshot tool
+          - slurp # Selection tool for screenshots
+          - brightnessctl # Brightness control
+          - playerctl # Media player control
+          - pavucontrol # Audio control GUI
+          - network-manager-applet # Network management applet
+        state: latest
+        allowerasing: true
+
+    # Audio system (required for Hyprland)
+    - name: "Install audio system packages"
+      ansible.builtin.dnf:
+        name:
+          - pipewire # Modern audio system
+          - pipewire-alsa # ALSA compatibility
+          - pipewire-pulseaudio # PulseAudio compatibility
+          - wireplumber # Session manager for PipeWire
+          - alsa-utils # ALSA utilities
+        state: present
+
+    # Fonts for better UI rendering
+    - name: "Install essential fonts for Hyprland"
+      ansible.builtin.dnf:
+        name:
+          - fontawesome-fonts # Icon fonts
+          - google-noto-emoji-fonts # Emoji support
+          - google-noto-sans-fonts # Unicode font coverage
+          - liberation-fonts-all # Free alternatives to Times, Arial, Courier
+          - dejavu-fonts-all # High-quality fonts
+        state: present
+
+    # Terminal and utilities
+    - name: "Install terminal and utilities"
+      ansible.builtin.dnf:
+        name:
+          - kitty # Modern GPU-accelerated terminal
+          - dolphin # File manager
+        state: present
+
+    # Enable required services
+    - name: "Enable PipeWire services for current user"
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        enabled: true
+        scope: user
+        daemon_reload: true
+      loop:
+        - pipewire.service
+        - pipewire-pulse.service
+        - wireplumber.service
+      become: false
+
+    # Set up environment variables for Wayland
+    - name: "Configure Wayland environment variables"
+      ansible.builtin.blockinfile:
+        path: "{{ user_home }}/.bashrc"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - Hyprland Environment"
+        block: |
+          # Hyprland/Wayland environment variables
+          export XDG_SESSION_TYPE=wayland
+          export XDG_CURRENT_DESKTOP=Hyprland
+          export XDG_SESSION_DESKTOP=Hyprland
+
+          # Qt applications on Wayland
+          export QT_QPA_PLATFORM=wayland
+          export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+
+          # GTK applications on Wayland
+          export GDK_BACKEND=wayland,x11
+
+          # Electron applications on Wayland
+          export ELECTRON_OZONE_PLATFORM_HINT=wayland
+        create: true
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+        mode: "0644"
+      become: false
+
+    # Configure GDM for Wayland (if using GDM)
+    - name: "Check if GDM is installed and enabled"
+      ansible.builtin.systemd:
+        name: gdm
+      register: gdm_status
+      failed_when: false
+      changed_when: false
+
+    - name: "Enable Wayland in GDM"
+      ansible.builtin.lineinfile:
+        path: /etc/gdm/custom.conf
+        regexp: "^#?WaylandEnable="
+        line: "WaylandEnable=true"
+        backup: true
+      when: gdm_status.status.LoadState is defined and gdm_status.status.LoadState == "loaded"
+
+    # Create desktop entry for Hyprland
+    - name: "Create Hyprland desktop entry"
+      ansible.builtin.copy:
+        content: |
+          [Desktop Entry]
+          Name=Hyprland
+          Comment=A dynamic tiling Wayland compositor
+          Exec=Hyprland
+          Type=Application
+          DesktopNames=Hyprland
+        dest: /usr/share/wayland-sessions/hyprland.desktop
+        owner: root
+        group: root
+        mode: "0644"
+
+  handlers:
+    - name: "Restart display manager"
+      ansible.builtin.systemd:
+        name: gdm
+        state: restarted
+      when: gdm_status.status.LoadState is defined and gdm_status.status.LoadState == "loaded"
