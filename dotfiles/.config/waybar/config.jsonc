@@ -1,12 +1,20 @@
 // Waybar Configuration for Hyprland
-// Features: Workspaces, clock, system monitoring (CPU, temperature, battery, audio)
+// Features: Workspaces, clock, system monitoring, keyboard layout, wifi selector
 // JSON with Comments format for better documentation
 {
-  "height": 30,
-  "spacing": 8,
+  "height": 20,
+  "spacing": 0,
   "modules-left": ["hyprland/workspaces"],
-  "modules-center": ["clock"],
-  "modules-right": ["pulseaudio", "cpu", "temperature", "battery"],
+  "modules-center": [],
+  "modules-right": [
+    "network",
+    "hyprland/language",
+    "pulseaudio",
+    "cpu",
+    "temperature",
+    "battery",
+    "clock"
+  ],
 
   "hyprland/workspaces": {
     "disable-scroll": false,
@@ -15,20 +23,22 @@
   },
 
   "clock": {
-    "format": "{:%H:%M}",
+    "format": "{:%B %d %H:%M}",
     "format-alt": "{:%Y-%m-%d}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
   },
 
   "cpu": {
     "format": "{usage}%",
+    "interval": 2,
     "tooltip": false
   },
 
   "temperature": {
     "critical-threshold": 60,
     "format": "{temperatureC}°C",
-    "format-critical": "{temperatureC}°C !"
+    "format-critical": "{temperatureC}°C !",
+    "interval": 5
   },
 
   "battery": {
@@ -37,8 +47,11 @@
       "critical": 15
     },
     "format": "{capacity}%",
-    "format-charging": "{capacity}% ↑",
-    "format-plugged": "{capacity}% ⚡"
+    "format-charging": "{capacity}% ↑⚡",
+    "format-plugged": "{capacity}% ⚡",
+    "format-full": "{capacity}% ✓",
+    "interval": 30,
+    "tooltip-format": "{timeTo}, {power}W"
   },
 
   "pulseaudio": {
@@ -51,5 +64,28 @@
     "scroll-step": 5,
     "tooltip": true,
     "tooltip-format": "Volume: {volume}%"
+  },
+
+  "network": {
+    "format-wifi": "{essid} ({signalStrength}%)",
+    "format-ethernet": "{ipaddr}/{cidr}",
+    "format-linked": "{ifname} (No IP)",
+    "format-disconnected": "Disconnected",
+    "format-alt": "{ifname}: {ipaddr}/{cidr}",
+    "tooltip-format": "{ifname} via {gwaddr}",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ifname}: {ipaddr}/{cidr}",
+    "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}",
+    "tooltip-format-disconnected": "Disconnected",
+    "on-click": "nm-connection-editor"
+  },
+
+  "hyprland/language": {
+    "format": "{}",
+    "format-english (us)": "EN",
+    "format-swedish": "SE",
+    "keyboard-name": "at-translated-set-2-keyboard",
+    "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
+    "tooltip": true,
+    "tooltip-format": "Keyboard: {}"
   }
 }

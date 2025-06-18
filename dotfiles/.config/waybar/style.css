@@ -5,7 +5,7 @@
 
 * {
     font-family: 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-    font-size: 13px;
+    font-size: 9px;
 }
 
 @keyframes blink {
@@ -31,6 +31,7 @@ window#waybar {
 #temperature,
 #backlight,
 #network,
+#language,
 #pulseaudio,
 #wireplumber,
 #custom-media,
@@ -40,122 +41,58 @@ window#waybar {
 #scratchpad,
 #power-profiles-daemon,
 #mpd {
-    background-color: rgba(60, 60, 70, 0.85);
+    background-color: transparent;
     color: #e0e0e0;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
-    padding: 0 16px;
-    margin: 0 6px;
-    border: none;
-    transition: background 0.3s, color 0.3s;
-}
-
-/* Softer hover effect */
-#pulseaudio:hover,
-#clock:hover,
-#battery:hover,
-#cpu:hover,
-#temperature:hover {
-    background-color: rgba(100, 100, 120, 0.95);
-    color: #fff;
+    padding: 0 14px;
+    margin: 0 4px;
 }
 
 /* Workspace styling for Hyprland */
-#workspaces {
-    background: transparent;
-    box-shadow: none;
-    margin: 0 8px;
-    padding: 0 4px;
-}
 
 #workspaces button {
-    background: rgba(100, 100, 120, 0.4);
-    color: #888;
-    border: 2px solid transparent;
-    box-shadow: none;
-    min-width: 32px;
-    min-height: 24px;
-    margin: 0 2px;
-    padding: 2px 8px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    font-size: 12px;
-    font-weight: bold;
+    transition: all 0.2s ease;
+    font-size: 8px;
+    margin: 0 4px;
+    border: none;
 }
 
 #workspaces button.active {
-    background: rgba(120, 140, 160, 0.9);
     color: #fff;
-    border: 2px solid #64727D;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    min-width: 36px;
-    min-height: 28px;
+    background: rgba(80, 120, 140, 0.7);
+
 }
 
 #workspaces button.urgent {
     background: #eb4d4b;
     color: #fff;
-    border: 2px solid #c0392b;
+    border: none;
     animation: blink 1s infinite;
 }
 
 #workspaces button:hover {
-    background: rgba(120, 140, 160, 0.7);
+    background: rgba(120, 140, 160, 0.8);
     color: #fff;
-    min-width: 34px;
-    min-height: 26px;
+    min-width: 14px;
+    min-height: 14px;
 }
 
 #workspaces button.visible {
-    background: rgba(80, 120, 140, 0.6);
+    background: rgba(80, 120, 140, 0.7);
     color: #ddd;
 }
 
 /* Remove harsh colors from battery, cpu, etc. */
-#battery {
-    background-color: rgba(200, 200, 220, 0.85);
-    color: #222;
-}
-#battery.charging, #battery.plugged {
-    background-color: #a3d9a5;
-    color: #222;
-}
 #battery.critical:not(.charging) {
     background-color: #f3bcbc;
     color: #222;
     animation: none;
-}
-#cpu {
-    background-color: #b7e0c7;
-    color: #222;
-}
-#temperature {
-    background-color: #ffe0b2;
-    color: #222;
-}
-#temperature.critical {
-    background-color: #f3bcbc;
-    color: #222;
-}
-#pulseaudio {
-    background-color: #ffe9a7;
-    color: #222;
 }
 #pulseaudio.muted {
     background-color: #d3d3d3;
     color: #888;
 }
 
-/* Remove box for tray icons */
-#tray {
-    background: transparent;
-    box-shadow: none;
-}
-
-/* Remove margin for leftmost and rightmost modules */
-.modules-left > widget:first-child > #workspaces {
-    margin-left: 0;
-}
-.modules-right > widget:last-child > #workspaces {
-    margin-right: 0;
+#network.disconnected {
+    background-color: #f3bcbc;
+    color: #222;
 }
