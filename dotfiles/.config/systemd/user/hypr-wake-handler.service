@@ -1,0 +1,11 @@
+[Unit]
+Description=Hyprland display manager for wake from sleep
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/pbjorklund/dotfiles/dotfiles/.config/hypr/scripts/lid-switch.sh wake
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+
+[Install]
+WantedBy=default.target
