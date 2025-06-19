@@ -15,6 +15,8 @@ backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)" # temporary backup with
 files="bashrc gitconfig tmux.conf inputrc"
 # List of .config subdirectories to symlink
 config_dirs="hypr swaylock waybar zellij mako wofi systemd kitty"
+# System files that need to be copied (not symlinked) to system locations
+system_files_to_copy=".config/hypr/scripts/systemd-sleep-hook.sh:/lib/systemd/system-sleep/hyprland-lid-state"
 # VS Code settings file (user settings location)
 vscode_settings_file=".config/Code/User/settings.json"
 
@@ -67,22 +69,52 @@ ln -sf "$dir/$vscode_settings_file" ~/.config/Code/User/settings.json
 # Handle system configuration files (requires sudo)
 echo "Setting up system configuration files"
 
-# Timeshift configuration
-if [[ -f "$repo_root/timeshift.json" ]]; then
-    echo "Setting up Timeshift configuration"
-    sudo mkdir -p /etc/timeshift
-    if [[ -f /etc/timeshift/timeshift.json ]]; then
-        echo "Moving existing Timeshift config to $backup_dir"
-        sudo cp /etc/timeshift/timeshift.json "$backup_dir/"
+# Install system files (systemd sleep hooks, etc.)
+for system_file_mapping in $system_files_to_copy; do
+    source_file="${system_file_mapping%:*}"
+    dest_file="${system_file_mapping#*:}"
+
+    if [[ -f "$dir/$source_file" ]]; then
+        echo "Installing system file: $source_file -> $dest_file"
+        if [[ -f "$dest_file" ]]; then
+            echo "Moving existing $dest_file to $backup_dir"
+            sudo cp "$dest_file" "$backup_dir/"
+        fi
+        sudo cp "$dir/$source_file" "$dest_file"
+        sudo chmod +x "$dest_file"
+    else
+        echo "⚠ Warning: System file $source_file not found"
     fi
-    echo "Installing Timeshift configuration"
-    sudo cp "$repo_root/timeshift.json" /etc/timeshift/timeshift.json
-    sudo chmod 644 /etc/timeshift/timeshift.json
-else
-    echo "⚠ Warning: timeshift.json not found in repository root"
-fi
+done
 
 echo ""
 echo "Dotfiles installation complete!"
 echo "Backup files saved to: $backup_dir"
+echo ""
+
+# Post-installation setup for systemd user services
+echo "Setting up systemd user services..."
+if systemctl --user daemon-reload; then
+    echo "Reloaded systemd user daemon"
+
+    # Enable and start the resume monitor service if it exists
+    if [[ -f ~/.config/systemd/user/hyprland-resume-monitor.service ]]; then
+        if systemctl --user enable hyprland-resume-monitor.service; then
+            echo "Enabled hyprland-resume-monitor.service"
+            if systemctl --user start hyprland-resume-monitor.service; then
+                echo "Started hyprland-resume-monitor.service"
+            else
+                echo "⚠ Warning: Failed to start hyprland-resume-monitor.service"
+            fi
+        else
+            echo "⚠ Warning: Failed to enable hyprland-resume-monitor.service"
+        fi
+    fi
+else
+    echo "⚠ Warning: Failed to reload systemd user daemon"
+fi
+
+echo ""
+echo "🎉 Setup complete! Hyprland lid switch functionality has been configured."
+echo "📝 The laptop display will now stay disabled when lid is closed and external monitors are connected."
 echo ""

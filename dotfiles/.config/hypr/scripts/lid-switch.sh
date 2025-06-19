@@ -43,10 +43,17 @@ handle_lid_close() {
     if is_docked; then
         log "External monitors detected - disabling laptop display only"
         hyprctl keyword monitor "$LAPTOP_DISPLAY,disable"
+
+        # Create a persistent state file that survives reboots
+        echo "laptop_disabled_docked" >/tmp/hypr-display-state
     else
         log "No external monitors - locking screen and suspending"
-        # Lock screen first
-        swaylock --daemonize
+        # Lock screen first (with error handling)
+        if command -v swaylock >/dev/null 2>&1; then
+            swaylock --daemonize 2>/dev/null || log "Warning: swaylock failed, continuing with suspend"
+        else
+            log "Warning: swaylock not found, suspending without lock"
+        fi
         sleep 1
         # Then suspend system
         systemctl suspend
@@ -60,28 +67,54 @@ handle_lid_open() {
 
     # Always re-enable laptop display when lid opens
     hyprctl keyword monitor "$LAPTOP_DISPLAY,$LAPTOP_RESOLUTION,$LAPTOP_POSITION,$LAPTOP_SCALE"
+
+    # Clear the persistent state
+    rm -f /tmp/hypr-display-state
 }
 
 # Handle wake from sleep - check if lid is closed and docked
 handle_wake() {
     log "System wake detected - checking lid and dock status"
 
+    # Check if we have a persistent state indicating laptop should be disabled
+    if [[ -f "/tmp/hypr-display-state" ]] && [[ "$(cat /tmp/hypr-display-state)" == "laptop_disabled_docked" ]]; then
+        log "Persistent state indicates laptop should remain disabled"
+        hyprctl keyword monitor "$LAPTOP_DISPLAY,disable"
+        return
+    fi
+
     if is_lid_closed && is_docked; then
         log "Woke with lid closed and docked - keeping laptop display disabled"
         hyprctl keyword monitor "$LAPTOP_DISPLAY,disable"
+        echo "laptop_disabled_docked" >/tmp/hypr-display-state
     elif is_lid_closed && ! is_docked; then
         log "Woke with lid closed and undocked - this shouldn't happen, enabling display"
         hyprctl keyword monitor "$LAPTOP_DISPLAY,$LAPTOP_RESOLUTION,$LAPTOP_POSITION,$LAPTOP_SCALE"
         save_lid_state "open"
+        rm -f /tmp/hypr-display-state
     else
         log "Woke with lid open - ensuring laptop display is enabled"
         hyprctl keyword monitor "$LAPTOP_DISPLAY,$LAPTOP_RESOLUTION,$LAPTOP_POSITION,$LAPTOP_SCALE"
+        rm -f /tmp/hypr-display-state
+    fi
+}
+
+# Handle monitor hotplug events - maintain lid state
+handle_hotplug() {
+    log "Monitor hotplug detected - checking if lid state should be maintained"
+
+    # If we have a persistent state indicating laptop should be disabled, maintain it
+    if [[ -f "/tmp/hypr-display-state" ]] && [[ "$(cat /tmp/hypr-display-state)" == "laptop_disabled_docked" ]]; then
+        log "Maintaining laptop display disabled state after hotplug"
+        # Give the system a moment to detect all monitors
+        sleep 1
+        hyprctl keyword monitor "$LAPTOP_DISPLAY,disable"
     fi
 }
 
 # Validate parameters
 [[ $# -eq 1 ]] || {
-    echo "Usage: $0 {close|open|wake}"
+    echo "Usage: $0 {close|open|wake|hotplug}"
     exit 1
 }
 
@@ -96,8 +129,11 @@ open)
 wake)
     handle_wake
     ;;
+hotplug)
+    handle_hotplug
+    ;;
 *)
-    echo "Usage: $0 {close|open|wake}"
+    echo "Usage: $0 {close|open|wake|hotplug}"
     exit 1
     ;;
 esac

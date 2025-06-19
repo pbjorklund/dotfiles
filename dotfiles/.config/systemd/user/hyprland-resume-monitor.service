@@ -1,0 +1,13 @@
+[Unit]
+Description=Hyprland Resume Monitor
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/home/pbjorklund/dotfiles/dotfiles/.config/hypr/scripts/resume-monitor.sh
+Restart=always
+RestartSec=2
+Environment=HOME=%h
+
+[Install]
+WantedBy=default.target
