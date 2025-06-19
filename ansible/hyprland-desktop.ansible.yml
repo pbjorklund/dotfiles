@@ -18,7 +18,7 @@
           - hyprland # Tiling window manager (includes hyprctl)
           - hyprutils # Hyprland utilities library
           - xdg-desktop-portal-hyprland # Desktop portal for Hyprland
-    # Additional Hyprland ecosystem packages  
+    # Additional Hyprland ecosystem packages
     - name: "Install additional Hyprland packages"
       ansible.builtin.dnf:
         name:
