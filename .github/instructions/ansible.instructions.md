@@ -10,7 +10,6 @@ MANDATORY requirements for all Ansible files in this dotfiles repository.
 
 - **MUST** use `ansible.builtin.dnf` module (FQCN required)
 - **MUST** use Flatpak for desktop applications EXCEPT: Chrome, 1Password, VS Code (use native packages)
-- **MUST** group packages with comments explaining purpose
 - **MUST** include package descriptions: `# Package Name - Description of what it does`
 
 ## User Context Requirements
@@ -39,13 +38,9 @@ MANDATORY requirements for all Ansible files in this dotfiles repository.
 
 - **MUST** use single-line `ansible.builtin.debug` messages for readable execution output
 - **MUST NOT** use multi-line strings with `msg: |` in debug tasks (creates unreadable `\n` output)
-- **MUST** use `loop` with `ansible.builtin.debug` for multiple related messages
-- **MUST** use YAML folded scalar `>-` for long conditional messages to maintain line length limits
 - **MUST** ensure all debug output is immediately readable during `ansible-playbook` execution
-- **MUST** use status indicators (✓, ⚠, ❌) for clear visual feedback in messages
 
 ## Violation Consequences
 
 - Multi-line debug messages with escaped newlines **WILL BE REJECTED**
 - Non-idempotent tasks **WILL BE REJECTED**
-- Boolean yes/no usage **WILL BE REJECTED**
