@@ -16,6 +16,7 @@ ansible-playbook workstation-setup.ansible.yml \
 ## Playbooks
 
 ### Core Components
+
 - **[`workstation-setup.ansible.yml`](workstation-setup.ansible.yml)** - Master orchestrator
 - **[`base-system.ansible.yml`](base-system.ansible.yml)** - Core packages and SSH (run once)
 - **[`applications.ansible.yml`](applications.ansible.yml)** - Desktop apps and dev tools
@@ -23,6 +24,7 @@ ansible-playbook workstation-setup.ansible.yml \
 - **[`personal-config.ansible.yml`](personal-config.ansible.yml)** - Dotfiles and GNOME settings
 
 ### Optional Components
+
 - **[`hardware-displaylink.ansible.yml`](hardware-displaylink.ansible.yml)** - DisplayLink drivers
 - **[`storage-nas.ansible.yml`](storage-nas.ansible.yml)** - NAS storage mounts
 - **[`configure-local-dns.ansible.yml`](configure-local-dns.ansible.yml)** - Local DNS resolution

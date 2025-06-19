@@ -113,50 +113,6 @@
       register: service_result
       failed_when: false
 
-    # CPU Optimization fixes
-    - name: Create DisplayLink service override directory for CPU optimization
-      ansible.builtin.file:
-        path: /etc/systemd/system/displaylink-driver.service.d
-        state: directory
-        mode: '0755'
-
-    - name: Create optimized DisplayLink service override (remove CPU limits for performance)
-      ansible.builtin.copy:
-        content: |
-          [Service]
-          # Remove CPU limitations entirely for smooth display performance
-          # CPUQuota removed - DisplayLink needs full CPU access for multiple high-refresh displays
-
-          # Remove nice priority - DisplayLink should run at normal priority for responsiveness  
-          # Nice removed
-
-          # Restart service if it fails
-          Restart=on-failure
-          RestartSec=5
-
-          # Kill service if it takes too long to stop
-          TimeoutStopSec=10
-          KillMode=mixed
-        dest: /etc/systemd/system/displaylink-driver.service.d/override.conf
-        mode: '0644'
-        owner: root
-        group: root
-
-    - name: Create DisplayLink kernel module parameters for better performance
-      ansible.builtin.copy:
-        content: |
-          # DisplayLink evdi module parameters for better performance
-          # Reduce CPU usage by optimizing buffer management
-          options evdi initial_device_count=4 loglevel=3
-        dest: /etc/modprobe.d/displaylink-evdi.conf
-        mode: '0644'
-        owner: root
-        group: root
-
-    - name: Reload systemd daemon for DisplayLink service changes
-      ansible.builtin.systemd:
-        daemon_reload: true
-
     - name: Clean up DisplayLink RPM file
       ansible.builtin.file:
         path: "/tmp/{{ displaylink_rpm_asset.name }}"
