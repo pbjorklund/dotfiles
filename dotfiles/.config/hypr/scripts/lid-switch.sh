@@ -20,7 +20,8 @@ log() {
 # Check if external monitors are connected (docked)
 is_docked() {
     local external_monitors
-    external_monitors=$(hyprctl monitors -j | jq -r '.[] | select(.name != "'"$LAPTOP_DISPLAY"'") | .name' 2>/dev/null || true)
+    # Look for specific external monitors using stable identifiers
+    external_monitors=$(hyprctl monitors -j | jq -r '.[] | select(.description | test("Samsung Electric Company|Acer Technologies")) | .name' 2>/dev/null || true)
     [[ -n "$external_monitors" ]]
 }
 
