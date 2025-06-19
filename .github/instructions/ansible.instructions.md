@@ -11,6 +11,7 @@ MANDATORY requirements for all Ansible files in this dotfiles repository.
 - **MUST** use `ansible.builtin.dnf` module (FQCN required)
 - **MUST** use Flatpak for desktop applications EXCEPT: Chrome, 1Password, VS Code (use native packages)
 - **MUST** include package descriptions: `# Package Name - Description of what it does`
+- **MUST** allow flatpack override for session bus for obsidian md
 
 ## User Context Requirements
 

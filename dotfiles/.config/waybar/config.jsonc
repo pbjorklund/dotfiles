@@ -2,13 +2,13 @@
 // Features: Workspaces, clock, system monitoring, keyboard layout, wifi selector
 // JSON with Comments format for better documentation
 {
-  "height": 20,
+  "height": 32,
   "spacing": 0,
   "modules-left": ["hyprland/workspaces"],
   "modules-center": [],
   "modules-right": [
     "network",
-    "hyprland/language",
+    "custom/language",
     "pulseaudio",
     "cpu",
     "temperature",
@@ -82,13 +82,12 @@
     "interval": 10
   },
 
-  "hyprland/language": {
+  "custom/language": {
+    "exec": "~/.config/hypr/scripts/get-keyboard-layout.sh",
+    "interval": 1,
     "format": "{}",
-    "format-us": "EN",
-    "format-se": "SE",
-    "keyboard-name": "video-bus",
-    "on-click": "hyprctl switchxkblayout video-bus next",
+    "on-click": "~/.config/hypr/scripts/switch-keyboard-layout.sh",
     "tooltip": true,
-    "tooltip-format": "Keyboard: {}"
+    "tooltip-format": "Keyboard Layout: {}"
   }
 }

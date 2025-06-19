@@ -156,6 +156,13 @@
         - org.gimp.GIMP # GNU Image Manipulation Program
         - io.mpv.Mpv # Modern media player
 
+    - name: Configure Obsidian flatpak permissions for clipboard access
+      ansible.builtin.command: flatpak override --user --socket=session-bus md.obsidian.Obsidian
+      become: false
+      become_user: "{{ original_user }}"
+      changed_when: false
+      failed_when: false
+
     # Remove unwanted packages
     - name: Remove Firefox (replaced with Chrome)
       ansible.builtin.dnf:
