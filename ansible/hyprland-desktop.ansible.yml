@@ -31,6 +31,7 @@
           - wl-clipboard # Clipboard utilities for Wayland
           - grim # Screenshot tool
           - slurp # Selection tool for screenshots
+          - wf-recorder # Screen recording tool
           - brightnessctl # Brightness control
           - playerctl # Media player control
           - pavucontrol # Audio control GUI
