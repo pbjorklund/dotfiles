@@ -25,7 +25,8 @@
   "clock": {
     "format": "{:%B %d %H:%M}",
     "format-alt": "{:%Y-%m-%d}",
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "interval": 1
   },
 
   "cpu": {
@@ -63,7 +64,8 @@
     "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
     "scroll-step": 5,
     "tooltip": true,
-    "tooltip-format": "Volume: {volume}%"
+    "tooltip-format": "Volume: {volume}%",
+    "interval": 1
   },
 
   "network": {
@@ -76,15 +78,16 @@
     "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ifname}: {ipaddr}/{cidr}",
     "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}",
     "tooltip-format-disconnected": "Disconnected",
-    "on-click": "nm-connection-editor"
+    "on-click": "nm-connection-editor",
+    "interval": 10
   },
 
   "hyprland/language": {
     "format": "{}",
-    "format-english (us)": "EN",
-    "format-swedish": "SE",
-    "keyboard-name": "at-translated-set-2-keyboard",
-    "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
+    "format-us": "EN",
+    "format-se": "SE",
+    "keyboard-name": "video-bus",
+    "on-click": "hyprctl switchxkblayout video-bus next",
     "tooltip": true,
     "tooltip-format": "Keyboard: {}"
   }
