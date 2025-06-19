@@ -24,22 +24,22 @@
   },
 
   "clock": {
-    "format": "{:%B %d %H:%M}",
-    "format-alt": "{:%Y-%m-%d}",
+    "format": " {:%B %d %H:%M}",
+    "format-alt": " {:%Y-%m-%d}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
     "interval": 1
   },
 
   "cpu": {
-    "format": "{usage}%",
+    "format": "󰻠 {usage}%",
     "interval": 2,
     "tooltip": false
   },
 
   "temperature": {
     "critical-threshold": 60,
-    "format": "{temperatureC}°C",
-    "format-critical": "{temperatureC}°C !",
+    "format": " {temperatureC}°C",
+    "format-critical": " {temperatureC}°C !",
     "interval": 5
   },
 
@@ -48,17 +48,21 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "{capacity}%",
-    "format-charging": "{capacity}% ↑⚡",
-    "format-plugged": "{capacity}% ⚡",
-    "format-full": "{capacity}% ✓",
+    "format": " {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-full": "󰁹 {capacity}%",
+    "format-warning": "󰂃 {capacity}%",
+    "format-critical": "󰁺 {capacity}%",
     "interval": 30,
     "tooltip-format": "{timeTo}, {power}W"
   },
 
   "pulseaudio": {
-    "format": "{volume}%",
-    "format-muted": "muted",
+    "format": "󰕾 {volume}%",
+    "format-muted": "󰖁 muted",
+    "format-bluetooth": "󰂯 {volume}%",
+    "format-bluetooth-muted": "󰂲 muted",
     "on-click": "pavucontrol",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
     "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
