@@ -58,22 +58,3 @@ WALLPAPER="${WALLPAPERS[$RANDOM % ${#WALLPAPERS[@]}]}"
 swaybg -o "$MONITOR" -i "$WALLPAPER" -m fill &
 
 echo "Applied wallpaper: $(basename "$WALLPAPER") to $MONITOR ($1 monitor)"
-
-if [[ ${#WALLPAPERS[@]} -eq 0 ]]; then
-    echo "No wallpapers found for monitor $1"
-    exit 1
-fi
-
-# Kill existing swaybg for this monitor
-pkill -f "swaybg.*$MONITOR" 2>/dev/null || true
-
-# Select random wallpaper
-WALLPAPER="${WALLPAPERS[$RANDOM % ${#WALLPAPERS[@]}]}"
-
-# Apply wallpaper with better scaling
-# fit = scale to show entire image (may have bars)
-# stretch = fill screen exactly (may distort aspect ratio)
-# fill = scale and crop to fill screen (may cut off parts)
-swaybg -o "$MONITOR" -i "$WALLPAPER" -m fill &
-
-echo "Applied wallpaper: $(basename "$WALLPAPER") to $MONITOR"
