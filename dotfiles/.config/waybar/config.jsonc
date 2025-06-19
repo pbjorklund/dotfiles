@@ -65,7 +65,7 @@
     "scroll-step": 5,
     "tooltip": true,
     "tooltip-format": "Volume: {volume}%",
-    "interval": 1
+    "interval": 5
   },
 
   "network": {
@@ -84,7 +84,7 @@
 
   "custom/language": {
     "exec": "~/.config/hypr/scripts/get-keyboard-layout.sh",
-    "interval": 1,
+    "interval": 30,
     "format": "{}",
     "on-click": "~/.config/hypr/scripts/switch-keyboard-layout.sh",
     "tooltip": true,

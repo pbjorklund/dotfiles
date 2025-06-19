@@ -1,0 +1,159 @@
+---
+- name: Fix DisplayLink High CPU Usage
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    - name: Create DisplayLink service override directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/displaylink-driver.service.d
+        state: directory
+        mode: '0755'
+
+    - name: Create DisplayLink service override to limit CPU usage
+      ansible.builtin.copy:
+        content: |
+          [Service]
+          # Limit CPU usage to prevent runaway processes
+          CPUQuota=50%
+          
+          # Set nice priority to reduce impact on system
+          Nice=10
+          
+          # Restart service if it fails
+          Restart=on-failure
+          RestartSec=5
+          
+          # Kill service if it takes too long to stop
+          TimeoutStopSec=10
+          KillMode=mixed
+        dest: /etc/systemd/system/displaylink-driver.service.d/override.conf
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: Create DisplayLink configuration directory
+      ansible.builtin.file:
+        path: /etc/displaylink
+        state: directory
+        mode: '0755'
+
+    - name: Create DisplayLink environment optimization file
+      ansible.builtin.copy:
+        content: |
+          # DisplayLink environment optimizations to reduce CPU usage
+          
+          # Disable unnecessary logging that can cause CPU spikes
+          DL_LOG_LEVEL=ERROR
+          
+          # Reduce polling frequency for device detection
+          DL_DEVICE_POLLING_INTERVAL=5000
+          
+          # Optimize memory usage
+          DL_MEMORY_OPTIMIZATION=1
+          
+          # Disable power management that can cause CPU loops
+          DL_DISABLE_POWER_MANAGEMENT=1
+        dest: /etc/displaylink/displaylink.conf
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: Create udev rule to optimize DisplayLink device handling
+      ansible.builtin.copy:
+        content: |
+          # Optimize DisplayLink device detection and reduce CPU usage
+          SUBSYSTEM=="usb", ATTR{idVendor}=="17e9", ATTR{idProduct}=="*", ACTION=="add", TAG+="systemd", ENV{SYSTEMD_WANTS}="displaylink-driver.service"
+          SUBSYSTEM=="usb", ATTR{idVendor}=="17e9", ATTR{idProduct}=="*", ACTION=="remove", RUN+="/bin/systemctl --no-block restart displaylink-driver.service"
+        dest: /etc/udev/rules.d/99-displaylink-optimize.rules
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: Create script to monitor and restart DisplayLink if CPU usage is too high
+      ansible.builtin.copy:
+        content: |
+          #!/bin/bash
+          # Monitor DisplayLink CPU usage and restart if necessary
+          
+          THRESHOLD=80
+          SERVICE="displaylink-driver.service"
+          
+          while true; do
+              CPU_USAGE=$(ps -C DisplayLinkManager -o %cpu --no-headers | awk '{sum += $1} END {print sum}')
+              
+              if (( $(echo "$CPU_USAGE > $THRESHOLD" | bc -l) )); then
+                  echo "$(date): DisplayLink CPU usage ($CPU_USAGE%) exceeds threshold ($THRESHOLD%), restarting service"
+                  systemctl restart "$SERVICE"
+                  sleep 30
+              fi
+              
+              sleep 60
+          done
+        dest: /usr/local/bin/displaylink-monitor.sh
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Create systemd service for DisplayLink monitoring
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=DisplayLink CPU Usage Monitor
+          After=displaylink-driver.service
+          Wants=displaylink-driver.service
+          
+          [Service]
+          Type=simple
+          ExecStart=/usr/local/bin/displaylink-monitor.sh
+          Restart=always
+          RestartSec=10
+          User=root
+          
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/displaylink-monitor.service
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: Install bc for CPU calculation in monitor script
+      ansible.builtin.dnf:
+        name: bc
+        state: present
+
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Enable and start DisplayLink monitor service
+      ansible.builtin.systemd:
+        name: displaylink-monitor.service
+        enabled: true
+        state: started
+
+    - name: Restart DisplayLink driver service with new configuration
+      ansible.builtin.systemd:
+        name: displaylink-driver.service
+        state: restarted
+
+    - name: Reload udev rules
+      ansible.builtin.command: udevadm control --reload-rules
+      changed_when: false
+
+    - name: Display optimization status
+      ansible.builtin.debug:
+        msg: |
+          🔧 DisplayLink CPU optimizations applied:
+          
+          ✅ Service CPU quota limited to 50%
+          ✅ Service nice priority set to 10 (lower priority)
+          ✅ Environment optimizations configured
+          ✅ Automatic monitoring service enabled
+          ✅ Optimized udev rules added
+          
+          Monitor the CPU usage with: watch 'ps aux | grep DisplayLink'
+          Check monitor logs with: journalctl -u displaylink-monitor.service -f

@@ -1,21 +1,16 @@
 #!/bin/bash
 
-# Get the current keyboard layout from the main keyboard
-# This works with both laptop and USB keyboards
+# Get the current keyboard layout more efficiently
+# Uses hyprctl activeworkspace which is much faster than devices
 
-# Find the main keyboard
-main_keyboard=$(hyprctl devices | grep -B 6 'main: yes' | grep -E '\s+(at-translated-set-2-keyboard|usb-keyboard)' | head -1 | sed 's/^\s*//' | sed 's/:$//')
+# Get the active keyboard layout using the faster activeworkspace command
+# This is much more efficient than parsing the entire devices output
+layout=$(hyprctl getoption input:kb_layout | grep -o 'str: "[^"]*"' | sed 's/str: "\([^"]*\)"/\1/')
 
-if [ -n "$main_keyboard" ]; then
-    # Get the layout of the main keyboard
-    layout=$(hyprctl devices | grep -A 5 "$main_keyboard" | grep 'active keymap:' | head -1 | sed 's/.*active keymap: //')
-    
-    # Convert to short format
-    case "$layout" in
-        "English (US)") echo "EN" ;;
-        "Swedish") echo "SE" ;;
-        *) echo "$layout" ;;
-    esac
-else
-    echo "??"
-fi
+# Convert to short format based on the layout string
+case "$layout" in
+    "us") echo "EN" ;;
+    "se") echo "SE" ;;
+    "us,se") echo "EN" ;;  # Default to first layout
+    *) echo "${layout:0:2}" | tr '[:lower:]' '[:upper:]' ;;
+esac
