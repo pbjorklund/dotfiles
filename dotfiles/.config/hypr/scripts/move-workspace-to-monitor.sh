@@ -1,6 +1,12 @@
 #!/bin/bash
-# Move workspace to monitor by stable identifier - dynamically finds monitor ID
+# Move workspace to monitor by stable identifier - dynamically finds monitor name
 # Usage: move-workspace-to-monitor.sh <portrait|main|laptop>
+
+# Function to find current connector name by monitor description
+find_monitor_connector() {
+    local target_desc="$1"
+    hyprctl monitors -j | jq -r ".[] | select(.description == \"$target_desc\") | .name"
+}
 
 case "$1" in
 laptop)
@@ -18,15 +24,15 @@ main)
     ;;
 esac
 
-# Find the current monitor ID for this description
-MONITOR_ID=$(hyprctl monitors -j | jq -r ".[] | select(.description == \"$TARGET_DESC\") | .id")
+# Find the current monitor name (connector) for this description
+MONITOR_NAME=$(find_monitor_connector "$TARGET_DESC")
 
-if [[ -z "$MONITOR_ID" ]]; then
+if [[ -z "$MONITOR_NAME" ]]; then
     echo "Monitor with description '$TARGET_DESC' not found"
     exit 1
 fi
 
-echo "Moving workspace to $1 monitor (ID: $MONITOR_ID)"
+echo "Moving workspace to $1 monitor ($MONITOR_NAME)"
 
-# Move current workspace to the found monitor
-hyprctl dispatch movecurrentworkspacetomonitor "$MONITOR_ID"
+# Move current workspace to the found monitor using the monitor name
+hyprctl dispatch movecurrentworkspacetomonitor "$MONITOR_NAME"
