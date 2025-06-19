@@ -34,7 +34,10 @@ pkill -f "swaybg.*$MONITOR" 2>/dev/null || true
 # Select random wallpaper
 WALLPAPER="${WALLPAPERS[$RANDOM % ${#WALLPAPERS[@]}]}"
 
-# Apply wallpaper
-swaybg -o "$MONITOR" -i "$WALLPAPER" -m fill &
+# Apply wallpaper with better scaling
+# fit = scale to show entire image (may have bars)
+# stretch = fill screen exactly (may distort aspect ratio)
+# fill = scale and crop to fill screen (may cut off parts)
+swaybg -o "$MONITOR" -i "$WALLPAPER" -m fit &
 
 echo "Applied wallpaper: $(basename "$WALLPAPER") to $MONITOR"
