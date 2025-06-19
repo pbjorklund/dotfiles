@@ -163,6 +163,13 @@
       changed_when: false
       failed_when: false
 
+    - name: Configure Plexamp flatpak permissions for Wayland socket access
+      ansible.builtin.command: flatpak override --user --socket=wayland com.plexamp.Plexamp
+      become: false
+      become_user: "{{ original_user }}"
+      changed_when: false
+      failed_when: false
+
     # Remove unwanted packages
     - name: Remove Firefox (replaced with Chrome)
       ansible.builtin.dnf:
