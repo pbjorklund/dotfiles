@@ -13,7 +13,8 @@
     "cpu",
     "temperature",
     "battery",
-    "clock"
+    "clock",
+    "custom/power"
   ],
 
   "hyprland/workspaces": {
@@ -69,25 +70,23 @@
   },
 
   "network": {
-    "format-wifi": "{essid} ({signalStrength}%)",
-    "format-ethernet": "{ipaddr}/{cidr}",
-    "format-linked": "{ifname} (No IP)",
-    "format-disconnected": "Disconnected",
+    "format-wifi": "󰖩 {essid} ({signalStrength}%)",
+    "format-ethernet": "󰈀",
+    "format-linked": "󰈂 No IP",
+    "format-disconnected": "󰖪 Disconnected",
     "format-alt": "{ifname}: {ipaddr}/{cidr}",
     "tooltip-format": "{ifname} via {gwaddr}",
     "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ifname}: {ipaddr}/{cidr}",
-    "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}",
+    "tooltip-format-ethernet": "Ethernet: {ifname}\n{ipaddr}/{cidr}",
     "tooltip-format-disconnected": "Disconnected",
     "on-click": "nm-connection-editor",
     "interval": 10
   },
 
-  "custom/language": {
-    "exec": "~/.config/hypr/scripts/get-keyboard-layout.sh",
-    "interval": 30,
-    "format": "{}",
-    "on-click": "~/.config/hypr/scripts/switch-keyboard-layout.sh",
-    "tooltip": true,
-    "tooltip-format": "Keyboard Layout: {}"
+  "custom/power": {
+    "format": "⏻",
+    "tooltip": "Sleep Computer",
+    "on-click": "systemctl suspend",
+    "on-click-right": "hyprctl dispatch dpms off"
   }
 }

@@ -37,6 +37,7 @@
           - pavucontrol # Audio control GUI
           - network-manager-applet # Network management applet
           - jq # JSON processor for wallpaper management script
+          - inotify-tools # File system event monitoring for waybar auto-restart
         state: present
 
     # Audio system (required for Hyprland)

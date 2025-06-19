@@ -110,6 +110,20 @@ if systemctl --user daemon-reload; then
             echo "⚠ Warning: Failed to enable hyprland-resume-monitor.service"
         fi
     fi
+
+    # Enable and start the waybar watcher service if it exists
+    if [[ -f ~/.config/systemd/user/waybar-watcher.service ]]; then
+        if systemctl --user enable waybar-watcher.service; then
+            echo "Enabled waybar-watcher.service"
+            if systemctl --user start waybar-watcher.service; then
+                echo "Started waybar-watcher.service"
+            else
+                echo "⚠ Warning: Failed to start waybar-watcher.service"
+            fi
+        else
+            echo "⚠ Warning: Failed to enable waybar-watcher.service"
+        fi
+    fi
 else
     echo "⚠ Warning: Failed to reload systemd user daemon"
 fi

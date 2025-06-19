@@ -96,3 +96,18 @@ window#waybar {
     background-color: #f3bcbc;
     color: #222;
 }
+
+/* Power button styling with right margin */
+#custom-power {
+    margin-right: 10px;
+    padding: 0 8px;
+    border-radius: 12px;
+    background: rgba(40, 60, 80, 0.7);
+    color: #ddd;
+    min-width: 20px;
+}
+
+#custom-power:hover {
+    background: rgba(80, 120, 140, 0.7);
+    transition: background 0.3s ease;
+}

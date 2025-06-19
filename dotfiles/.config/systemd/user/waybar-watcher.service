@@ -1,0 +1,12 @@
+[Unit]
+Description=Waybar config file watcher
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c "inotifywait -m -e modify,move,create,delete %h/.config/waybar/ --format='%%w%%f %%e' | while read file event; do if [[ \"$file\" =~ \\.(jsonc|css)$ ]]; then echo \"Config changed: $file ($event)\"; pkill waybar; sleep 0.5; waybar & fi; done"
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target

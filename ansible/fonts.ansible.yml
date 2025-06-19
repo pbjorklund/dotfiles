@@ -28,6 +28,51 @@
           - abattis-cantarell-fonts # Cantarell - GNOME default UI font
         state: present
 
+    # Install Nerd Fonts for waybar and terminal icons
+    - name: Create fonts directory
+      ansible.builtin.file:
+        path: "/home/{{ original_user }}/.local/share/fonts"
+        state: directory
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+        mode: "0755"
+
+    - name: Download Fira Code Nerd Font
+      ansible.builtin.get_url:
+        url: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip"
+        dest: "/tmp/FiraCode.zip"
+        mode: "0644"
+
+    - name: Download JetBrains Mono Nerd Font
+      ansible.builtin.get_url:
+        url: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip"
+        dest: "/tmp/JetBrainsMono.zip"
+        mode: "0644"
+
+    - name: Extract Fira Code Nerd Font
+      ansible.builtin.unarchive:
+        src: "/tmp/FiraCode.zip"
+        dest: "/home/{{ original_user }}/.local/share/fonts"
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+        remote_src: true
+
+    - name: Extract JetBrains Mono Nerd Font
+      ansible.builtin.unarchive:
+        src: "/tmp/JetBrainsMono.zip"
+        dest: "/home/{{ original_user }}/.local/share/fonts"
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+        remote_src: true
+
+    - name: Clean up font archives
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/FiraCode.zip"
+        - "/tmp/JetBrainsMono.zip"
+
     # Update font cache for immediate availability
     - name: Update font cache
       ansible.builtin.command:
@@ -74,6 +119,8 @@
           Installed font families:
           - Inter - Modern UI typeface designed for computer screens
           - Fira Code - Programming font with ligatures
+          - Fira Code Nerd Font - Programming font with icons and symbols
+          - JetBrains Mono Nerd Font - Programming font with icons and symbols
           - Noto Emoji - Google's comprehensive emoji support
           - DejaVu (Sans, Serif, Mono) - Excellent Unicode coverage
           - Liberation (Sans, Serif, Mono) - Metric-compatible alternatives
