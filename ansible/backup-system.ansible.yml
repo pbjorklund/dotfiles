@@ -27,21 +27,9 @@
       become_user: "{{ original_user }}"
       become: false
 
-    - name: Configure Timeshift for system backups
-      ansible.builtin.debug:
-        msg: >-
-          ✓ Timeshift available for system snapshots.
-          Run ./dotfiles/install.sh to configure dotfiles.
-          Configure backup location: sudo timeshift --list-devices and sudo timeshift --snapshot-device /dev/sdX
-
-    - name: Display backup system setup completion
-      ansible.builtin.debug:
-        msg: "✓ Backup system installed - Timeshift (system) + Pika Backup (user data)"
-
     - name: Display backup configuration reminders
       ansible.builtin.debug:
         msg: "{{ item }}"
       loop:
-        - "⚠ Timeshift: Run 'sudo timeshift-gtk' to configure snapshot device and schedule"
+        - "⚠ Timeshift: Run 'timeshift-launcher' to configure snapshot device and schedule"
         - "⚠ Pika Backup: Configure repositories and schedules via the GUI application"
-        - "📁 Backup configs can be managed via dotfiles - add to dotfiles/ and update install.sh"
