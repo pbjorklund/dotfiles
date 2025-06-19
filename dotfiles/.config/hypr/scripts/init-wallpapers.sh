@@ -1,6 +1,17 @@
 #!/bin/bash
 # Dynamic wallpaper initialization script for Hyprland
 # Sets default wallpapers on all monitors using stable descriptions
+#
+# Monitor Hardware Setup:
+# - main: Acer XZ321QU ultrawide (3440x1440, landscape, primary display)
+# - portrait: Acer XV240Y P (1920x1080, rotated 90° portrait orientation)
+# - laptop: BOE 0x094C (built-in laptop display, may not always be connected)
+#
+# Technical Notes:
+# - Uses monitor descriptions for stable identification across sessions
+# - Monitor IDs can change but descriptions remain constant
+# - Script dynamically finds current connector names from descriptions
+# - Gracefully handles disconnected monitors by checking if connector exists
 
 WALLPAPER_DIR="$HOME/.config/hypr/wallpapers"
 

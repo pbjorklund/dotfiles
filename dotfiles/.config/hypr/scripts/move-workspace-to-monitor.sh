@@ -1,6 +1,16 @@
 #!/bin/bash
 # Move workspace to monitor by stable identifier - dynamically finds monitor name
 # Usage: move-workspace-to-monitor.sh <portrait|main|laptop>
+#
+# Monitor Hardware Setup:
+# - main: Acer XZ321QU ultrawide (3440x1440, landscape, primary display)
+# - portrait: Acer XV240Y P (1920x1080, rotated 90° portrait orientation)
+# - laptop: BOE 0x094C (built-in laptop display, may not always be connected)
+#
+# Technical Notes:
+# - Uses monitor descriptions for stable identification across sessions
+# - Monitor IDs can change but descriptions remain constant
+# - Script gracefully handles disconnected monitors
 
 # Function to find current connector name by monitor description
 find_monitor_connector() {

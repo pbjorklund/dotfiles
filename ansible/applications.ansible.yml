@@ -82,6 +82,7 @@
           - jq # JSON processor
           - tree # Directory structure viewer
           - htop # Process monitor
+          - btop # Process monitor
           - ripgrep # Fast grep alternative
           - fd-find # Fast find alternative
           - bat # Cat with syntax highlighting
