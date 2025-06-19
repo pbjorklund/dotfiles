@@ -123,17 +123,6 @@
       become_user: "{{ original_user }}"
       when: cliphist_release is defined
 
-    # System backup and restore tools
-    - name: Install system backup tools
-      ansible.builtin.dnf:
-        name:
-          - timeshift # System restore utility (like macOS Time Machine)
-          - rsync # Efficient file transfer and sync
-          - rclone # Cloud storage sync tool (for S3 compatible storage)
-        state: present
-      # Note: PikaBackup (Flatpak) provides personal file backup with versioning
-      # Timeshift provides system snapshots for full system restore
-
     # GNOME desktop utilities
     - name: Install GNOME desktop utilities and extensions
       ansible.builtin.dnf:
@@ -164,7 +153,6 @@
         - org.zotero.Zotero # Reference management and research tool
         - org.onlyoffice.desktopeditors # Office suite
         - com.plexamp.Plexamp # Music player for Plex
-        - org.gnome.World.PikaBackup # Simple backup tool for GNOME
         - org.gimp.GIMP # GNU Image Manipulation Program
         - io.mpv.Mpv # Modern media player
 
@@ -309,10 +297,3 @@
       become: false
       become_user: "{{ original_user }}"
       when: not rustup_installed.stat.exists
-
-    - name: Configure Timeshift for system backups
-      ansible.builtin.debug:
-        msg: >-
-          ✓ Timeshift available for system snapshots.
-          Run ./dotfiles/install.sh to configure dotfiles.
-          Configure backup location: sudo timeshift --list-devices and sudo timeshift --snapshot-device /dev/sdX

@@ -1,0 +1,47 @@
+---
+# Backup System Configuration Playbook
+# Installs and configures all backup-related applications and tools
+# Handles both system snapshots (Timeshift) and user data backups (Pika Backup)
+
+- name: Configure comprehensive backup system
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    # System backup and restore tools
+    - name: Install system backup tools
+      ansible.builtin.dnf:
+        name:
+          - timeshift # System restore utility (like macOS Time Machine)
+          - rsync # Efficient file transfer and sync
+          - rclone # Cloud storage sync tool (for S3 compatible storage)
+        state: present
+
+    - name: Install Pika Backup via Flatpak for user data backups
+      community.general.flatpak:
+        name: org.gnome.World.PikaBackup # Modern backup tool with encryption support
+        state: present
+      become_user: "{{ original_user }}"
+      become: false
+
+    - name: Configure Timeshift for system backups
+      ansible.builtin.debug:
+        msg: >-
+          ✓ Timeshift available for system snapshots.
+          Run ./dotfiles/install.sh to configure dotfiles.
+          Configure backup location: sudo timeshift --list-devices and sudo timeshift --snapshot-device /dev/sdX
+
+    - name: Display backup system setup completion
+      ansible.builtin.debug:
+        msg: "✓ Backup system installed - Timeshift (system) + Pika Backup (user data)"
+
+    - name: Display backup configuration reminders
+      ansible.builtin.debug:
+        msg: "{{ item }}"
+      loop:
+        - "⚠ Timeshift: Run 'sudo timeshift-gtk' to configure snapshot device and schedule"
+        - "⚠ Pika Backup: Configure repositories and schedules via the GUI application"
+        - "📁 Backup configs can be managed via dotfiles - add to dotfiles/ and update install.sh"

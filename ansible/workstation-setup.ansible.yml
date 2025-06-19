@@ -1,4 +1,3 @@
----
 # Complete Fedora Workstation Setup - orchestrates all component playbooks
 
 - name: Run base system setup
@@ -36,6 +35,10 @@
   tags: nas
   when: configure_nas | default(false)
 
+- name: Configure backup system
+  import_playbook: backup-system.ansible.yml
+  tags: backup
+
 - name: Display setup completion summary
   hosts: localhost
   connection: local
@@ -45,28 +48,4 @@
       ansible.builtin.debug:
         msg: |
           🎉 Fedora Workstation Setup Complete!
-
-          ✅ Completed Components:
-          - Base system configuration
-          - Application installation
-          - Service configuration
-          - Personal dotfiles and settings
-          - Hyprland desktop environment setup
-
-          📋 Optional Components Available:
-          - DNS configuration: --extra-vars "configure_dns=true"
-          - DisplayLink drivers: --extra-vars "install_displaylink=true"
-          - NAS storage: --extra-vars "configure_nas=true"
-
-          🚀 Next Steps:
-          1. Log out and back in for group changes
-          2. Restart for kernel modules (if DisplayLink installed)
-          3. Configure any remaining personal preferences
-
-          📚 Individual playbooks can be run separately:
-          - ansible-playbook ansible/applications.ansible.yml (update apps)
-          - ansible-playbook ansible/personal-config.ansible.yml (update dotfiles)
-          - ansible-playbook ansible/hyprland-desktop.ansible.yml (Hyprland setup)
-          - ansible-playbook ansible/hardware-displaylink.ansible.yml (DisplayLink)
-          - ansible-playbook ansible/storage-nas.ansible.yml (NAS mounts)
       tags: always
