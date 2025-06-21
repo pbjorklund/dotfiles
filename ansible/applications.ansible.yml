@@ -51,6 +51,8 @@
         gpgcheck: true
         gpgkey: https://packages.microsoft.com/keys/microsoft.asc
 
+
+
     # Native packages with system integration
     - name: Install desktop applications (native packages)
       ansible.builtin.dnf:
@@ -59,6 +61,29 @@
           - 1password-cli # 1Password CLI for secure credential access
           - google-chrome-stable # Web browser (needs system integration)
           - code # Visual Studio Code (needs system integration)
+        state: present
+
+    # Configure 1Password native messaging for Firefox-based browsers
+    - name: Create 1Password config directory
+      ansible.builtin.file:
+        path: "/etc/1password"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Create custom allowed browsers file for 1Password
+      ansible.builtin.file:
+        path: "/etc/1password/custom_allowed_browsers"
+        state: touch
+        mode: "0644"
+        owner: root
+        group: root
+
+    - name: Add Zen Browser to 1Password custom allowed browsers
+      ansible.builtin.lineinfile:
+        path: "/etc/1password/custom_allowed_browsers"
+        line: "zen-bin"
         state: present
 
     # Development tools
@@ -244,6 +269,76 @@
       become: true
       become_user: "{{ original_user }}"
       when: lazydocker_release is defined
+
+    # GitHub tools (Zen Browser)
+    - name: Get Zen Browser latest release info
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/zen-browser/desktop/releases/latest
+        method: GET
+        return_content: true
+      register: zen_browser_release
+
+    - name: Install Zen Browser (privacy-focused Firefox-based browser)
+      ansible.builtin.get_url:
+        url: "{{ zen_browser_release.json.assets | selectattr('name', 'match', '^zen\\.linux-x86_64\\.tar\\.xz$') | map(attribute='browser_download_url') | first }}"
+        dest: /tmp/zen-browser.tar.xz
+        mode: "0644"
+      become: true
+      become_user: "{{ original_user }}"
+      when: zen_browser_release is defined
+
+    - name: Create Zen Browser directory
+      ansible.builtin.file:
+        path: "/opt/zen-browser"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      when: zen_browser_release is defined
+
+    - name: Extract Zen Browser
+      ansible.builtin.unarchive:
+        src: /tmp/zen-browser.tar.xz
+        dest: /opt/zen-browser
+        remote_src: true
+        extra_opts: [--strip-components=1]
+      when: zen_browser_release is defined
+
+    - name: Create Zen Browser desktop entry
+      ansible.builtin.copy:
+        content: |
+          [Desktop Entry]
+          Version=1.0
+          Name=Zen Browser
+          Comment=Privacy-focused Firefox-based browser
+          GenericName=Web Browser
+          Keywords=Internet;WWW;Browser;Web;Explorer
+          Exec=/opt/zen-browser/zen %u
+          Terminal=false
+          X-MultipleArgs=false
+          Type=Application
+          Icon=/opt/zen-browser/browser/chrome/icons/default/default128.png
+          Categories=GNOME;GTK;Network;WebBrowser;
+          MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
+          StartupNotify=true
+        dest: /usr/share/applications/zen-browser.desktop
+        mode: "0644"
+      when: zen_browser_release is defined
+
+    - name: Create Zen Browser symlink
+      ansible.builtin.file:
+        src: /opt/zen-browser/zen
+        dest: /usr/local/bin/zen
+        state: link
+      when: zen_browser_release is defined
+
+    - name: Clean up Zen Browser installation file
+      ansible.builtin.file:
+        path: /tmp/zen-browser.tar.xz
+        state: absent
+      become: true
+      become_user: "{{ original_user }}"
+      when: zen_browser_release is defined
 
     # Rust development environment
     - name: Remove Fedora packaged Rust/Cargo (conflicts with rustup)

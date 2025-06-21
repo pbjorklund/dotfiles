@@ -1,0 +1,11 @@
+[Unit]
+Description=Disable USB Wakeup for Sleep Stability
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/pbjorklund/dotfiles/dotfiles/.config/hypr/scripts/disable-usb-wakeup.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
