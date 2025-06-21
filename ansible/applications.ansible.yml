@@ -51,8 +51,6 @@
         gpgcheck: true
         gpgkey: https://packages.microsoft.com/keys/microsoft.asc
 
-
-
     # Native packages with system integration
     - name: Install desktop applications (native packages)
       ansible.builtin.dnf:
@@ -76,15 +74,29 @@
       ansible.builtin.file:
         path: "/etc/1password/custom_allowed_browsers"
         state: touch
-        mode: "0644"
+        mode: "0755"
         owner: root
         group: root
 
     - name: Add Zen Browser to 1Password custom allowed browsers
       ansible.builtin.lineinfile:
         path: "/etc/1password/custom_allowed_browsers"
-        line: "zen-bin"
+        line: "{{ item }}"
         state: present
+      loop:
+        - "zen-bin"
+        - "zen"
+
+    - name: Set correct permissions for 1Password custom allowed browsers
+      ansible.builtin.file:
+        path: "/etc/1password/custom_allowed_browsers"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Display 1Password integration setup instructions
+      ansible.builtin.debug:
+        msg: "1Password setup complete. CRITICAL: 1) Completely close 1Password app (pkill -f 1password), 2) Restart 1Password, 3) Close Zen Browser, 4) Restart Zen Browser, 5) Install 1Password extension from Firefox Add-ons store."
 
     # Development tools
     - name: Install development tools
@@ -278,6 +290,11 @@
         return_content: true
       register: zen_browser_release
 
+    - name: Check if Zen Browser is already installed
+      ansible.builtin.stat:
+        path: /opt/zen-browser/zen
+      register: zen_installed
+
     - name: Install Zen Browser (privacy-focused Firefox-based browser)
       ansible.builtin.get_url:
         url: "{{ zen_browser_release.json.assets | selectattr('name', 'match', '^zen\\.linux-x86_64\\.tar\\.xz$') | map(attribute='browser_download_url') | first }}"
@@ -285,7 +302,7 @@
         mode: "0644"
       become: true
       become_user: "{{ original_user }}"
-      when: zen_browser_release is defined
+      when: zen_browser_release is defined and not zen_installed.stat.exists
 
     - name: Create Zen Browser directory
       ansible.builtin.file:
@@ -294,7 +311,7 @@
         mode: "0755"
         owner: root
         group: root
-      when: zen_browser_release is defined
+      when: zen_browser_release is defined and not zen_installed.stat.exists
 
     - name: Extract Zen Browser
       ansible.builtin.unarchive:
@@ -302,7 +319,7 @@
         dest: /opt/zen-browser
         remote_src: true
         extra_opts: [--strip-components=1]
-      when: zen_browser_release is defined
+      when: zen_browser_release is defined and not zen_installed.stat.exists
 
     - name: Create Zen Browser desktop entry
       ansible.builtin.copy:
@@ -323,14 +340,14 @@
           StartupNotify=true
         dest: /usr/share/applications/zen-browser.desktop
         mode: "0644"
-      when: zen_browser_release is defined
+      when: zen_browser_release is defined and not zen_installed.stat.exists
 
     - name: Create Zen Browser symlink
       ansible.builtin.file:
         src: /opt/zen-browser/zen
         dest: /usr/local/bin/zen
         state: link
-      when: zen_browser_release is defined
+      when: zen_browser_release is defined and not zen_installed.stat.exists
 
     - name: Clean up Zen Browser installation file
       ansible.builtin.file:
@@ -338,7 +355,7 @@
         state: absent
       become: true
       become_user: "{{ original_user }}"
-      when: zen_browser_release is defined
+      when: zen_browser_release is defined and not zen_installed.stat.exists
 
     # Rust development environment
     - name: Remove Fedora packaged Rust/Cargo (conflicts with rustup)
