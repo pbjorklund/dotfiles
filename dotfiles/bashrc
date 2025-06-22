@@ -92,3 +92,7 @@ umask 077 # Restrictive file permissions by default
 export TMPDIR="/tmp/$(whoami)"
 mkdir -p "$TMPDIR"
 chmod 700 "$TMPDIR"
+# 1Password integration
+export SSH_AUTH_SOCK=~/.1password/agent.sock
+export OP_BIOMETRIC_UNLOCK_ENABLED=true
+export GH_TOKEN=$(op item get "GitHub Personal Access Token" --fields credential --reveal 2>/dev/null)

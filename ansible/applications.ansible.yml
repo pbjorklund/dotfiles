@@ -81,7 +81,105 @@
 
     - name: Display 1Password integration setup instructions
       ansible.builtin.debug:
-        msg: "1Password setup complete. CRITICAL: 1) Completely close 1Password app (pkill -f 1password), 2) Restart 1Password, 3) Close Zen Browser, 4) Restart Zen Browser, 5) Install 1Password extension from Firefox Add-ons store."
+        msg: "1Password setup complete. Restart 1Password app and Zen Browser, then install 1Password extension"
+
+    # Configure 1Password CLI authentication
+    - name: Check if 1Password CLI is authenticated
+      ansible.builtin.command: op account list
+      register: op_auth_check
+      become: false
+      become_user: "{{ original_user }}"
+      failed_when: false
+      changed_when: false
+
+    - name: Display 1Password CLI setup instructions if not authenticated
+      ansible.builtin.debug:
+        msg: "1Password CLI setup: Run 'op account add --address your-account.1password.com --email your@email.com'"
+      when: op_auth_check.rc != 0
+
+    # Configure Git to use 1Password for credentials
+    - name: Configure Git to use 1Password CLI for credentials
+      community.general.git_config:
+        name: credential.helper
+        value: '!f() { op item get "$1" --fields credential --reveal 2>/dev/null || echo; }; f'
+        scope: global
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display Git credential setup instructions
+      ansible.builtin.debug:
+        msg: "Git credentials: Store GitHub tokens in 1Password, use 'op item get TokenName --fields credential' format"
+
+    # Configure GitHub CLI to use SSH authentication (no PAT needed)
+    - name: Create GitHub CLI config directory
+      ansible.builtin.file:
+        path: "/home/{{ original_user }}/.config/gh"
+        state: directory
+        mode: "0700"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Configure GitHub CLI to prefer SSH authentication
+      ansible.builtin.copy:
+        content: |
+          git_protocol: ssh
+          editor: vim
+        dest: "/home/{{ original_user }}/.config/gh/config.yml"
+        mode: "0600"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display GitHub CLI setup instructions
+      ansible.builtin.debug:
+        msg: "GitHub CLI: Uses SSH authentication via 1Password SSH agent - run 'gh auth login' and choose SSH when prompted"
+
+    # Configure Docker to use 1Password for registry credentials
+    - name: Create Docker config directory
+      ansible.builtin.file:
+        path: "/home/{{ original_user }}/.docker"
+        state: directory
+        mode: "0700"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display Docker credential setup instructions
+      ansible.builtin.debug:
+        msg: "Docker credentials: Use 'docker login' with tokens stored in 1Password for secure registry access"
+
+    # Install and configure 1Password CLI plugins
+    - name: Display 1Password CLI plugin setup instructions
+      ansible.builtin.debug:
+        msg: "1Password plugins: Available for gh, docker, terraform, aws - configure manually after setup"
+
+    # Configure SSH to use 1Password SSH agent (integrated with existing SSH config)
+    - name: Add 1Password SSH agent to existing SSH config
+      ansible.builtin.lineinfile:
+        path: "/home/{{ original_user }}/.ssh/config"
+        line: "  IdentityAgent ~/.1password/agent.sock"
+        insertafter: "Host \\*"
+        state: present
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display SSH key setup instructions for 1Password
+      ansible.builtin.debug:
+        msg: "SSH setup: Generate SSH keys in 1Password app (Developer Tools > SSH Keys), add public keys to GitHub/GitLab"
+
+    - name: Add 1Password environment variables to bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ original_user }}/.bashrc"
+        line: "{{ item }}"
+        state: present
+      loop:
+        - "# 1Password integration"
+        - "export SSH_AUTH_SOCK=~/.1password/agent.sock"
+        - "export OP_BIOMETRIC_UNLOCK_ENABLED=true"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display 1Password development integration summary
+      ansible.builtin.debug:
+        msg: "1Password integration configured for: Git credentials, SSH keys, and development environment variables. Run dotfiles/install.sh after setup."
 
     # Development tools
     - name: Install development tools
@@ -109,7 +207,6 @@
           - fd-find # Fast find alternative
           - bat # Cat with syntax highlighting
           - fzf # Fuzzy finder
-          - zsh # Alternative shell
           - zellij # Terminal multiplexer
           - wl-clipboard # Wayland clipboard utilities (wl-copy, wl-paste)
         state: present
@@ -128,7 +225,7 @@
         mode: "0755"
       become: true
       become_user: "{{ original_user }}"
-      when: cliphist_release is defined
+      when: cliphist_release is defined and cliphist_release.json is defined
 
     - name: Install cliphist binary
       ansible.builtin.copy:
@@ -136,7 +233,7 @@
         dest: "/usr/local/bin/cliphist"
         mode: "0755"
         remote_src: true
-      when: cliphist_release is defined
+      when: cliphist_release is defined and cliphist_release.json is defined
 
     - name: Clean up cliphist installation file
       ansible.builtin.file:
@@ -144,7 +241,7 @@
         state: absent
       become: true
       become_user: "{{ original_user }}"
-      when: cliphist_release is defined
+      when: cliphist_release is defined and cliphist_release.json is defined
 
     # GNOME desktop utilities
     - name: Install GNOME desktop utilities and extensions
@@ -307,7 +404,10 @@
 
     - name: Install Zen Browser (privacy-focused Firefox-based browser)
       ansible.builtin.get_url:
-        url: "{{ zen_browser_release.json.assets | selectattr('name', 'match', '^zen\\.linux-x86_64\\.tar\\.xz$') | map(attribute='browser_download_url') | first }}"
+        url: >-
+          {{ zen_browser_release.json.assets |
+             selectattr('name', 'match', '^zen\\.linux-x86_64\\.tar\\.xz$') |
+             map(attribute='browser_download_url') | first }}
         dest: /tmp/zen-browser.tar.xz
         mode: "0644"
       become: true

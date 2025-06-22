@@ -14,7 +14,7 @@ backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)" # temporary backup with
 # List of files to symlink in homedir (excluding directories and install script)
 files="bashrc gitconfig tmux.conf inputrc"
 # List of .config subdirectories to symlink
-config_dirs="hypr swaylock waybar zellij mako wofi systemd kitty"
+config_dirs="hypr swaylock waybar zellij mako wofi systemd kitty gh"
 # System files that need to be copied (not symlinked) to system locations
 system_files_to_copy=".config/hypr/scripts/systemd-sleep-hook.sh:/lib/systemd/system-sleep/hyprland-lid-state"
 # VS Code settings file (user settings location)

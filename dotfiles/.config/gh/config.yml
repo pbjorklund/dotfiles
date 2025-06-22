@@ -1,0 +1,11 @@
+# Use SSH for all Git operations (works with 1Password SSH agent)
+git_protocol: ssh
+# Default editor
+editor: vim
+# Prefer SSH authentication over HTTPS tokens
+prompt: enabled
+# Browser for web authentication
+browser: zen
+# Default hostname
+hostname: github.com
+version: "1"
