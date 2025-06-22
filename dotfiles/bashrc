@@ -95,4 +95,11 @@ chmod 700 "$TMPDIR"
 # 1Password integration
 export SSH_AUTH_SOCK=~/.1password/agent.sock
 export OP_BIOMETRIC_UNLOCK_ENABLED=true
-export GH_TOKEN=$(op item get "GitHub Personal Access Token" --fields credential --reveal 2>/dev/null)
+
+# GitHub token function - only loads when needed
+gh_token() {
+    if [ -z "$GH_TOKEN" ]; then
+        export GH_TOKEN=$(op item get "GitHub Personal Access Token" --fields credential --reveal 2>/dev/null)
+    fi
+    echo "$GH_TOKEN"
+}

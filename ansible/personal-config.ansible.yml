@@ -7,32 +7,6 @@
     original_user: "{{ ansible_env.SUDO_USER }}"
 
   tasks:
-    - name: Check if dotfiles directory exists
-      ansible.builtin.stat:
-        path: "/home/{{ original_user }}/dotfiles"
-      register: dotfiles_dir
-      become: true
-      become_user: "{{ original_user }}"
-
-    - name: Clone dotfiles repository
-      ansible.builtin.git:
-        repo: https://github.com/pbjorklund/dotfiles.git
-        dest: "/home/{{ original_user }}/dotfiles"
-        version: master
-        update: false
-      become: true
-      become_user: "{{ original_user }}"
-      when: not dotfiles_dir.stat.exists
-
-    - name: Run dotfiles install script
-      ansible.builtin.command:
-        cmd: ./dotfiles/install.sh
-        chdir: "/home/{{ original_user }}/dotfiles"
-      become: true
-      become_user: "{{ original_user }}"
-      register: install_result
-      changed_when: "'Creating symlink' in install_result.stdout"
-
     # GNOME Configuration
     - name: Enable focus-on-hover in GNOME
       community.general.dconf:
@@ -94,9 +68,5 @@
 
     - name: Show SSH public key message
       ansible.builtin.debug:
-        msg: |
-          🔑 SSH Key Ready for GitHub:
-
-          Add this public key to your GitHub account:
-          {{ ssh_public_key.stdout | default('SSH key not found - run base-system.ansible.yml first') }}
+        msg: "🔑 SSH Key Ready: Add this public key to GitHub - {{ ssh_public_key.stdout | default('SSH key not found - run base-system.ansible.yml first') }}"
       when: ssh_public_key.rc == 0

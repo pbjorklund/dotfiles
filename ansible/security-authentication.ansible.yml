@@ -1,0 +1,172 @@
+---
+- name: Configure Security and Authentication
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    # Third-party repositories for security tools
+    - name: Import 1Password GPG key
+      ansible.builtin.rpm_key:
+        key: https://downloads.1password.com/linux/keys/1password.asc
+        state: present
+
+    - name: Add 1Password repository
+      ansible.builtin.yum_repository:
+        name: 1password
+        description: 1Password Stable Channel
+        baseurl: https://downloads.1password.com/linux/rpm/stable/$basearch
+        enabled: true
+        gpgcheck: true
+        repo_gpgcheck: true
+        gpgkey: https://downloads.1password.com/linux/keys/1password.asc
+
+    # Native packages with system integration
+    - name: Install security and authentication packages
+      ansible.builtin.dnf:
+        name:
+          - 1password # Password manager (needs system integration)
+          - 1password-cli # 1Password CLI for secure credential access
+        state: present
+
+    # Configure 1Password native messaging for Firefox-based browsers
+    - name: Create 1Password config directory
+      ansible.builtin.file:
+        path: "/etc/1password"
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Create custom allowed browsers file for 1Password
+      ansible.builtin.file:
+        path: "/etc/1password/custom_allowed_browsers"
+        state: touch
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Add Zen Browser to 1Password custom allowed browsers
+      ansible.builtin.lineinfile:
+        path: "/etc/1password/custom_allowed_browsers"
+        line: "{{ item }}"
+        state: present
+      loop:
+        - "zen-bin"
+        - "zen"
+
+    - name: Set correct permissions for 1Password custom allowed browsers
+      ansible.builtin.file:
+        path: "/etc/1password/custom_allowed_browsers"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Display 1Password integration setup instructions
+      ansible.builtin.debug:
+        msg: "1Password setup complete. Restart 1Password app and Zen Browser, then install 1Password extension"
+
+    # Configure 1Password CLI authentication
+    - name: Check if 1Password CLI is authenticated
+      ansible.builtin.command: op account list
+      register: op_auth_check
+      become: false
+      become_user: "{{ original_user }}"
+      failed_when: false
+      changed_when: false
+
+    - name: Display 1Password CLI setup instructions if not authenticated
+      ansible.builtin.debug:
+        msg: "1Password CLI setup: Run 'op account add --address your-account.1password.com --email your@email.com'"
+      when: op_auth_check.rc != 0
+
+    # Remove any broken Git credential helpers that cause VS Code authentication spam
+    - name: Remove broken Git credential helper if it exists
+      community.general.git_config:
+        name: credential.helper
+        state: absent
+        scope: global
+      become: false
+      become_user: "{{ original_user }}"
+      failed_when: false
+
+    # Configure Git to use SSH for GitHub (works with 1Password SSH agent)
+    - name: Configure Git to use SSH for GitHub
+      community.general.git_config:
+        name: url.ssh://git@github.com/.insteadOf
+        value: https://github.com/
+        scope: global
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display Git SSH setup instructions
+      ansible.builtin.debug:
+        msg: "Git configured to use SSH authentication via 1Password SSH agent - no credential helper needed"
+
+    # Configure GitHub CLI to use SSH authentication (no PAT needed)
+    - name: Create GitHub CLI config directory
+      ansible.builtin.file:
+        path: "/home/{{ original_user }}/.config/gh"
+        state: directory
+        mode: "0700"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Configure GitHub CLI to prefer SSH authentication
+      ansible.builtin.copy:
+        content: |
+          git_protocol: ssh
+          editor: vim
+        dest: "/home/{{ original_user }}/.config/gh/config.yml"
+        mode: "0600"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display GitHub CLI setup instructions
+      ansible.builtin.debug:
+        msg: "GitHub CLI: Uses SSH authentication via 1Password SSH agent - run 'gh auth login' and choose SSH when prompted"
+
+    # Configure Docker to use 1Password for registry credentials
+    - name: Create Docker config directory
+      ansible.builtin.file:
+        path: "/home/{{ original_user }}/.docker"
+        state: directory
+        mode: "0700"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display Docker credential setup instructions
+      ansible.builtin.debug:
+        msg: "Docker credentials: Use 'docker login' with tokens stored in 1Password for secure registry access"
+
+    # Configure SSH to use 1Password SSH agent (integrated with existing SSH config)
+    - name: Add 1Password SSH agent to existing SSH config
+      ansible.builtin.lineinfile:
+        path: "/home/{{ original_user }}/.ssh/config"
+        line: "  IdentityAgent ~/.1password/agent.sock"
+        insertafter: "Host \\*"
+        state: present
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display SSH key setup instructions for 1Password
+      ansible.builtin.debug:
+        msg: "SSH setup: Generate SSH keys in 1Password app (Developer Tools > SSH Keys), add public keys to GitHub/GitLab"
+
+    - name: Add 1Password environment variables to bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ original_user }}/.bashrc"
+        line: "{{ item }}"
+        state: present
+      loop:
+        - "# 1Password integration"
+        - "export SSH_AUTH_SOCK=~/.1password/agent.sock"
+        - "export OP_BIOMETRIC_UNLOCK_ENABLED=true"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Display 1Password development integration summary
+      ansible.builtin.debug:
+        msg: "1Password integration configured for: Git credentials, SSH keys, and development environment variables. Run dotfiles/install.sh after setup."

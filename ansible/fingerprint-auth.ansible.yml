@@ -32,6 +32,38 @@
         groups: plugdev
         append: true
 
+    - name: Create polkit rule for fingerprint device access
+      ansible.builtin.copy:
+        dest: /etc/polkit-1/rules.d/70-fingerprint-reader.rules
+        content: |
+          // Allow users in plugdev group to access fingerprint devices
+          polkit.addRule(function(action, subject) {
+              if (action.id == "net.reactivated.fprint.device.enroll" ||
+                  action.id == "net.reactivated.fprint.device.verify" ||
+                  action.id == "net.reactivated.fprint.device.setusername") {
+                  if (subject.isInGroup("plugdev")) {
+                      return polkit.Result.YES;
+                  }
+              }
+          });
+
+          // Allow the original user to manage their own fingerprints
+          polkit.addRule(function(action, subject) {
+              if (action.id == "net.reactivated.fprint.device.enroll" ||
+                  action.id == "net.reactivated.fprint.device.verify" ||
+                  action.id == "net.reactivated.fprint.device.setusername") {
+                  if (subject.user == "{{ original_user }}") {
+                      return polkit.Result.YES;
+                  }
+              }
+          });
+        mode: "0644"
+        owner: root
+        group: root
+      notify:
+        - Restart polkit
+        - Restart fprintd
+
     - name: Create udev rule for ThinkPad X1 Gen 11 fingerprint reader
       ansible.builtin.copy:
         dest: /etc/udev/rules.d/70-fingerprint-reader.rules
@@ -39,16 +71,16 @@
           # ThinkPad X1 Gen 11 Synaptics Prometheus fingerprint reader permissions
           # Vendor ID 06cb = Synaptics, Product ID 00fc = Prometheus reader
           # Using TAG+="uaccess" for modern systemd-logind integration
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00fc", TAG+="uaccess"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00fc", TAG+="uaccess", GROUP="plugdev", MODE="0664"
 
           # Legacy ThinkPad fingerprint readers (for compatibility)
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00bd", TAG+="uaccess"
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="27c6", ATTRS{idProduct}=="55a2", TAG+="uaccess"
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="27c6", ATTRS{idProduct}=="55a4", TAG+="uaccess"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00bd", TAG+="uaccess", GROUP="plugdev", MODE="0664"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="27c6", ATTRS{idProduct}=="55a2", TAG+="uaccess", GROUP="plugdev", MODE="0664"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="27c6", ATTRS{idProduct}=="55a4", TAG+="uaccess", GROUP="plugdev", MODE="0664"
 
           # Additional Synaptics fingerprint readers
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00f0", TAG+="uaccess"
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00f9", TAG+="uaccess"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00f0", TAG+="uaccess", GROUP="plugdev", MODE="0664"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="00f9", TAG+="uaccess", GROUP="plugdev", MODE="0664"
         mode: "0644"
         owner: root
         group: root
@@ -327,20 +359,26 @@
       ansible.builtin.debug:
         msg: "{{ item }}"
       loop:
-        - "✓ Fingerprint authentication system configured"
+        - "✓ Standard fingerprint authentication system configured"
         - "Hardware status: Synaptics Prometheus (06cb:00fc) detected"
-        - "⚠ Known issue: This reader has firmware enrollment problems"
-        - "Alternative solutions:"
-        - "  • External USB fingerprint reader (Kensington, Eikon, etc.)"
-        - "  • YubiKey with FIDO2/WebAuthn support"
-        - "  • Smart card authentication"
-        - "If enrollment works: fprintd-list, fprintd-verify, fprintd-delete"
+        - "⚠ CRITICAL: This reader has known firmware enrollment problems"
+        - "If standard fprintd fails repeatedly, try alternative solutions:"
+        - "  1. synaTudor driver (experimental): ansible-playbook ansible/synaptics-tudor-fingerprint.ansible.yml"
+        - "  2. External USB fingerprint reader (reliable)"
+        - "  3. YubiKey with FIDO2/WebAuthn support"
+        - "  4. Smart card authentication"
+        - "Standard commands: fprintd-list, fprintd-verify, fprintd-delete"
 
   handlers:
     - name: Reload udev rules
       ansible.builtin.command:
         cmd: udevadm control --reload-rules && udevadm trigger
       changed_when: true
+
+    - name: Restart polkit
+      ansible.builtin.systemd:
+        name: polkit
+        state: restarted
 
     - name: Restart fprintd
       ansible.builtin.systemd:

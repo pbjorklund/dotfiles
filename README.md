@@ -1,6 +1,6 @@
 # Development Environment
 
-Automated Linux development environment setup with personal dotfiles.
+Automated Fedora workstation setup with modular Ansible playbooks and personal dotfiles.
 
 ## Quick Start
 
@@ -8,8 +8,11 @@ Automated Linux development environment setup with personal dotfiles.
 git clone https://github.com/pbjorklund/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
-# Complete system setup
+# Complete workstation setup (recommended)
 ansible-playbook ansible/workstation-setup.ansible.yml
+
+# Selective setup using tags
+ansible-playbook ansible/workstation-setup.ansible.yml --tags security,development
 
 # Dotfiles only
 cd dotfiles && ./install.sh
@@ -17,10 +20,22 @@ cd dotfiles && ./install.sh
 
 ## Components
 
-- **[dotfiles/](dotfiles/)** - Personal configuration files
-- **[ansible/](ansible/)** - System automation and setup
+- **[ansible/](ansible/)** - Modular system automation and setup playbooks
+  - Security & authentication (1Password, SSH, GitHub CLI)
+  - Development tools (VS Code, containers, CLI utilities)
+  - Desktop applications (GNOME, Flatpaks, browsers)
+  - Optional components (hardware drivers, NAS, DNS)
+- **[dotfiles/](dotfiles/)** - Personal configuration files (bash, git, tmux)
+
+## Features
+
+- **Modular Architecture**: Focused playbooks for specific areas (security, development, desktop)
+- **Selective Execution**: Run only what you need using tags or individual playbooks
+- **Idempotent**: Safe to run repeatedly, only applies necessary changes
+- **Secure by Default**: SSH-based Git auth, 1Password integration, privacy hardening
+- **Hardware Support**: ThinkPad fingerprint auth, DisplayLink drivers
 
 ## Requirements
 
-- Fedora Linux
-- sudo access
+- Fedora Linux with sudo access
+- Ansible installed (`dnf install ansible`)

@@ -1,0 +1,195 @@
+---
+- name: Install Development Tools and CLI Utilities
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    # Third-party repositories for development tools
+    - name: Import Microsoft GPG key
+      ansible.builtin.rpm_key:
+        key: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: Add Visual Studio Code repository
+      ansible.builtin.yum_repository:
+        name: vscode
+        description: Visual Studio Code
+        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        enabled: true
+        gpgcheck: true
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+
+    # Development tools
+    - name: Install development tools
+      ansible.builtin.dnf:
+        name:
+          - code # Visual Studio Code (needs system integration)
+          - vim # Text editor
+          - neovim # Modern vim
+          - nodejs # JavaScript runtime
+          - npm # Node package manager
+          - ansible # Automation tool
+          - ansible-lint # Ansible linting
+          - yamllint # YAML linting
+          - gh # GitHub CLI
+        state: present
+
+    # Command line utilities
+    - name: Install command line utilities
+      ansible.builtin.dnf:
+        name:
+          - jq # JSON processor
+          - tree # Directory structure viewer
+          - htop # Process monitor
+          - btop # Process monitor
+          - ripgrep # Fast grep alternative
+          - fd-find # Fast find alternative
+          - bat # Cat with syntax highlighting
+          - fzf # Fuzzy finder
+          - zellij # Terminal multiplexer
+          - wl-clipboard # Wayland clipboard utilities (wl-copy, wl-paste)
+        state: present
+
+    # Containerization tools
+    - name: Install containerization tools
+      ansible.builtin.dnf:
+        name:
+          - docker # Container runtime (includes compose)
+        state: present
+
+    # GitHub tools (cliphist)
+    - name: Get cliphist latest release info
+      ansible.builtin.uri:
+        url: "https://api.github.com/repos/sentriz/cliphist/releases/latest"
+        return_content: true
+      register: cliphist_release
+
+    - name: Install cliphist (clipboard history manager for Wayland)
+      ansible.builtin.get_url:
+        url: "{{ cliphist_release.json.assets | selectattr('name', 'match', '.*linux-amd64') | map(attribute='browser_download_url') | first }}"
+        dest: "/tmp/cliphist"
+        mode: "0755"
+      become: true
+      become_user: "{{ original_user }}"
+      when: cliphist_release is defined and cliphist_release.json is defined
+
+    - name: Install cliphist binary
+      ansible.builtin.copy:
+        src: "/tmp/cliphist"
+        dest: "/usr/local/bin/cliphist"
+        mode: "0755"
+        remote_src: true
+      when: cliphist_release is defined and cliphist_release.json is defined
+
+    - name: Clean up cliphist installation file
+      ansible.builtin.file:
+        path: "/tmp/cliphist"
+        state: absent
+      become: true
+      become_user: "{{ original_user }}"
+      when: cliphist_release is defined and cliphist_release.json is defined
+
+    # GitHub tools (lazydocker)
+    - name: Get lazydocker latest release info
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/jesseduffield/lazydocker/releases/latest
+        method: GET
+        return_content: true
+      register: lazydocker_release
+
+    - name: Install lazydocker (terminal UI for Docker)
+      ansible.builtin.get_url:
+        url: "{{ lazydocker_release.json.assets | selectattr('name', 'match', '.*Linux_x86_64\\.tar\\.gz$') | map(attribute='browser_download_url') | first }}"
+        dest: /tmp/lazydocker.tar.gz
+        mode: "0644"
+      become: true
+      become_user: "{{ original_user }}"
+      when: lazydocker_release is defined
+
+    - name: Extract lazydocker
+      ansible.builtin.unarchive:
+        src: /tmp/lazydocker.tar.gz
+        dest: /tmp
+        remote_src: true
+      become: true
+      become_user: "{{ original_user }}"
+      when: lazydocker_release is defined
+
+    - name: Install lazydocker binary
+      ansible.builtin.copy:
+        src: /tmp/lazydocker
+        dest: /usr/local/bin/lazydocker
+        mode: "0755"
+        owner: root
+        group: root
+        remote_src: true
+      when: lazydocker_release is defined
+
+    - name: Clean up lazydocker installation files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/lazydocker.tar.gz
+        - /tmp/lazydocker
+      become: true
+      become_user: "{{ original_user }}"
+      when: lazydocker_release is defined
+
+    # Rust development environment
+    - name: Display Rust setup instructions
+      ansible.builtin.debug:
+        msg: "Rust setup: Manually remove system rust/cargo packages if needed, then install rustup"
+
+    - name: Check if rustup is already installed
+      ansible.builtin.stat:
+        path: "/home/{{ original_user }}/.cargo/bin/rustup"
+      register: rustup_installed
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Download rustup installer
+      ansible.builtin.get_url:
+        url: "https://sh.rustup.rs"
+        dest: "/tmp/rustup-init.sh"
+        mode: "0755"
+      become: false
+      become_user: "{{ original_user }}"
+      when: not rustup_installed.stat.exists
+
+    - name: Install rustup (official Rust toolchain installer)
+      ansible.builtin.command: "/tmp/rustup-init.sh -y --default-toolchain stable"
+      args:
+        creates: "/home/{{ original_user }}/.cargo/bin/rustup"
+      become: false
+      become_user: "{{ original_user }}"
+      when: not rustup_installed.stat.exists
+
+    - name: Remove rustup installer
+      ansible.builtin.file:
+        path: "/tmp/rustup-init.sh"
+        state: absent
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Add cargo bin to PATH in bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ original_user }}/.bashrc"
+        line: 'export PATH="$HOME/.cargo/bin:$PATH"'
+        regexp: '^export PATH=.*\.cargo/bin.*'
+        state: present
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Install essential Rust components
+      ansible.builtin.command: "/home/{{ original_user }}/.cargo/bin/rustup component add clippy rustfmt"
+      args:
+        creates: "/home/{{ original_user }}/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/clippy-driver"
+      environment:
+        PATH: "/home/{{ original_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+      become: false
+      become_user: "{{ original_user }}"
+      when: not rustup_installed.stat.exists

@@ -1,0 +1,38 @@
+---
+- name: Deploy Personal Dotfiles Configuration
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    - name: Check if dotfiles directory exists
+      ansible.builtin.stat:
+        path: "/home/{{ original_user }}/dotfiles"
+      register: dotfiles_dir
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Clone dotfiles repository
+      ansible.builtin.git:
+        repo: https://github.com/pbjorklund/dotfiles.git
+        dest: "/home/{{ original_user }}/dotfiles"
+        version: master
+        update: false
+      become: false
+      become_user: "{{ original_user }}"
+      when: not dotfiles_dir.stat.exists
+
+    - name: Run dotfiles install script
+      ansible.builtin.command:
+        cmd: ./dotfiles/install.sh
+        chdir: "/home/{{ original_user }}/dotfiles"
+      become: false
+      become_user: "{{ original_user }}"
+      register: install_result
+      changed_when: "'Creating symlink' in install_result.stdout"
+
+    - name: Display dotfiles deployment status
+      ansible.builtin.debug:
+        msg: "Dotfiles deployed successfully - Personal configuration files symlinked to home directory"

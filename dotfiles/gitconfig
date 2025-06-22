@@ -21,5 +21,7 @@ untracked = blue bold
 helper = libsecret
 [credential "https://gist.github.com"]
 helper = libsecret
-[credential]
-	helper = "!f() { op item get \"$1\" --fields credential --reveal 2>/dev/null || echo; }; f"
+[url "ssh://git@github.com/"]
+insteadOf = https://github.com/
+[url "ssh://git@gist.github.com/"]
+insteadOf = https://gist.github.com/

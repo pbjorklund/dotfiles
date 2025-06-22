@@ -4,13 +4,25 @@
   import_playbook: base-system.ansible.yml
   tags: base
 
-- name: Install applications
-  import_playbook: applications.ansible.yml
-  tags: apps
+- name: Configure security and authentication
+  import_playbook: security-authentication.ansible.yml
+  tags: security
+
+- name: Install development tools
+  import_playbook: development-tools.ansible.yml
+  tags: development
+
+- name: Install desktop applications
+  import_playbook: desktop-applications.ansible.yml
+  tags: desktop
 
 - name: Configure services
   import_playbook: services.ansible.yml
   tags: services
+
+- name: Deploy personal dotfiles
+  import_playbook: dotfiles.ansible.yml
+  tags: dotfiles
 
 - name: Apply personal configuration
   import_playbook: personal-config.ansible.yml
@@ -20,20 +32,17 @@
   import_playbook: hyprland-desktop.ansible.yml
   tags: hyprland
 
-- name: Configure local DNS (optional)
+- name: Configure local DNS
   import_playbook: configure-local-dns.ansible.yml
   tags: dns
-  when: configure_dns | default(false)
 
-- name: Install DisplayLink drivers (optional)
+- name: Install DisplayLink drivers
   import_playbook: hardware-displaylink.ansible.yml
   tags: displaylink
-  when: install_displaylink | default(false)
 
-- name: Configure NAS storage (optional)
+- name: Configure NAS storage
   import_playbook: storage-nas.ansible.yml
   tags: nas
-  when: configure_nas | default(false)
 
 - name: Configure backup system
   import_playbook: backup-system.ansible.yml
@@ -47,10 +56,9 @@
   import_playbook: privacy-hardening.ansible.yml
   tags: privacy
 
-- name: Configure fingerprint authentication (optional)
+- name: Configure fingerprint authentication
   import_playbook: fingerprint-auth.ansible.yml
   tags: fingerprint
-  when: configure_fingerprint | default(false)
 
 - name: Display setup completion summary
   hosts: localhost
@@ -59,27 +67,5 @@
   tasks:
     - name: Display setup completion summary
       ansible.builtin.debug:
-        msg: |
-          🎉 Fedora Workstation Setup Complete!
-
-          🔒 Security & Privacy Features Applied:
-          • Firewall enabled with intrusion detection (fail2ban)
-          • Privacy-focused DNS with DNS-over-TLS
-          • SSH hardened with strong ciphers
-          • Git credentials secured with libsecret
-          • Rootless containers (Podman) for development
-          • Privacy-invasive services disabled
-          • System hardening with kernel security parameters
-
-          📋 Next Steps:
-          1. Reboot to ensure all services start properly
-          2. Install dotfiles: cd dotfiles && ./install.sh
-          3. Configure VS Code for devcontainer compatibility
-          4. Test container functionality: podman run hello-world
-
-          🔐 Security Notes:
-          • Your system uses modern, secure defaults
-          • Container access is rootless (no docker group risk)
-          • Location services and tracking disabled
-          • Check security warnings in ~/.container-security-info
+        msg: "🎉 Fedora Workstation Setup Complete! Security & Privacy features applied. Next: Reboot, then run dotfiles/install.sh for personal configs"
       tags: always

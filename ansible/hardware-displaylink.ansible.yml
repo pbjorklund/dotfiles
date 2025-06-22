@@ -28,14 +28,12 @@
 
     - name: Display Secure Boot status
       ansible.builtin.debug:
-        msg: |
-          🔒 Secure Boot Status: {{ secure_boot_status.stdout | default('Unable to determine') }}
-          {{ secure_boot_message }}
+        msg: "🔒 Secure Boot Status: {{ secure_boot_status.stdout | default('Unable to determine') }} - {{ secure_boot_message }}"
       vars:
         secure_boot_message: >-
-          {{ 'Secure Boot is ENABLED - MOK enrollment will be required' if 'enabled' in secure_boot_status.stdout | lower
-             else 'Secure Boot is disabled - MOK enrollment not required' if secure_boot_status.rc == 0
-             else 'Could not determine Secure Boot status' }}
+          {{ 'MOK enrollment will be required' if 'enabled' in secure_boot_status.stdout | lower
+             else 'MOK enrollment not required' if secure_boot_status.rc == 0
+             else 'Could not determine status' }}
 
     - name: Get current Fedora version
       ansible.builtin.slurp:

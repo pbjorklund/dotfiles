@@ -4,6 +4,14 @@ set -euo pipefail
 # install.sh
 # This script creates symlinks from the home directory to any desired dotfiles in ~/dotfiles
 # Features: Dotfiles symlinks, .config directory management, system config files, backup creation
+#
+# RESPONSIBILITY: Personal configuration file deployment (NOT system packages)
+# - Dotfiles symlinking (.bashrc, .gitconfig, .tmux.conf, etc.)
+# - .config directory management (hypr, waybar, kitty, etc.)
+# - VS Code settings deployment
+# - System integration files (systemd sleep hooks)
+#
+# System packages and services are handled by Ansible playbooks
 ############################
 
 ########## Variables
