@@ -23,20 +23,6 @@
         repo_gpgcheck: true
         gpgkey: https://downloads.1password.com/linux/keys/1password.asc
 
-    - name: Import Google Chrome GPG key
-      ansible.builtin.rpm_key:
-        key: https://dl.google.com/linux/linux_signing_key.pub
-        state: present
-
-    - name: Add Google Chrome repository
-      ansible.builtin.yum_repository:
-        name: google-chrome
-        description: Google Chrome
-        baseurl: http://dl.google.com/linux/chrome/rpm/stable/x86_64
-        enabled: true
-        gpgcheck: true
-        gpgkey: https://dl.google.com/linux/linux_signing_key.pub
-
     - name: Import Microsoft GPG key
       ansible.builtin.rpm_key:
         key: https://packages.microsoft.com/keys/microsoft.asc
@@ -57,7 +43,6 @@
         name:
           - 1password # Password manager (needs system integration)
           - 1password-cli # 1Password CLI for secure credential access
-          - google-chrome-stable # Web browser (needs system integration)
           - code # Visual Studio Code (needs system integration)
         state: present
 
@@ -209,7 +194,7 @@
       failed_when: false
 
     # Remove unwanted packages
-    - name: Remove Firefox (replaced with Chrome)
+    - name: Remove Firefox (replaced with Zen Browser)
       ansible.builtin.dnf:
         name: firefox
         state: absent
