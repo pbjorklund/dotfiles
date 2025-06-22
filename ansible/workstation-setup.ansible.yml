@@ -32,6 +32,10 @@
   import_playbook: hyprland-desktop.ansible.yml
   tags: hyprland
 
+- name: Configure SDDM display manager
+  import_playbook: sddm-display-manager.ansible.yml
+  tags: sddm
+
 - name: Configure local DNS
   import_playbook: configure-local-dns.ansible.yml
   tags: dns

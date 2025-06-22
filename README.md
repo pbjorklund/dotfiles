@@ -24,6 +24,8 @@ cd dotfiles && ./install.sh
   - Security & authentication (1Password, SSH, GitHub CLI)
   - Development tools (VS Code, containers, CLI utilities)
   - Desktop applications (GNOME, Flatpaks, browsers)
+  - Hyprland desktop environment with workspace management
+  - SDDM display manager with custom theme
   - Optional components (hardware drivers, NAS, DNS)
 - **[dotfiles/](dotfiles/)** - Personal configuration files (bash, git, tmux)
 
@@ -33,6 +35,7 @@ cd dotfiles && ./install.sh
 - **Selective Execution**: Run only what you need using tags or individual playbooks
 - **Idempotent**: Safe to run repeatedly, only applies necessary changes
 - **Secure by Default**: SSH-based Git auth, 1Password integration, privacy hardening
+- **Modern Desktop**: Hyprland with advanced workspace/monitor management, SDDM with custom theme
 - **Hardware Support**: ThinkPad fingerprint auth, DisplayLink drivers
 
 ## Requirements
