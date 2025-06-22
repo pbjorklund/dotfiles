@@ -83,6 +83,16 @@
       when: op_auth_check.rc != 0
 
     # Remove any broken Git credential helpers that cause VS Code authentication spam
+    - name: Check current Git credential helper
+      community.general.git_config:
+        name: credential.helper
+        scope: global
+      register: git_credential_helper
+      become: false
+      become_user: "{{ original_user }}"
+      failed_when: false
+      changed_when: false
+
     - name: Remove broken Git credential helper if it exists
       community.general.git_config:
         name: credential.helper
@@ -90,7 +100,7 @@
         scope: global
       become: false
       become_user: "{{ original_user }}"
-      failed_when: false
+      when: git_credential_helper.config_value is defined
 
     # Configure Git to use SSH for GitHub (works with 1Password SSH agent)
     - name: Configure Git to use SSH for GitHub
@@ -142,6 +152,30 @@
         msg: "Docker credentials: Use 'docker login' with tokens stored in 1Password for secure registry access"
 
     # Configure SSH to use 1Password SSH agent (integrated with existing SSH config)
+    - name: Ensure SSH config directory exists
+      ansible.builtin.file:
+        path: "/home/{{ original_user }}/.ssh"
+        state: directory
+        mode: "0700"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Ensure SSH config file exists
+      ansible.builtin.file:
+        path: "/home/{{ original_user }}/.ssh/config"
+        state: touch
+        mode: "0600"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Add Host * section to SSH config if not present
+      ansible.builtin.lineinfile:
+        path: "/home/{{ original_user }}/.ssh/config"
+        line: "Host *"
+        state: present
+      become: false
+      become_user: "{{ original_user }}"
+
     - name: Add 1Password SSH agent to existing SSH config
       ansible.builtin.lineinfile:
         path: "/home/{{ original_user }}/.ssh/config"

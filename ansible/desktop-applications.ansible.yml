@@ -33,8 +33,24 @@
         - org.gimp.GIMP # GNU Image Manipulation Program
         - io.mpv.Mpv # Modern media player
 
+    - name: Check Obsidian flatpak permissions for session bus
+      ansible.builtin.command: flatpak info --show-permissions md.obsidian.Obsidian
+      register: obsidian_permissions
+      become: false
+      become_user: "{{ original_user }}"
+      changed_when: false
+      failed_when: false
+
     - name: Configure Obsidian flatpak permissions for clipboard access
       ansible.builtin.command: flatpak override --user --socket=session-bus md.obsidian.Obsidian
+      become: false
+      become_user: "{{ original_user }}"
+      changed_when: false
+      when: obsidian_permissions.stdout is defined and 'session-bus' not in obsidian_permissions.stdout
+
+    - name: Check Plexamp flatpak permissions for Wayland socket
+      ansible.builtin.command: flatpak info --show-permissions com.plexamp.Plexamp
+      register: plexamp_permissions
       become: false
       become_user: "{{ original_user }}"
       changed_when: false
@@ -45,20 +61,21 @@
       become: false
       become_user: "{{ original_user }}"
       changed_when: false
-      failed_when: false
+      when: plexamp_permissions.stdout is defined and 'wayland' not in plexamp_permissions.stdout
 
     # GitHub tools (Zen Browser)
+    - name: Check if Zen Browser is already installed
+      ansible.builtin.stat:
+        path: /opt/zen-browser/zen
+      register: zen_installed
+
     - name: Get Zen Browser latest release info
       ansible.builtin.uri:
         url: https://api.github.com/repos/zen-browser/desktop/releases/latest
         method: GET
         return_content: true
       register: zen_browser_release
-
-    - name: Check if Zen Browser is already installed
-      ansible.builtin.stat:
-        path: /opt/zen-browser/zen
-      register: zen_installed
+      when: not zen_installed.stat.exists
 
     - name: Install Zen Browser (privacy-focused Firefox-based browser)
       ansible.builtin.get_url:
@@ -70,7 +87,7 @@
         mode: "0644"
       become: true
       become_user: "{{ original_user }}"
-      when: zen_browser_release is defined and not zen_installed.stat.exists
+      when: not zen_installed.stat.exists and zen_browser_release is defined
 
     - name: Create Zen Browser directory
       ansible.builtin.file:
@@ -79,7 +96,7 @@
         mode: "0755"
         owner: root
         group: root
-      when: zen_browser_release is defined and not zen_installed.stat.exists
+      when: not zen_installed.stat.exists and zen_browser_release is defined
 
     - name: Extract Zen Browser
       ansible.builtin.unarchive:
@@ -87,7 +104,7 @@
         dest: /opt/zen-browser
         remote_src: true
         extra_opts: [--strip-components=1]
-      when: zen_browser_release is defined and not zen_installed.stat.exists
+      when: not zen_installed.stat.exists and zen_browser_release is defined
 
     - name: Create Zen Browser desktop entry
       ansible.builtin.copy:
@@ -108,14 +125,14 @@
           StartupNotify=true
         dest: /usr/share/applications/zen-browser.desktop
         mode: "0644"
-      when: zen_browser_release is defined and not zen_installed.stat.exists
+      when: not zen_installed.stat.exists and zen_browser_release is defined
 
     - name: Create Zen Browser symlink
       ansible.builtin.file:
         src: /opt/zen-browser/zen
         dest: /usr/local/bin/zen
         state: link
-      when: zen_browser_release is defined and not zen_installed.stat.exists
+      when: not zen_installed.stat.exists and zen_browser_release is defined
 
     - name: Clean up Zen Browser installation file
       ansible.builtin.file:
@@ -123,4 +140,4 @@
         state: absent
       become: true
       become_user: "{{ original_user }}"
-      when: zen_browser_release is defined and not zen_installed.stat.exists
+      when: not zen_installed.stat.exists and zen_browser_release is defined

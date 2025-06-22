@@ -18,6 +18,7 @@
           - hyprland # Tiling window manager (includes hyprctl)
           - hyprutils # Hyprland utilities library
           - xdg-desktop-portal-hyprland # Desktop portal for Hyprland
+        state: present
     # Additional Hyprland ecosystem packages
     - name: "Install additional Hyprland packages"
       ansible.builtin.dnf:
@@ -82,6 +83,7 @@
         - pipewire-pulse.service
         - wireplumber.service
       become: false
+      become_user: "{{ original_user }}"
 
     # Set up environment variables for Wayland
     - name: "Configure Wayland environment variables"

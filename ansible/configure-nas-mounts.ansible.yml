@@ -70,7 +70,10 @@
     - name: Add new /mnt mount entries to fstab with credentials file
       ansible.builtin.lineinfile:
         path: /etc/fstab
-        line: "//{{ nas_ip }}/{{ item }} /mnt/{{ item }} cifs credentials=/etc/cifs-nas-credentials,uid={{ original_user }},gid={{ original_user }},iocharset=utf8,file_mode=0755,dir_mode=0755,noauto,user 0 0"
+        line: >-
+          //{{ nas_ip }}/{{ item }} /mnt/{{ item }} cifs
+          credentials=/etc/cifs-nas-credentials,uid={{ original_user }},gid={{ original_user }},
+          iocharset=utf8,file_mode=0755,dir_mode=0755,noauto,user 0 0
         state: present
         backup: true
       loop: "{{ mount_shares }}"

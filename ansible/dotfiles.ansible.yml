@@ -24,14 +24,22 @@
       become_user: "{{ original_user }}"
       when: not dotfiles_dir.stat.exists
 
+    - name: Check if dotfiles install script has been run
+      ansible.builtin.stat:
+        path: "/home/{{ original_user }}/.bashrc"
+      register: bashrc_exists
+      become: false
+      become_user: "{{ original_user }}"
+
     - name: Run dotfiles install script
       ansible.builtin.command:
-        cmd: ./dotfiles/install.sh
+        cmd: ./install.sh
         chdir: "/home/{{ original_user }}/dotfiles"
       become: false
       become_user: "{{ original_user }}"
       register: install_result
-      changed_when: "'Creating symlink' in install_result.stdout"
+      changed_when: "'Creating symlink' in install_result.stdout or 'Symlink created' in install_result.stdout"
+      when: not dotfiles_dir.stat.exists or not bashrc_exists.stat.exists
 
     - name: Display dotfiles deployment status
       ansible.builtin.debug:

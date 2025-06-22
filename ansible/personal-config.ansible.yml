@@ -56,17 +56,3 @@
         value: "'nothing'"
       become: true
       become_user: "{{ original_user }}"
-
-    - name: Display SSH public key for GitHub
-      ansible.builtin.command:
-        cmd: cat /home/{{ original_user }}/.ssh/id_ed25519.pub
-      register: ssh_public_key
-      become: true
-      become_user: "{{ original_user }}"
-      changed_when: false
-      failed_when: false
-
-    - name: Show SSH public key message
-      ansible.builtin.debug:
-        msg: "🔑 SSH Key Ready: Add this public key to GitHub - {{ ssh_public_key.stdout | default('SSH key not found - run base-system.ansible.yml first') }}"
-      when: ssh_public_key.rc == 0

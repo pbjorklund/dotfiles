@@ -61,11 +61,17 @@
         state: present
 
     # GitHub tools (cliphist)
+    - name: Check if cliphist is already installed
+      ansible.builtin.stat:
+        path: "/usr/local/bin/cliphist"
+      register: cliphist_installed
+
     - name: Get cliphist latest release info
       ansible.builtin.uri:
         url: "https://api.github.com/repos/sentriz/cliphist/releases/latest"
         return_content: true
       register: cliphist_release
+      when: not cliphist_installed.stat.exists
 
     - name: Install cliphist (clipboard history manager for Wayland)
       ansible.builtin.get_url:
@@ -74,7 +80,7 @@
         mode: "0755"
       become: true
       become_user: "{{ original_user }}"
-      when: cliphist_release is defined and cliphist_release.json is defined
+      when: not cliphist_installed.stat.exists and cliphist_release is defined and cliphist_release.json is defined
 
     - name: Install cliphist binary
       ansible.builtin.copy:
@@ -82,7 +88,7 @@
         dest: "/usr/local/bin/cliphist"
         mode: "0755"
         remote_src: true
-      when: cliphist_release is defined and cliphist_release.json is defined
+      when: not cliphist_installed.stat.exists and cliphist_release is defined and cliphist_release.json is defined
 
     - name: Clean up cliphist installation file
       ansible.builtin.file:
@@ -90,15 +96,21 @@
         state: absent
       become: true
       become_user: "{{ original_user }}"
-      when: cliphist_release is defined and cliphist_release.json is defined
+      when: not cliphist_installed.stat.exists and cliphist_release is defined and cliphist_release.json is defined
 
     # GitHub tools (lazydocker)
+    - name: Check if lazydocker is already installed
+      ansible.builtin.stat:
+        path: "/usr/local/bin/lazydocker"
+      register: lazydocker_installed
+
     - name: Get lazydocker latest release info
       ansible.builtin.uri:
         url: https://api.github.com/repos/jesseduffield/lazydocker/releases/latest
         method: GET
         return_content: true
       register: lazydocker_release
+      when: not lazydocker_installed.stat.exists
 
     - name: Install lazydocker (terminal UI for Docker)
       ansible.builtin.get_url:
@@ -107,7 +119,7 @@
         mode: "0644"
       become: true
       become_user: "{{ original_user }}"
-      when: lazydocker_release is defined
+      when: not lazydocker_installed.stat.exists and lazydocker_release is defined
 
     - name: Extract lazydocker
       ansible.builtin.unarchive:
@@ -116,7 +128,7 @@
         remote_src: true
       become: true
       become_user: "{{ original_user }}"
-      when: lazydocker_release is defined
+      when: not lazydocker_installed.stat.exists and lazydocker_release is defined
 
     - name: Install lazydocker binary
       ansible.builtin.copy:
@@ -126,7 +138,7 @@
         owner: root
         group: root
         remote_src: true
-      when: lazydocker_release is defined
+      when: not lazydocker_installed.stat.exists and lazydocker_release is defined
 
     - name: Clean up lazydocker installation files
       ansible.builtin.file:
@@ -137,7 +149,7 @@
         - /tmp/lazydocker
       become: true
       become_user: "{{ original_user }}"
-      when: lazydocker_release is defined
+      when: not lazydocker_installed.stat.exists and lazydocker_release is defined
 
     # Rust development environment
     - name: Display Rust setup instructions
@@ -187,7 +199,7 @@
     - name: Install essential Rust components
       ansible.builtin.command: "/home/{{ original_user }}/.cargo/bin/rustup component add clippy rustfmt"
       args:
-        creates: "/home/{{ original_user }}/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/clippy-driver"
+        creates: "/home/{{ original_user }}/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo-clippy"
       environment:
         PATH: "/home/{{ original_user }}/.cargo/bin:{{ ansible_env.PATH }}"
       become: false
