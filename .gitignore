@@ -1,0 +1,26 @@
+# SSH security files - never commit these
+dotfiles/.ssh/known_hosts
+dotfiles/.ssh/id_*
+dotfiles/.ssh/*.pub
+dotfiles/.ssh/authorized_keys
+
+# Personal/sensitive configuration files
+dotfiles/.config/*/credentials*
+dotfiles/.config/*/token*
+dotfiles/.config/*/session*
+dotfiles/.local/share/keyrings/
+
+# Temporary files
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# OS generated files
+.Trash-*
