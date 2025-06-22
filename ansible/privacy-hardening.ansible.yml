@@ -148,18 +148,34 @@
         - abrt-ccpp # Core dump reporting
       failed_when: false
 
-    # Set privacy-focused systemd journal settings
-    - name: Configure systemd journal for privacy
+    # Set privacy-focused systemd journal settings (balance privacy with system maintainability)
+    - name: Check if journald.conf exists
+      ansible.builtin.stat:
+        path: /etc/systemd/journald.conf
+      register: journald_conf_exists
+
+    - name: Create journald.conf if it doesn't exist
+      ansible.builtin.copy:
+        dest: /etc/systemd/journald.conf
+        content: |
+          # Journal configuration for privacy-focused logging
+          [Journal]
+        mode: "0644"
+      when: not journald_conf_exists.stat.exists
+
+    - name: Configure systemd journal for privacy with reasonable retention
       ansible.builtin.lineinfile:
         path: /etc/systemd/journald.conf
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
         state: present
       loop:
-        - { regexp: "^#?Storage=", line: "Storage=volatile" }
-        - { regexp: "^#?SystemMaxUse=", line: "SystemMaxUse=50M" }
-        - { regexp: "^#?RuntimeMaxUse=", line: "RuntimeMaxUse=50M" }
-      notify: restart journald
+        - { regexp: "^#?Storage=", line: "Storage=persistent" } # Keep logs but limit retention
+        - { regexp: "^#?SystemMaxUse=", line: "SystemMaxUse=500M" } # Reasonable size limit
+        - { regexp: "^#?MaxRetentionSec=", line: "MaxRetentionSec=1week" } # Only keep 1 week of logs
+        - { regexp: "^#?MaxFileSec=", line: "MaxFileSec=1day" } # Rotate daily
+        - { regexp: "^#?ForwardToSyslog=", line: "ForwardToSyslog=no" } # Don't duplicate to syslog
+      notify: Restart journald
 
   handlers:
     - name: Restart journald
