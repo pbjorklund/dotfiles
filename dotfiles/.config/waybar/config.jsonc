@@ -90,7 +90,7 @@
   "custom/power": {
     "format": "⏻",
     "tooltip": "Sleep Computer",
-    "on-click": "systemctl suspend",
+    "on-click": "systemctl suspend && swaylock",
     "on-click-right": "hyprctl dispatch dpms off"
   }
 }
