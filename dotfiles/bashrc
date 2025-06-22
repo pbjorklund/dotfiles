@@ -76,3 +76,19 @@ export GDK_BACKEND=wayland,x11
 # Electron applications on Wayland
 export ELECTRON_OZONE_PLATFORM_HINT=wayland
 # END ANSIBLE MANAGED BLOCK - Hyprland Environment
+
+# Privacy and Security Settings
+export HISTCONTROL=ignoreboth:erasedups # Don't save duplicate or space-prefixed commands
+export HISTIGNORE="*sudo -S*:*pass*:*password*:*secret*:*token*:history*:cd*:ls*:exit*:clear*"
+shopt -s histverify # Verify history expansions before execution
+
+# Disable crash reporting
+export GNOME_DISABLE_CRASH_DIALOG=1
+
+# Reduce information leakage
+umask 077 # Restrictive file permissions by default
+
+# Secure temporary files
+export TMPDIR="/tmp/$(whoami)"
+mkdir -p "$TMPDIR"
+chmod 700 "$TMPDIR"

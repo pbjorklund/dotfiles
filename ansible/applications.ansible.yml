@@ -220,6 +220,31 @@
         name: gnome-terminal
         state: absent
 
+    # Remove privacy-invasive packages (only those that are safe to remove)
+    - name: Remove privacy-invasive packages safely
+      ansible.builtin.dnf:
+        name:
+          - gnome-contacts # Syncs with online services
+          - gnome-maps # Location tracking
+          - gnome-weather # Location tracking
+          - cheese # Webcam access
+          - totem # Video player with online features
+          - rhythmbox # Music player with online features
+        state: absent
+        autoremove: true
+      failed_when: false
+
+    # Disable location services instead of removing (safer)
+    - name: Disable location services
+      ansible.builtin.systemd:
+        name: geoclue
+        state: stopped
+        enabled: false
+      failed_when: false
+
+    # Note: tracker/localsearch and geoclue2 have critical dependencies
+    # We disable them via systemd instead of removing packages
+
     # GitHub tools (lazydocker)
     - name: Get lazydocker latest release info
       ansible.builtin.uri:

@@ -39,6 +39,19 @@
   import_playbook: backup-system.ansible.yml
   tags: backup
 
+- name: Configure firewall and security
+  import_playbook: firewall-security.ansible.yml
+  tags: security
+
+- name: Apply privacy hardening
+  import_playbook: privacy-hardening.ansible.yml
+  tags: privacy
+
+- name: Configure fingerprint authentication (optional)
+  import_playbook: fingerprint-auth.ansible.yml
+  tags: fingerprint
+  when: configure_fingerprint | default(false)
+
 - name: Display setup completion summary
   hosts: localhost
   connection: local
@@ -48,4 +61,25 @@
       ansible.builtin.debug:
         msg: |
           🎉 Fedora Workstation Setup Complete!
+
+          🔒 Security & Privacy Features Applied:
+          • Firewall enabled with intrusion detection (fail2ban)
+          • Privacy-focused DNS with DNS-over-TLS
+          • SSH hardened with strong ciphers
+          • Git credentials secured with libsecret
+          • Rootless containers (Podman) for development
+          • Privacy-invasive services disabled
+          • System hardening with kernel security parameters
+
+          📋 Next Steps:
+          1. Reboot to ensure all services start properly
+          2. Install dotfiles: cd dotfiles && ./install.sh
+          3. Configure VS Code for devcontainer compatibility
+          4. Test container functionality: podman run hello-world
+
+          🔐 Security Notes:
+          • Your system uses modern, secure defaults
+          • Container access is rootless (no docker group risk)
+          • Location services and tracking disabled
+          • Check security warnings in ~/.container-security-info
       tags: always

@@ -1,0 +1,110 @@
+---
+- name: Configure Firewall and Security Settings
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    # Firewall configuration using firewalld (Fedora default)
+    - name: Install security packages
+      ansible.builtin.dnf:
+        name:
+          - firewalld # Fedora's default firewall
+          - fail2ban # Intrusion prevention
+          - rkhunter # Rootkit hunter
+          - clamav # Antivirus
+          - clamav-update # ClamAV signature updates
+        state: present
+
+    - name: Enable and start firewalld
+      ansible.builtin.systemd:
+        name: firewalld
+        state: started
+        enabled: true
+
+    - name: Configure firewalld default zone to drop
+      ansible.posix.firewalld:
+        zone: public
+        state: enabled
+        permanent: true
+        immediate: true
+
+    - name: Allow SSH through firewall (if needed)
+      ansible.posix.firewalld:
+        service: ssh
+        permanent: true
+        state: enabled
+        immediate: true
+      when: ansible_facts['services']['sshd.service'] is defined
+
+    # Fail2ban configuration
+    - name: Configure fail2ban for SSH protection
+      ansible.builtin.copy:
+        dest: /etc/fail2ban/jail.local
+        content: |
+          [DEFAULT]
+          bantime = 3600
+          findtime = 600
+          maxretry = 3
+
+          [sshd]
+          enabled = true
+          port = ssh
+          logpath = /var/log/secure
+          maxretry = 3
+        mode: "0644"
+      notify: Restart fail2ban
+
+    - name: Start and enable fail2ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: started
+        enabled: true
+      failed_when: false # Continue if fail2ban service issues
+
+    # Kernel security parameters
+    - name: Configure kernel security parameters
+      ansible.posix.sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        state: present
+        sysctl_file: /etc/sysctl.d/99-security.conf
+        reload: true
+      loop:
+        # Network security
+        - { name: "net.ipv4.conf.all.accept_redirects", value: "0" }
+        - { name: "net.ipv6.conf.all.accept_redirects", value: "0" }
+        - { name: "net.ipv4.conf.all.send_redirects", value: "0" }
+        - { name: "net.ipv4.conf.all.accept_source_route", value: "0" }
+        - { name: "net.ipv6.conf.all.accept_source_route", value: "0" }
+        - { name: "net.ipv4.conf.all.log_martians", value: "1" }
+        - { name: "net.ipv4.icmp_echo_ignore_broadcasts", value: "1" }
+        - { name: "net.ipv4.icmp_ignore_bogus_error_responses", value: "1" }
+        - { name: "net.ipv4.tcp_syncookies", value: "1" }
+        # Memory protection
+        - { name: "kernel.dmesg_restrict", value: "1" }
+        - { name: "kernel.kptr_restrict", value: "2" }
+        - { name: "kernel.yama.ptrace_scope", value: "1" }
+
+    # Secure shared memory
+    - name: Secure shared memory
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        line: "tmpfs /run/shm tmpfs defaults,noexec,nosuid 0 0"
+        regexp: '^tmpfs\s+/run/shm'
+        state: present
+
+    # Update ClamAV signatures
+    - name: Update ClamAV virus signatures
+      ansible.builtin.command: freshclam
+      register: freshclam_result
+      failed_when: false
+      changed_when: freshclam_result.rc == 0
+
+  handlers:
+    - name: Restart fail2ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: restarted
