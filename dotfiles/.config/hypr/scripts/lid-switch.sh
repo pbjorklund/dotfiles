@@ -77,7 +77,7 @@ handle_lid_open() {
 # Handle wake from sleep - check if lid is closed and docked
 handle_wake() {
     log "System wake detected - checking lid and dock status"
-    
+
     # Add debouncing to prevent wake loops
     local wake_lockfile="/tmp/hypr-wake-handler.lock"
     if [[ -f "$wake_lockfile" ]]; then
@@ -88,7 +88,7 @@ handle_wake() {
         fi
     fi
     echo $$ >"$wake_lockfile"
-    
+
     # Wait for system to stabilize after wake
     sleep 2
 
@@ -114,7 +114,7 @@ handle_wake() {
         hyprctl keyword monitor "$LAPTOP_DISPLAY,$LAPTOP_RESOLUTION,$LAPTOP_POSITION,$LAPTOP_SCALE" 2>/dev/null || log "Warning: Failed to enable display"
         rm -f /tmp/hypr-display-state
     fi
-    
+
     rm -f "$wake_lockfile"
 }
 
