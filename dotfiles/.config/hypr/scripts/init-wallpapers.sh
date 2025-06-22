@@ -31,7 +31,7 @@ sleep 0.5
 MAIN_DESC="Acer Technologies Acer XZ321QU 0x9372982E"
 MAIN_MONITOR=$(find_monitor_connector "$MAIN_DESC")
 if [[ -n "$MAIN_MONITOR" ]]; then
-    swaybg -o "$MAIN_MONITOR" -i "$WALLPAPER_DIR/main.jpg" -m fill &
+    swaybg -o "$MAIN_MONITOR" -i "$WALLPAPER_DIR/main.png" -m fill &
     echo "Set main wallpaper on $MAIN_MONITOR"
 fi
 
@@ -47,7 +47,7 @@ fi
 LAPTOP_DESC="BOE 0x094C"
 LAPTOP_MONITOR=$(find_monitor_connector "$LAPTOP_DESC")
 if [[ -n "$LAPTOP_MONITOR" ]]; then
-    swaybg -o "$LAPTOP_MONITOR" -i "$WALLPAPER_DIR/main.jpg" -m fill &
+    swaybg -o "$LAPTOP_MONITOR" -i "$WALLPAPER_DIR/main.png" -m fill &
     echo "Set laptop wallpaper on $LAPTOP_MONITOR"
 fi
 

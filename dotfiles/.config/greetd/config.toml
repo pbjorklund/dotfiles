@@ -1,0 +1,8 @@
+[terminal]
+# Terminal virtual terminal settings
+vt = 1
+
+[default_session]
+# TUIgreet command with optimal settings
+command = "tuigreet --time --remember --remember-user-session --sessions /usr/share/wayland-sessions"
+user = "greeter"

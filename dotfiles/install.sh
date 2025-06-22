@@ -23,6 +23,8 @@ backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)" # temporary backup with
 files="bashrc gitconfig tmux.conf inputrc"
 # List of .config subdirectories to symlink
 config_dirs="hypr swaylock swayidle waybar zellij mako wofi systemd kitty gh"
+# List of system config directories that need to be copied (not symlinked) to system locations
+system_config_dirs="greetd"
 # List of dotfiles directories to symlink (containing multiple files)
 dotfile_dirs="ssh docker"
 # System files that need to be copied (not symlinked) to system locations
@@ -88,6 +90,20 @@ ln -sf "$dir/$vscode_settings_file" ~/.config/Code/User/settings.json
 
 # Handle system configuration files (requires sudo)
 echo "Setting up system configuration files"
+
+# Install system config directories
+for system_config_dir in $system_config_dirs; do
+    if [[ -d "$dir/.config/$system_config_dir" ]]; then
+        echo "Installing system config directory: .config/$system_config_dir -> /etc/$system_config_dir"
+        if [[ -d "/etc/$system_config_dir" ]]; then
+            echo "Moving existing /etc/$system_config_dir to $backup_dir"
+            sudo cp -r "/etc/$system_config_dir" "$backup_dir/"
+        fi
+        sudo cp -r "$dir/.config/$system_config_dir" "/etc/"
+    else
+        echo "⚠ Warning: System config directory .config/$system_config_dir not found"
+    fi
+done
 
 # Install system files (systemd sleep hooks, etc.)
 for system_file_mapping in $system_files_to_copy; do
