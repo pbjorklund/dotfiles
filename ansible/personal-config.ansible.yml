@@ -50,9 +50,5 @@
       become: true
       become_user: "{{ original_user }}"
 
-    - name: Configure power settings - never suspend on AC
-      community.general.dconf:
-        key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type"
-        value: "'nothing'"
-      become: true
-      become_user: "{{ original_user }}"
+    # Note: Power management is now handled by Hyprland via swayidle
+    # See dotfiles/.config/hypr/conf/power.conf for idle/sleep configuration

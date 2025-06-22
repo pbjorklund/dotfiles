@@ -22,7 +22,9 @@ backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)" # temporary backup with
 # List of files to symlink in homedir (excluding directories and install script)
 files="bashrc gitconfig tmux.conf inputrc"
 # List of .config subdirectories to symlink
-config_dirs="hypr swaylock waybar zellij mako wofi systemd kitty gh"
+config_dirs="hypr swaylock swayidle waybar zellij mako wofi systemd kitty gh"
+# List of dotfiles directories to symlink (containing multiple files)
+dotfile_dirs="ssh docker"
 # System files that need to be copied (not symlinked) to system locations
 system_files_to_copy=".config/hypr/scripts/systemd-sleep-hook.sh:/lib/systemd/system-sleep/hyprland-lid-state"
 # VS Code settings file (user settings location)
@@ -62,6 +64,16 @@ for config_dir in $config_dirs; do
     fi
     echo "Creating symlink to .config/$config_dir"
     ln -sf "$dir/.config/$config_dir" ~/.config/"$config_dir"
+done
+
+# Create symlinks for dotfiles directories (like .ssh, .docker)
+for dotfile_dir in $dotfile_dirs; do
+    if [ -e ~/."$dotfile_dir" ]; then
+        echo "Moving existing .$dotfile_dir to $backup_dir"
+        mv ~/."$dotfile_dir" "$backup_dir/"
+    fi
+    echo "Creating symlink to .$dotfile_dir"
+    ln -sf "$dir/.$dotfile_dir" ~/."$dotfile_dir"
 done
 
 # Handle VS Code settings

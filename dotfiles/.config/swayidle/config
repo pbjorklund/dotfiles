@@ -1,0 +1,19 @@
+# Swayidle configuration for power management
+# Lock screen after 30 minutes of inactivity
+timeout 1800 'swaylock -f'
+
+# Turn off display 1 minute after lock
+timeout 1860 'hyprctl dispatch dpms off'
+
+# Turn on display when activity resumes
+resume 'hyprctl dispatch dpms on'
+
+# Lock before system sleep/suspend
+before-sleep 'swaylock -f'
+
+# Ensure display is on after resume
+after-resume 'hyprctl dispatch dpms on'
+
+# Battery-only suspend after extended idle (uncomment for battery behavior)
+# This would need a script to detect AC vs battery power
+# timeout 5400 'systemctl suspend'

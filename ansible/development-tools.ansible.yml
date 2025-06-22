@@ -151,11 +151,6 @@
       become_user: "{{ original_user }}"
       when: not lazydocker_installed.stat.exists and lazydocker_release is defined
 
-    # Rust development environment
-    - name: Display Rust setup instructions
-      ansible.builtin.debug:
-        msg: "Rust setup: Manually remove system rust/cargo packages if needed, then install rustup"
-
     - name: Check if rustup is already installed
       ansible.builtin.stat:
         path: "/home/{{ original_user }}/.cargo/bin/rustup"

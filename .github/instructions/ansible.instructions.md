@@ -36,12 +36,6 @@ MANDATORY requirements for all Ansible files in this dotfiles repository.
 
 - **MUST** be idempotent (safe to run multiple times)
 
-## Output Formatting Requirements
-
-- **MUST** use single-line `ansible.builtin.debug` messages for readable execution output
-- **MUST NOT** use multi-line strings with `msg: |` in debug tasks (creates unreadable `\n` output)
-- **MUST** ensure all debug output is immediately readable during `ansible-playbook` execution
-
 ## Violation Consequences
 
 - Multi-line debug messages with escaped newlines **WILL BE REJECTED**
