@@ -64,6 +64,16 @@
         owner: root
         group: root
 
+    # Ensure 1Password desktop entry is properly installed
+    - name: Copy 1Password desktop entry to applications directory
+      ansible.builtin.copy:
+        src: /opt/1Password/resources/1password.desktop
+        dest: /usr/share/applications/1password.desktop
+        remote_src: true
+        mode: "0644"
+        owner: root
+        group: root
+
     - name: Display 1Password integration setup instructions
       ansible.builtin.debug:
         msg: "1Password setup complete. Restart 1Password app and Zen Browser, then install 1Password extension"
