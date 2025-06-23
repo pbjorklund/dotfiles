@@ -85,32 +85,6 @@
       become: false
       become_user: "{{ original_user }}"
 
-    # Set up environment variables for Wayland
-    - name: "Configure Wayland environment variables"
-      ansible.builtin.blockinfile:
-        path: "{{ user_home }}/.bashrc"
-        marker: "# {mark} ANSIBLE MANAGED BLOCK - Hyprland Environment"
-        block: |
-          # Hyprland/Wayland environment variables
-          export XDG_SESSION_TYPE=wayland
-          export XDG_CURRENT_DESKTOP=Hyprland
-          export XDG_SESSION_DESKTOP=Hyprland
-
-          # Qt applications on Wayland
-          export QT_QPA_PLATFORM=wayland
-          export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-
-          # GTK applications on Wayland
-          export GDK_BACKEND=wayland,x11
-
-          # Electron applications on Wayland
-          export ELECTRON_OZONE_PLATFORM_HINT=wayland
-        create: true
-        owner: "{{ original_user }}"
-        group: "{{ original_user }}"
-        mode: "0644"
-      become: false
-
     # Configure GDM for Wayland (if using GDM)
     - name: "Check if GDM is installed and enabled"
       ansible.builtin.systemd:

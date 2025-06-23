@@ -82,5 +82,6 @@
   "ansible.python.interpreterPath": "/bin/python",
   "[nginx]": {
     "editor.defaultFormatter": "raynigon.nginx-formatter"
-  }
+  },
+  "chat.commandCenter.enabled": false
 }
