@@ -13,6 +13,7 @@
       - backups
       - media
       - pictures
+    cifs_options: "credentials=/etc/cifs-nas-credentials,uid={{ original_user }},gid={{ original_user }},iocharset=utf8,file_mode=0755,dir_mode=0755"
 
   tasks:
     - name: Install autofs package
@@ -93,7 +94,7 @@
       ansible.builtin.copy:
         content: |
           {% for share in mount_shares %}
-          {{ share }} -fstype=cifs,credentials=/etc/cifs-nas-credentials,uid={{ original_user }},gid={{ original_user }},iocharset=utf8,file_mode=0755,dir_mode=0755 ://{{ nas_ip }}/{{ share }}
+          {{ share }} -fstype=cifs,{{ cifs_options }} ://{{ nas_ip }}/{{ share }}
           {% endfor %}
         dest: /etc/auto.nas
         mode: "0644"
@@ -149,5 +150,11 @@
 
     - name: Display 1Password CLI setup instructions
       ansible.builtin.debug:
-        msg: "1Password CLI not available or not configured. Please install and configure 1Password CLI first: 1. Install: sudo dnf install 1password-cli 2. Sign in: op account add 3. Authenticate: op signin 4. Verify: op account list Then re-run this playbook."
+        msg: >-
+          1Password CLI not available or not configured. Please install and configure 1Password CLI first:
+          1. Install: sudo dnf install 1password-cli
+          2. Sign in: op account add
+          3. Authenticate: op signin
+          4. Verify: op account list
+          Then re-run this playbook.
       when: op_test.rc != 0 or op_credentials.results[0].rc != 0
