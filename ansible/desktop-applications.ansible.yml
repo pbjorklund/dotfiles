@@ -150,9 +150,9 @@
           Categories=GNOME;GTK;Network;WebBrowser;
           MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
           StartupNotify=true
+          StartupWMClass=zen
         dest: /usr/share/applications/zen-browser.desktop
         mode: "0644"
-      when: not zen_installed.stat.exists and zen_browser_release is defined
 
     - name: Create Zen Browser symlink
       ansible.builtin.file:
