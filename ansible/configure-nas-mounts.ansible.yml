@@ -1,8 +1,8 @@
 ---
-# Configuration playbook for NAS mount management
-# Updates fstab entries from old /home/user/synology paths to new /mnt paths
+# Configuration playbook for NAS automount management using autofs
+# Configures automatic mounting of NAS shares when accessed
 
-- name: Configure NAS mount points in fstab
+- name: Configure NAS automount points with autofs
   hosts: localhost
   connection: local
   become: true
@@ -15,6 +15,11 @@
       - pictures
 
   tasks:
+    - name: Install autofs package
+      ansible.builtin.dnf:
+        name: autofs  # Autofs - Automatic filesystem mounting service
+        state: present
+
     - name: Remove old synology mount entries from fstab
       ansible.builtin.lineinfile:
         path: /etc/fstab
@@ -32,6 +37,15 @@
         backup: true
       loop: "{{ mount_shares }}"
       register: fstab_broken_cleanup
+
+    - name: Remove any existing fstab entries for NAS mounts
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: "^//{{ nas_ip }}/{{ item }}\\s+/mnt/{{ item }}\\s+"
+        state: absent
+        backup: true
+      loop: "{{ mount_shares }}"
+      register: fstab_nas_cleanup
 
     - name: Test 1Password CLI functionality
       ansible.builtin.command:
@@ -67,54 +81,73 @@
         backup: true
       when: op_test.rc == 0 and op_credentials.results[0].rc == 0 and op_credentials.results[1].rc == 0
 
-    - name: Add new /mnt mount entries to fstab with credentials file
+    - name: Configure autofs master map
+      ansible.builtin.lineinfile:
+        path: /etc/auto.master
+        line: "/mnt/nas /etc/auto.nas --timeout=60 --ghost"
+        state: present
+        backup: true
+      register: autofs_master
+
+    - name: Create autofs map for NAS shares
+      ansible.builtin.copy:
+        content: |
+          {% for share in mount_shares %}
+          {{ share }} -fstype=cifs,credentials=/etc/cifs-nas-credentials,uid={{ original_user }},gid={{ original_user }},iocharset=utf8,file_mode=0755,dir_mode=0755 ://{{ nas_ip }}/{{ share }}
+          {% endfor %}
+        dest: /etc/auto.nas
+        mode: "0644"
+        owner: root
+        group: root
+        backup: true
+      when: op_test.rc == 0 and op_credentials.results[0].rc == 0 and op_credentials.results[1].rc == 0
+      register: autofs_map
+
+    - name: Remove old fstab mount entries (replaced by autofs)
       ansible.builtin.lineinfile:
         path: /etc/fstab
         line: >-
           //{{ nas_ip }}/{{ item }} /mnt/{{ item }} cifs
           credentials=/etc/cifs-nas-credentials,uid={{ original_user }},gid={{ original_user }},
-          iocharset=utf8,file_mode=0755,dir_mode=0755,noauto,user 0 0
-        state: present
+          iocharset=utf8,file_mode=0755,dir_mode=0755,noauto 0 0
+        state: absent
         backup: true
       loop: "{{ mount_shares }}"
       register: fstab_updates
-      when: op_test.rc == 0 and op_credentials.results[0].rc == 0 and op_credentials.results[1].rc == 0
 
-    - name: Ensure /mnt mount directories exist
+    - name: Ensure autofs base directory exists
       ansible.builtin.file:
-        path: "/mnt/{{ item }}"
+        path: "/mnt/nas"
         state: directory
         mode: "0755"
         owner: root
         group: root
+
+    - name: Remove old individual mount directories (now handled by autofs)
+      ansible.builtin.file:
+        path: "/mnt/{{ item }}"
+        state: absent
       loop: "{{ mount_shares }}"
 
     - name: Reload systemd daemon to update mount units
       ansible.builtin.systemd:
         daemon_reload: true
-      when: fstab_cleanup.changed or fstab_broken_cleanup.changed or fstab_updates.changed
+      when: fstab_cleanup.changed or fstab_broken_cleanup.changed or fstab_nas_cleanup.changed or fstab_updates.changed
 
-    - name: Display mount instructions
+    - name: Enable and start autofs service
+      ansible.builtin.systemd:
+        name: autofs
+        enabled: true
+        state: restarted
+      when: autofs_master.changed or autofs_map.changed
+
+    - name: Display automount instructions
       ansible.builtin.debug:
-        msg: |
-          NAS mount configuration complete. To mount shares:
-          sudo mount /mnt/{{ item }}
-
-          To mount all configured shares:
-          sudo mount -a -t cifs
+        msg: "NAS automount configuration complete. Shares automatically mount when accessed at /mnt/nas/{{ item }} and unmount after 60 seconds of inactivity."
       loop: "{{ mount_shares }}"
       when: op_test.rc == 0 and op_credentials.results[0].rc == 0
 
     - name: Display 1Password CLI setup instructions
       ansible.builtin.debug:
-        msg: |
-          1Password CLI not available or not configured.
-          Please install and configure 1Password CLI first:
-
-          1. Install: sudo dnf install 1password-cli
-          2. Sign in: op account add
-          3. Authenticate: op signin
-          4. Verify: op account list
-
-          Then re-run this playbook.
+        msg: "1Password CLI not available or not configured. Please install and configure 1Password CLI first: 1. Install: sudo dnf install 1password-cli 2. Sign in: op account add 3. Authenticate: op signin 4. Verify: op account list Then re-run this playbook."
       when: op_test.rc != 0 or op_credentials.results[0].rc != 0

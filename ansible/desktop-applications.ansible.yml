@@ -63,6 +63,33 @@
       changed_when: false
       when: plexamp_permissions.stdout is defined and 'wayland' not in plexamp_permissions.stdout
 
+    # GitHub tools (Libation)
+    - name: Check if Libation is already installed
+      ansible.builtin.command: which libation
+      register: libation_installed
+      failed_when: false
+      changed_when: false
+
+    - name: Download Libation RPM (Audible audiobook manager and downloader)
+      ansible.builtin.get_url:
+        url: https://github.com/rmcrackan/Libation/releases/download/v12.4.4/Libation.12.4.4-linux-chardonnay-amd64.rpm
+        dest: /tmp/libation.rpm
+        mode: "0644"
+      when: libation_installed.rc != 0
+
+    - name: Install Libation RPM
+      ansible.builtin.dnf:
+        name: /tmp/libation.rpm
+        state: present
+        disable_gpg_check: true
+      when: libation_installed.rc != 0
+
+    - name: Clean up Libation RPM file
+      ansible.builtin.file:
+        path: /tmp/libation.rpm
+        state: absent
+      when: libation_installed.rc != 0
+
     # GitHub tools (Zen Browser)
     - name: Check if Zen Browser is already installed
       ansible.builtin.stat:
