@@ -57,9 +57,7 @@ export PATH="$PATH:/home/pbjorklund/.local/bin"
 . "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 
-if [ -z "$WAYLAND_DISPLAY" ] || [ "$WAYLAND_DISPLAY" = "wayland-0" ]; then
-    export WAYLAND_DISPLAY=wayland-1
-fi
+# Wayland display is set automatically by Hyprland
 # BEGIN ANSIBLE MANAGED BLOCK - Hyprland Environment
 # Hyprland/Wayland environment variables
 export XDG_SESSION_TYPE=wayland
@@ -75,6 +73,7 @@ export GDK_BACKEND=wayland,x11
 
 # Electron applications on Wayland
 export ELECTRON_OZONE_PLATFORM_HINT=wayland
+export ELECTRON_ENABLE_WAYLAND=1
 # END ANSIBLE MANAGED BLOCK - Hyprland Environment
 
 # Privacy and Security Settings
@@ -92,6 +91,7 @@ umask 077 # Restrictive file permissions by default
 export TMPDIR="/tmp/$(whoami)"
 mkdir -p "$TMPDIR"
 chmod 700 "$TMPDIR"
+
 # 1Password integration
 export SSH_AUTH_SOCK=~/.1password/agent.sock
 export OP_BIOMETRIC_UNLOCK_ENABLED=true

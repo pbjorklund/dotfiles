@@ -165,6 +165,5 @@ else
 fi
 
 echo ""
-echo "🎉 Setup complete! Hyprland lid switch functionality has been configured."
-echo "📝 The laptop display will now stay disabled when lid is closed and external monitors are connected."
+echo "🎉 Setup complete!📝"
 echo ""
