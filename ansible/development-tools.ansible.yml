@@ -60,43 +60,25 @@
           - docker # Container runtime (includes compose)
         state: present
 
-    # GitHub tools (cliphist)
-    - name: Check if cliphist is already installed
-      ansible.builtin.stat:
-        path: "/usr/local/bin/cliphist"
-      register: cliphist_installed
+    # Wayland clipboard management
+    - name: Install clipman (clipboard manager for Wayland with X11 sync)
+      ansible.builtin.dnf:
+        name:
+          - clipman # Simple clipboard manager for Wayland
+        state: present
 
-    - name: Get cliphist latest release info
-      ansible.builtin.uri:
-        url: "https://api.github.com/repos/sentriz/cliphist/releases/latest"
-        return_content: true
-      register: cliphist_release
-      when: not cliphist_installed.stat.exists
+    # Hyprland compositor upgrade
+    - name: Enable solopasha/hyprland COPR repository for latest Hyprland
+      ansible.builtin.command:
+        cmd: dnf copr enable -y solopasha/hyprland
+      args:
+        creates: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:solopasha:hyprland.repo
 
-    - name: Install cliphist (clipboard history manager for Wayland)
-      ansible.builtin.get_url:
-        url: "{{ cliphist_release.json.assets | selectattr('name', 'match', '.*linux-amd64') | map(attribute='browser_download_url') | first }}"
-        dest: "/tmp/cliphist"
-        mode: "0755"
-      become: true
-      become_user: "{{ original_user }}"
-      when: not cliphist_installed.stat.exists and cliphist_release is defined and cliphist_release.json is defined
-
-    - name: Install cliphist binary
-      ansible.builtin.copy:
-        src: "/tmp/cliphist"
-        dest: "/usr/local/bin/cliphist"
-        mode: "0755"
-        remote_src: true
-      when: not cliphist_installed.stat.exists and cliphist_release is defined and cliphist_release.json is defined
-
-    - name: Clean up cliphist installation file
-      ansible.builtin.file:
-        path: "/tmp/cliphist"
-        state: absent
-      become: true
-      become_user: "{{ original_user }}"
-      when: not cliphist_installed.stat.exists and cliphist_release is defined and cliphist_release.json is defined
+    - name: Upgrade Hyprland to latest version (should be 0.49+)
+      ansible.builtin.dnf:
+        name:
+          - hyprland # Dynamic tiling Wayland compositor
+        state: latest
 
     # GitHub tools (lazydocker)
     - name: Check if lazydocker is already installed
