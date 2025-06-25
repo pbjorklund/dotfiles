@@ -24,7 +24,7 @@ files="bashrc gitconfig tmux.conf inputrc"
 # List of .config subdirectories to symlink
 config_dirs="hypr swaylock swayidle waybar zellij mako wofi systemd kitty gh"
 # List of system config directories that need to be copied (not symlinked) to system locations
-system_config_dirs="greetd"
+system_config_dirs=""
 # List of dotfiles directories to symlink (containing multiple files)
 dotfile_dirs="ssh docker"
 # System files that need to be copied (not symlinked) to system locations
