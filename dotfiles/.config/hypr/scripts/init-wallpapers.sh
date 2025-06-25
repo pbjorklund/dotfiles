@@ -51,4 +51,12 @@ if [[ -n "$LAPTOP_MONITOR" ]]; then
     echo "Set laptop wallpaper on $LAPTOP_MONITOR"
 fi
 
+# Set wallpaper for ultra-wide monitor (if connected)
+ULTRA_DESC="Samsung Electric Company SE790C HTRH401237"
+ULTRA_MONITOR=$(find_monitor_connector "$ULTRA_DESC")
+if [[ -n "$ULTRA_MONITOR" ]]; then
+    swaybg -o "$ULTRA_MONITOR" -i "$WALLPAPER_DIR/ultra.png" -m fill &
+    echo "Set ultra-wide wallpaper on $ULTRA_MONITOR"
+fi
+
 echo "Wallpaper initialization complete"

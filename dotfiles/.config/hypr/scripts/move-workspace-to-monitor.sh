@@ -28,8 +28,11 @@ portrait)
 main)
     TARGET_DESC="Acer Technologies Acer XZ321QU 0x9372982E"
     ;;
+ultra)
+    TARGET_DESC="Samsung Electric Company SE790C HTRH401237"
+    ;;
 *)
-    echo "Usage: $0 <laptop|portrait|main>"
+    echo "Usage: $0 <laptop|portrait|main|ultra>"
     exit 1
     ;;
 esac

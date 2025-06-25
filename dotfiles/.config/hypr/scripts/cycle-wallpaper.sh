@@ -29,11 +29,18 @@ main)
     MONITOR=$(find_monitor_connector "$TARGET_DESC")
     WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'main*' -o -name 'work*' | grep -E '\.(jpg|webp|png)$' | sort))
     ;;
+ultra)
+    # Ultra-wide monitor - find current connector for Samsung SE790C
+    TARGET_DESC="Samsung Electric Company SE790C HTRH401237"
+    MONITOR=$(find_monitor_connector "$TARGET_DESC")
+    WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'main*' | grep -E '\.(jpg|webp|png)$' | sort))
+    ;;
 *)
     echo "Usage: $0 <laptop|portrait|main>"
     echo "  laptop   - BOE laptop display (any connector)"
     echo "  portrait - XV240Y P portrait monitor (any connector)"
     echo "  main     - XZ321QU main monitor (any connector)"
+    echo "  ultra    - Samsung SE790C ultra-wide monitor (any connector)"
     exit 1
     ;;
 esac
