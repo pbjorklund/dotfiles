@@ -83,5 +83,53 @@
   "[nginx]": {
     "editor.defaultFormatter": "raynigon.nginx-formatter"
   },
-  "chat.commandCenter.enabled": false
+  "chat.commandCenter.enabled": false,
+  "inlineChat.holdToSpeech": false,
+  "github.copilot.chat.agent.thinkingTool": true,
+  "accessibility.signals.progress": {
+    "sound": "off"
+  },
+  "accessibility.signalOptions.volume": 0,
+  "markdown-preview-enhanced.enablePreviewZenMode": true,
+  "markdown-preview-enhanced.codeBlockTheme": "atom-dark.css",
+  "markdown-preview-enhanced.previewTheme": "solarized-dark.css",
+  "peacock.affectStatusBar": false,
+  "peacock.favoriteColors": [
+    {
+      "name": "Muted Steel",
+      "value": "#8a9ba8"
+    },
+    {
+      "name": "Muted Sage",
+      "value": "#a8c4a0"
+    },
+    {
+      "name": "Soft Charcoal",
+      "value": "#a8a8a8"
+    },
+    {
+      "name": "Pale Sky",
+      "value": "#9bb5d1"
+    },
+    {
+      "name": "Soft Peach",
+      "value": "#d4b89c"
+    },
+    {
+      "name": "Gentle Mint",
+      "value": "#a0c4b8"
+    },
+    {
+      "name": "Muted Olive",
+      "value": "#b5b88a"
+    },
+    {
+      "name": "Warm Sand",
+      "value": "#c9b896"
+    },
+    {
+      "name": "Soft Teal",
+      "value": "#8fb3b3"
+    }
+  ]
 }
