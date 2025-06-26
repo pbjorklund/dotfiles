@@ -5,9 +5,6 @@ dotfiles/.ssh/id_*
 dotfiles/.ssh/*.pub
 dotfiles/.ssh/authorized_keys
 
-# Docker configuration and cache files
-dotfiles/.docker/
-
 # Personal/sensitive configuration files
 dotfiles/.config/*/credentials*
 dotfiles/.config/*/token*

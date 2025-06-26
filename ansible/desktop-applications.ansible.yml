@@ -31,7 +31,6 @@
         - org.onlyoffice.desktopeditors # Office suite
         - com.plexamp.Plexamp # Music player for Plex
         - org.gimp.GIMP # GNU Image Manipulation Program
-        - io.mpv.Mpv # Modern media player
 
     - name: Check Obsidian flatpak permissions for session bus
       ansible.builtin.command: flatpak info --show-permissions md.obsidian.Obsidian

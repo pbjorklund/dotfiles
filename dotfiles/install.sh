@@ -26,7 +26,7 @@ config_dirs="hypr swaylock swayidle waybar zellij mako wofi systemd kitty gh"
 # List of system config directories that need to be copied (not symlinked) to system locations
 system_config_dirs=""
 # List of dotfiles directories to symlink (containing multiple files)
-dotfile_dirs="ssh docker"
+dotfile_dirs="ssh"
 # System files that need to be copied (not symlinked) to system locations
 system_files_to_copy=".config/hypr/scripts/systemd-sleep-hook.sh:/lib/systemd/system-sleep/hyprland-lid-state"
 # VS Code settings file (user settings location)

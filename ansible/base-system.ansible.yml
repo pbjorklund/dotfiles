@@ -23,6 +23,7 @@
           - git-credential-libsecret # Secure Git credential storage
           - openssh-clients # SSH tools (includes ssh-keygen)
           - cifs-utils # SMB/CIFS mounting utilities
+          - gnome-keyring # Secure credential storage daemon
         state: present
 
     - name: Install Python development packages

@@ -79,3 +79,13 @@ gh_token() {
     fi
     echo "$GH_TOKEN"
 }
+
+# SSH wrapper to handle terminal compatibility
+ssh() {
+    # If current TERM is kitty-based, use xterm-256color for SSH
+    if [[ "$TERM" == *"kitty"* ]]; then
+        env TERM=xterm-256color command ssh "$@"
+    else
+        command ssh "$@"
+    fi
+}
