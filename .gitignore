@@ -1,9 +1,5 @@
 # SSH security files - never commit these
-dotfiles/.ssh/known_hosts
-dotfiles/.ssh/known_hosts.old
-dotfiles/.ssh/id_*
-dotfiles/.ssh/*.pub
-dotfiles/.ssh/authorized_keys
+dotfiles/.ssh/
 
 # Personal/sensitive configuration files
 dotfiles/.config/*/credentials*
