@@ -68,7 +68,7 @@ for config_dir in $config_dirs; do
     ln -sf "$dir/.config/$config_dir" ~/.config/"$config_dir"
 done
 
-# Create symlinks for dotfiles directories (like .ssh, .docker)
+# Create symlinks for dotfiles directories
 for dotfile_dir in $dotfile_dirs; do
     if [ -e ~/."$dotfile_dir" ]; then
         echo "Moving existing .$dotfile_dir to $backup_dir"
