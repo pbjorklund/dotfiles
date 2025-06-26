@@ -167,21 +167,3 @@ fi
 echo ""
 echo "🎉 Setup complete!📝"
 echo ""
-
-# Handle SSH config template (SECURITY: Never symlink SSH configs)
-echo "Setting up SSH config template"
-mkdir -p ~/.ssh
-chmod 700 ~/.ssh
-if [ ! -f ~/.ssh/config ]; then
-    if [ -f "$dir/.ssh/config.template" ]; then
-        echo "Creating SSH config from template (please customize it)"
-        cp "$dir/.ssh/config.template" ~/.ssh/config
-        chmod 600 ~/.ssh/config
-        echo "WARNING: Please edit ~/.ssh/config and customize it for your environment"
-    else
-        echo "No SSH config template found"
-    fi
-else
-    echo "SSH config already exists, skipping template deployment"
-    echo "Template available at: $dir/.ssh/config.template"
-fi
