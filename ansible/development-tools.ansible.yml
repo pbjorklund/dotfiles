@@ -53,6 +53,32 @@
           - wl-clipboard # Wayland clipboard utilities (wl-copy, wl-paste)
         state: present
 
+    # npm configuration and global packages
+    - name: Configure npm global directory for user
+      ansible.builtin.command: "npm config set prefix '~/.npm-global'"
+      become: false
+      become_user: "{{ original_user }}"
+      environment:
+        HOME: "/home/{{ original_user }}"
+
+    - name: Create npm global directory
+      ansible.builtin.file:
+        path: "/home/{{ original_user }}/.npm-global"
+        state: directory
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+        mode: "0755"
+      become: false
+      become_user: "{{ original_user }}"
+
+    - name: Install opencode-ai globally
+      ansible.builtin.command: "npm install -g opencode-ai@latest"
+      become: false
+      become_user: "{{ original_user }}"
+      environment:
+        HOME: "/home/{{ original_user }}"
+        PATH: "/home/{{ original_user }}/.npm-global/bin:{{ ansible_env.PATH }}"
+
     # Containerization tools
     - name: Install containerization tools
       ansible.builtin.dnf:

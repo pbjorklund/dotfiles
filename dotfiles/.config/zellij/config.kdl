@@ -312,6 +312,11 @@ load_plugins {
 // Use a simplified UI without special fonts (arrow glyphs)
 // simplified_ui true
 
+// Hide UI elements for tmux-like experience
+pane_frames false
+status_bar false
+tab_bar false
+
 // Theme Selection
 // Choose the theme that is specified in the themes section
 theme "nord"
@@ -344,10 +349,6 @@ default_mode "normal"
 // On certain configurations, or terminals this could
 // potentially interfere with copying text
 // mouse_mode false
-
-// Pane Frame Configuration
-// Toggle having pane frames around the panes
-// pane_frames false
 
 // Session Mirroring
 // When attaching to an existing session with other users,
@@ -430,3 +431,4 @@ copy_clipboard "system"
 // Release Notes
 // Whether to show release notes on first version run
 // show_release_notes false
+

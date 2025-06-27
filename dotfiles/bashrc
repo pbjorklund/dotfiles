@@ -68,6 +68,10 @@ export TMPDIR="/tmp/$(whoami)"
 mkdir -p "$TMPDIR"
 chmod 700 "$TMPDIR"
 
+# npm configuration - use home directory for global packages to avoid permissions issues
+export NPM_CONFIG_PREFIX=~/.npm-global
+export PATH=~/.npm-global/bin:$PATH
+
 # 1Password integration
 export SSH_AUTH_SOCK=~/.1password/agent.sock
 export OP_BIOMETRIC_UNLOCK_ENABLED=true
@@ -89,3 +93,6 @@ ssh() {
         command ssh "$@"
     fi
 }
+
+# opencode
+export PATH=/home/pbjorklund/.opencode/bin:$PATH
