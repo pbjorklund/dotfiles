@@ -31,6 +31,7 @@
   "workbench.panel.defaultLocation": "left",
   "workbench.sideBar.location": "left",
   "window.menuBarVisibility": "toggle",
+  "window.titleBarStyle": "custom",
   "breadcrumbs.enabled": false,
   "workbench.statusBar.visible": true,
   "terminal.integrated.fontFamily": "'FiraCode Nerd Font', 'Fira Code', 'Inter', monospace",
