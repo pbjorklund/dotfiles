@@ -35,14 +35,14 @@
     - name: Check Obsidian flatpak permissions for session bus
       ansible.builtin.command: flatpak info --show-permissions md.obsidian.Obsidian
       register: obsidian_permissions
-      become: false
+      become: true
       become_user: "{{ original_user }}"
       changed_when: false
       failed_when: false
 
     - name: Configure Obsidian flatpak permissions for clipboard access
       ansible.builtin.command: flatpak override --user --socket=session-bus md.obsidian.Obsidian
-      become: false
+      become: true
       become_user: "{{ original_user }}"
       changed_when: false
       when: obsidian_permissions.stdout is defined and 'session-bus' not in obsidian_permissions.stdout
@@ -50,14 +50,14 @@
     - name: Check Plexamp flatpak permissions for Wayland socket
       ansible.builtin.command: flatpak info --show-permissions com.plexamp.Plexamp
       register: plexamp_permissions
-      become: false
+      become: true
       become_user: "{{ original_user }}"
       changed_when: false
       failed_when: false
 
     - name: Configure Plexamp flatpak permissions for Wayland socket access
       ansible.builtin.command: flatpak override --user --socket=wayland com.plexamp.Plexamp
-      become: false
+      become: true
       become_user: "{{ original_user }}"
       changed_when: false
       when: plexamp_permissions.stdout is defined and 'wayland' not in plexamp_permissions.stdout
@@ -167,3 +167,32 @@
       become: true
       become_user: "{{ original_user }}"
       when: not zen_installed.stat.exists and zen_browser_release is defined
+
+    # FirefoxPWA - Progressive Web App support for Firefox
+    - name: Import FirefoxPWA GPG key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://packagecloud.io/filips/FirefoxPWA/gpgkey
+
+    - name: Add FirefoxPWA repository
+      ansible.builtin.yum_repository:
+        name: firefoxpwa
+        description: FirefoxPWA
+        baseurl: https://packagecloud.io/filips/FirefoxPWA/rpm_any/rpm_any/$basearch
+        gpgkey: https://packagecloud.io/filips/FirefoxPWA/gpgkey
+        repo_gpgcheck: true
+        gpgcheck: false
+        enabled: true
+        metadata_expire: 7d
+
+    - name: Update DNF cache for FirefoxPWA repo
+      ansible.builtin.dnf:
+        update_cache: true
+        disablerepo: "*"
+        enablerepo: firefoxpwa
+
+    - name: Install FirefoxPWA # firefoxpwa - Progressive Web App support for Firefox
+      ansible.builtin.dnf:
+        name: firefoxpwa
+        state: present
+        enablerepo: firefoxpwa
