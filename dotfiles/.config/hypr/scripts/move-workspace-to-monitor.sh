@@ -1,16 +1,17 @@
 #!/bin/bash
 # Move workspace to monitor by stable identifier - dynamically finds monitor name
-# Usage: move-workspace-to-monitor.sh <portrait|main|laptop>
+# Usage: move-workspace-to-monitor.sh <main|secondary|laptop>
 #
-# Monitor Hardware Setup:
-# - main: Acer XZ321QU ultrawide (3440x1440, landscape, primary display)
-# - portrait: Acer XV240Y P (1920x1080, rotated 90° portrait orientation)
-# - laptop: BOE 0x094C (built-in laptop display, may not always be connected)
+# Smart Monitor Detection:
+# - When SE790C (Samsung ultrawide) is connected: it becomes main (single monitor setup)
+# - When XZ321QU (Acer) is connected: XZ321QU=main, XV240Y=secondary (home office setup)
+# - When F3T3KS2 (Dell) is connected: F3T3KS2=main, S24F350=secondary (wife's setup)
+# - laptop always refers to BOE 0x094C (built-in laptop screen)
 #
 # Technical Notes:
 # - Uses monitor descriptions for stable identification across sessions
 # - Monitor IDs can change but descriptions remain constant
-# - Script gracefully handles disconnected monitors
+# - Script gracefully handles disconnected monitors and different setups
 
 # Function to find current connector name by monitor description
 find_monitor_connector() {
@@ -18,21 +19,64 @@ find_monitor_connector() {
     hyprctl monitors -j | jq -r ".[] | select(.description == \"$target_desc\") | .name"
 }
 
+# Function to determine which monitor should be main based on what's connected
+determine_main_monitor() {
+    # Check for Samsung ultrawide (work setup)
+    if find_monitor_connector "Samsung Electric Company SE790C HTRH401237" >/dev/null 2>&1; then
+        echo "Samsung Electric Company SE790C HTRH401237"
+        return
+    fi
+
+    # Check for Acer XZ321QU (home office main)
+    if find_monitor_connector "Acer Technologies Acer XZ321QU 0x9372982E" >/dev/null 2>&1; then
+        echo "Acer Technologies Acer XZ321QU 0x9372982E"
+        return
+    fi
+
+    # Check for Dell (wife's setup main)
+    if find_monitor_connector "Dell Inc. DELL U2419HC F3T3KS2" >/dev/null 2>&1; then
+        echo "Dell Inc. DELL U2419HC F3T3KS2"
+        return
+    fi
+
+    # Fallback to laptop if no external monitors
+    echo "BOE 0x094C"
+}
+
+# Function to determine which monitor should be secondary based on what's connected
+determine_secondary_monitor() {
+    # Check for home office secondary (portrait)
+    if find_monitor_connector "Acer Technologies XV240Y P 0x944166C5" >/dev/null 2>&1; then
+        echo "Acer Technologies XV240Y P 0x944166C5"
+        return
+    fi
+
+    # Check for wife's setup secondary
+    if find_monitor_connector "Samsung Electric Company S24F350 H4ZNA00867" >/dev/null 2>&1; then
+        echo "Samsung Electric Company S24F350 H4ZNA00867"
+        return
+    fi
+
+    # No secondary monitor available
+    echo ""
+}
+
 case "$1" in
 laptop)
     TARGET_DESC="BOE 0x094C"
     ;;
-portrait)
-    TARGET_DESC="Acer Technologies XV240Y P 0x944166C5"
-    ;;
 main)
-    TARGET_DESC="Acer Technologies Acer XZ321QU 0x9372982E"
+    TARGET_DESC=$(determine_main_monitor)
     ;;
-ultra)
-    TARGET_DESC="Samsung Electric Company SE790C HTRH401237"
+secondary)
+    TARGET_DESC=$(determine_secondary_monitor)
+    if [[ -z "$TARGET_DESC" ]]; then
+        echo "No secondary monitor available in current setup"
+        exit 1
+    fi
     ;;
 *)
-    echo "Usage: $0 <laptop|portrait|main|ultra>"
+    echo "Usage: $0 <main|secondary|laptop>"
     exit 1
     ;;
 esac
