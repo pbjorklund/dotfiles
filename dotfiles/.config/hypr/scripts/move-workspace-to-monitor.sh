@@ -22,23 +22,26 @@ find_monitor_connector() {
 # Function to determine which monitor should be main based on what's connected
 determine_main_monitor() {
     # Check for Samsung ultrawide (work setup)
-    if find_monitor_connector "Samsung Electric Company SE790C HTRH401237" >/dev/null 2>&1; then
+    local samsung_connector=$(find_monitor_connector "Samsung Electric Company SE790C HTRH401237")
+    if [[ -n "$samsung_connector" ]]; then
         echo "Samsung Electric Company SE790C HTRH401237"
         return
     fi
-
+    
     # Check for Acer XZ321QU (home office main)
-    if find_monitor_connector "Acer Technologies Acer XZ321QU 0x9372982E" >/dev/null 2>&1; then
+    local acer_connector=$(find_monitor_connector "Acer Technologies Acer XZ321QU 0x9372982E")
+    if [[ -n "$acer_connector" ]]; then
         echo "Acer Technologies Acer XZ321QU 0x9372982E"
         return
     fi
-
+    
     # Check for Dell (wife's setup main)
-    if find_monitor_connector "Dell Inc. DELL U2419HC F3T3KS2" >/dev/null 2>&1; then
+    local dell_connector=$(find_monitor_connector "Dell Inc. DELL U2419HC F3T3KS2")
+    if [[ -n "$dell_connector" ]]; then
         echo "Dell Inc. DELL U2419HC F3T3KS2"
         return
     fi
-
+    
     # Fallback to laptop if no external monitors
     echo "BOE 0x094C"
 }
@@ -46,17 +49,19 @@ determine_main_monitor() {
 # Function to determine which monitor should be secondary based on what's connected
 determine_secondary_monitor() {
     # Check for home office secondary (portrait)
-    if find_monitor_connector "Acer Technologies XV240Y P 0x944166C5" >/dev/null 2>&1; then
+    local acer_portrait_connector=$(find_monitor_connector "Acer Technologies XV240Y P 0x944166C5")
+    if [[ -n "$acer_portrait_connector" ]]; then
         echo "Acer Technologies XV240Y P 0x944166C5"
         return
     fi
-
+    
     # Check for wife's setup secondary
-    if find_monitor_connector "Samsung Electric Company S24F350 H4ZNA00867" >/dev/null 2>&1; then
+    local samsung_secondary_connector=$(find_monitor_connector "Samsung Electric Company S24F350 H4ZNA00867")
+    if [[ -n "$samsung_secondary_connector" ]]; then
         echo "Samsung Electric Company S24F350 H4ZNA00867"
         return
     fi
-
+    
     # No secondary monitor available
     echo ""
 }
