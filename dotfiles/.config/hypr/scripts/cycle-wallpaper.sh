@@ -1,6 +1,6 @@
 #!/bin/bash
 # Smart wallpaper cycling script for Hyprland - dynamically finds monitors by description
-# Usage: cycle-wallpaper.sh <portrait|main|laptop>
+# Usage: cycle-wallpaper.sh <main|secondary|laptop>
 
 WALLPAPER_DIR="$HOME/.config/hypr/wallpapers"
 
@@ -10,37 +10,88 @@ find_monitor_connector() {
     hyprctl monitors -j | jq -r ".[] | select(.description == \"$target_desc\") | .name"
 }
 
+# Function to determine which monitor should be main based on what's connected
+determine_main_monitor() {
+    # Check for Samsung ultrawide (work setup)
+    local samsung_connector=$(find_monitor_connector "Samsung Electric Company SE790C HTRH401237")
+    if [[ -n "$samsung_connector" ]]; then
+        echo "Samsung Electric Company SE790C HTRH401237"
+        return
+    fi
+    
+    # Check for Acer XZ321QU (home office main)
+    local acer_connector=$(find_monitor_connector "Acer Technologies Acer XZ321QU 0x9372982E")
+    if [[ -n "$acer_connector" ]]; then
+        echo "Acer Technologies Acer XZ321QU 0x9372982E"
+        return
+    fi
+    
+    # Check for Dell (wife's setup main)
+    local dell_connector=$(find_monitor_connector "Dell Inc. DELL U2419HC F3T3KS2")
+    if [[ -n "$dell_connector" ]]; then
+        echo "Dell Inc. DELL U2419HC F3T3KS2"
+        return
+    fi
+    
+    # Fallback to laptop if no external monitors
+    echo "BOE 0x094C"
+}
+
+# Function to determine which monitor should be secondary based on what's connected
+determine_secondary_monitor() {
+    # Check for home office secondary (portrait)
+    local acer_portrait_connector=$(find_monitor_connector "Acer Technologies XV240Y P 0x944166C5")
+    if [[ -n "$acer_portrait_connector" ]]; then
+        echo "Acer Technologies XV240Y P 0x944166C5"
+        return
+    fi
+    
+    # Check for wife's setup secondary
+    local samsung_secondary_connector=$(find_monitor_connector "Samsung Electric Company S24F350 H4ZNA00867")
+    if [[ -n "$samsung_secondary_connector" ]]; then
+        echo "Samsung Electric Company S24F350 H4ZNA00867"
+        return
+    fi
+    
+    # No secondary monitor available
+    echo ""
+}
+
 case "$1" in
 laptop)
-    # Laptop monitor - find current connector for BOE display
     TARGET_DESC="BOE 0x094C"
     MONITOR=$(find_monitor_connector "$TARGET_DESC")
     WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'laptop*' -o -name 'main*' | grep -E '\.(jpg|webp|png)$' | sort))
     ;;
-portrait)
-    # Portrait monitor - find current connector for XV240Y P
-    TARGET_DESC="Acer Technologies XV240Y P 0x944166C5"
-    MONITOR=$(find_monitor_connector "$TARGET_DESC")
-    WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'portrait*' | grep -E '\.(jpg|webp|png)$' | sort))
-    ;;
 main)
-    # Main monitor - find current connector for XZ321QU
-    TARGET_DESC="Acer Technologies Acer XZ321QU 0x9372982E"
+    TARGET_DESC=$(determine_main_monitor)
     MONITOR=$(find_monitor_connector "$TARGET_DESC")
-    WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'main*' -o -name 'work*' | grep -E '\.(jpg|webp|png)$' | sort))
+    # Choose wallpapers based on monitor type
+    if [[ "$TARGET_DESC" == "Samsung Electric Company SE790C HTRH401237" ]]; then
+        WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'ultra*' -o -name 'main*' | grep -E '\.(jpg|webp|png)$' | sort))
+    else
+        WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'main*' -o -name 'work*' | grep -E '\.(jpg|webp|png)$' | sort))
+    fi
     ;;
-ultra)
-    # Ultra-wide monitor - find current connector for Samsung SE790C
-    TARGET_DESC="Samsung Electric Company SE790C HTRH401237"
+secondary)
+    TARGET_DESC=$(determine_secondary_monitor)
+    if [[ -z "$TARGET_DESC" ]]; then
+        echo "No secondary monitor available in current setup"
+        exit 1
+    fi
     MONITOR=$(find_monitor_connector "$TARGET_DESC")
-    WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'main*' | grep -E '\.(jpg|webp|png)$' | sort))
+    # Choose wallpapers based on monitor type
+    if [[ "$TARGET_DESC" == "Acer Technologies XV240Y P 0x944166C5" ]]; then
+        WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'portrait*' | grep -E '\.(jpg|webp|png)$' | sort))
+    else
+        WALLPAPERS=($(find "$WALLPAPER_DIR" -name 'main*' | grep -E '\.(jpg|webp|png)$' | sort))
+    fi
     ;;
 *)
-    echo "Usage: $0 <laptop|portrait|main>"
-    echo "  laptop   - BOE laptop display (any connector)"
-    echo "  portrait - XV240Y P portrait monitor (any connector)"
-    echo "  main     - XZ321QU main monitor (any connector)"
-    echo "  ultra    - Samsung SE790C ultra-wide monitor (any connector)"
+    echo "Usage: $0 <main|secondary|laptop>"
+    echo "  main      - Smart main monitor detection"
+    echo "  secondary - Smart secondary monitor detection"
+    echo "  laptop    - BOE laptop display"
     exit 1
     ;;
 esac
