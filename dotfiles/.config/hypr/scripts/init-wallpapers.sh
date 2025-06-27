@@ -30,21 +30,21 @@ determine_main_monitor() {
         echo "Samsung Electric Company SE790C HTRH401237"
         return
     fi
-    
+
     # Check for Acer XZ321QU (home office main)
     local acer_connector=$(find_monitor_connector "Acer Technologies Acer XZ321QU 0x9372982E")
     if [[ -n "$acer_connector" ]]; then
         echo "Acer Technologies Acer XZ321QU 0x9372982E"
         return
     fi
-    
+
     # Check for Dell (wife's setup main)
     local dell_connector=$(find_monitor_connector "Dell Inc. DELL U2419HC F3T3KS2")
     if [[ -n "$dell_connector" ]]; then
         echo "Dell Inc. DELL U2419HC F3T3KS2"
         return
     fi
-    
+
     # Fallback to laptop if no external monitors
     echo "BOE 0x094C"
 }
@@ -57,14 +57,14 @@ determine_secondary_monitor() {
         echo "Acer Technologies XV240Y P 0x944166C5"
         return
     fi
-    
+
     # Check for wife's setup secondary
     local samsung_secondary_connector=$(find_monitor_connector "Samsung Electric Company S24F350 H4ZNA00867")
     if [[ -n "$samsung_secondary_connector" ]]; then
         echo "Samsung Electric Company S24F350 H4ZNA00867"
         return
     fi
-    
+
     # No secondary monitor available
     echo ""
 }
