@@ -11,12 +11,41 @@
     user_home: "/home/{{ original_user }}"
 
   tasks:
-    # Niri packages from main Fedora repository
+    # Enable yalter/niri COPR repository for latest Niri
+    - name: "Enable yalter/niri COPR repository for latest Niri"
+      ansible.builtin.dnf:
+        name: "dnf-plugins-core"
+        state: present
+
+    - name: "Enable yalter/niri COPR repository"
+      ansible.builtin.command:
+        cmd: dnf copr enable -y yalter/niri
+      register: copr_result
+      changed_when: "'already enabled' not in copr_result.stdout"
+      failed_when: copr_result.rc != 0
+
+    # Niri packages from COPR repository
     - name: "Install Niri core packages"
       ansible.builtin.dnf:
         name:
-          - niri # Tiling window manager
+          - niri # Latest Niri tiling window manager from COPR
           - xwayland-satellite # XWayland support for Niri
+        state: present
+
+    # XDG Desktop Portals - required for Wayland desktop integration
+    - name: "Install XDG Desktop Portal GTK"
+      ansible.builtin.dnf:
+        name: xdg-desktop-portal-gtk # Default fallback portal implementation
+        state: present
+
+    - name: "Install XDG Desktop Portal GNOME"
+      ansible.builtin.dnf:
+        name: xdg-desktop-portal-gnome # Required for screencasting support
+        state: present
+
+    - name: "Install GNOME Keyring"
+      ansible.builtin.dnf:
+        name: gnome-keyring # Secret portal implementation for app authentication
         state: present
 
     # Niri-specific tools
