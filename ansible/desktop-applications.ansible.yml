@@ -56,6 +56,24 @@
         - displaylink
         - electron
 
+    - name: Configure Obsidian DisplayLink compatibility (force X11 backend)
+      ansible.builtin.command: flatpak override --user --env=ELECTRON_OZONE_PLATFORM_HINT=x11 --nosocket=wayland md.obsidian.Obsidian
+      become: true
+      become_user: "{{ original_user }}"
+      changed_when: false
+      tags:
+        - displaylink
+        - electron
+
+    - name: Configure MS Teams DisplayLink compatibility (force X11 backend)
+      ansible.builtin.command: flatpak override --user --env=ELECTRON_OZONE_PLATFORM_HINT=x11 --nosocket=wayland com.github.IsmaelMartinez.teams_for_linux
+      become: true
+      become_user: "{{ original_user }}"
+      changed_when: false
+      tags:
+        - displaylink
+        - electron
+
     - name: Check Plexamp flatpak permissions for Wayland socket
       ansible.builtin.command: flatpak info --show-permissions com.plexamp.Plexamp
       register: plexamp_permissions
