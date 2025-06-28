@@ -32,6 +32,10 @@
   import_playbook: hyprland-desktop.ansible.yml
   tags: hyprland
 
+- name: Configure Niri desktop environment
+  import_playbook: niri-desktop.ansible.yml
+  tags: niri
+
 - name: Configure SDDM display manager
   import_playbook: sddm-display-manager.ansible.yml
   tags: sddm

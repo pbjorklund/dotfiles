@@ -22,7 +22,7 @@ backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)" # temporary backup with
 # List of files to symlink in homedir (excluding directories and install script)
 files="bashrc gitconfig tmux.conf inputrc"
 # List of .config subdirectories to symlink
-config_dirs="hypr swaylock swayidle waybar zellij mako wofi systemd kitty gh nvim opencode"
+config_dirs="hypr swaylock swayidle waybar zellij mako wofi systemd kitty gh nvim opencode niri"
 # List of system config directories that need to be copied (not symlinked) to system locations
 system_config_dirs=""
 # List of dotfiles directories to symlink (containing multiple files)

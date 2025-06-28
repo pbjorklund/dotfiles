@@ -19,71 +19,22 @@
           - hyprutils # Hyprland utilities library
           - xdg-desktop-portal-hyprland # Desktop portal for Hyprland
         state: present
-    # Additional Hyprland ecosystem packages
-    - name: "Install additional Hyprland packages"
+
+    # Hyprland-specific tools
+    - name: "Install Hyprland-specific packages"
       ansible.builtin.dnf:
         name:
           - swaybg # Wallpaper daemon for Wayland compositors
-          - waybar # Status bar for Wayland
           - wofi # Application launcher
           - mako # Notification daemon
           - swaylock # Screen locker
           - swayidle # Idle management daemon
-          - wl-clipboard # Clipboard utilities for Wayland
           - grim # Screenshot tool
           - slurp # Selection tool for screenshots
           - wf-recorder # Screen recording tool
-          - brightnessctl # Brightness control
-          - playerctl # Media player control
-          - pavucontrol # Audio control GUI
-          - network-manager-applet # Network management applet
           - jq # JSON processor for wallpaper management script
           - inotify-tools # File system event monitoring for waybar auto-restart
         state: present
-
-    # Audio system (required for Hyprland)
-    - name: "Install audio system packages"
-      ansible.builtin.dnf:
-        name:
-          - pipewire # Modern audio system
-          - pipewire-alsa # ALSA compatibility
-          - pipewire-pulseaudio # PulseAudio compatibility
-          - wireplumber # Session manager for PipeWire
-          - alsa-utils # ALSA utilities
-        state: present
-
-    # Fonts for better UI rendering
-    - name: "Install essential fonts for Hyprland"
-      ansible.builtin.dnf:
-        name:
-          - fontawesome-fonts # Icon fonts
-          - google-noto-emoji-fonts # Emoji support
-          - google-noto-sans-fonts # Unicode font coverage
-          - liberation-fonts-all # Free alternatives to Times, Arial, Courier
-          - dejavu-fonts-all # High-quality fonts
-        state: present
-
-    # Terminal and utilities
-    - name: "Install terminal and utilities"
-      ansible.builtin.dnf:
-        name:
-          - kitty # Modern GPU-accelerated terminal
-          - dolphin # File manager
-        state: present
-
-    # Enable required services
-    - name: "Enable PipeWire services for current user"
-      ansible.builtin.systemd:
-        name: "{{ item }}"
-        enabled: true
-        scope: user
-        daemon_reload: true
-      loop:
-        - pipewire.service
-        - pipewire-pulse.service
-        - wireplumber.service
-      become: false
-      become_user: "{{ original_user }}"
 
     # Configure GDM for Wayland (if using GDM)
     - name: "Check if GDM is installed and enabled"
@@ -116,9 +67,5 @@
         group: root
         mode: "0644"
 
-  handlers:
-    - name: "Restart display manager"
-      ansible.builtin.systemd:
-        name: gdm
-        state: restarted
-      when: gdm_status.status.LoadState is defined and gdm_status.status.LoadState == "loaded"
+- name: "Import common Wayland desktop environment"
+  import_playbook: wayland-desktop.ansible.yml

@@ -1,0 +1,58 @@
+---
+# Niri Desktop Environment Setup
+# Installs packages and configures system-level settings for Niri
+# NOTE: Dotfiles are deployed separately using dotfiles/install.sh
+
+- name: "Configure Niri Desktop Environment"
+  hosts: localhost
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id) }}"
+    user_home: "/home/{{ original_user }}"
+
+  tasks:
+    # Niri packages from main Fedora repository
+    - name: "Install Niri core packages"
+      ansible.builtin.dnf:
+        name:
+          - niri # Tiling window manager
+          - xwayland-satellite # XWayland support for Niri
+        state: present
+
+    # Niri-specific tools
+    - name: "Install Niri-specific packages"
+      ansible.builtin.dnf:
+        name:
+          - fuzzel # Application launcher optimized for Wayland
+          - swaylock # Screen locker
+          - swaybg # Wallpaper daemon for Wayland compositors
+          - grim # Screenshot tool
+          - slurp # Selection tool for screenshots
+        state: present
+
+    # Remove the desktop entry creation section since package provides it
+    # Configure GDM for Wayland (if using GDM)
+    - name: "Check if GDM is installed and enabled"
+      ansible.builtin.systemd:
+        name: gdm
+      register: gdm_status
+      failed_when: false
+      changed_when: false
+
+    - name: "Enable Wayland in GDM"
+      ansible.builtin.lineinfile:
+        path: /etc/gdm/custom.conf
+        regexp: "^#?WaylandEnable="
+        line: "WaylandEnable=true"
+        backup: true
+      when: gdm_status.status.LoadState is defined and gdm_status.status.LoadState == "loaded"
+
+  handlers:
+    - name: "Restart display manager"
+      ansible.builtin.systemd:
+        name: gdm
+        state: restarted
+      when: gdm_status.status.LoadState is defined and gdm_status.status.LoadState == "loaded"
+
+- name: "Import common Wayland desktop environment"
+  import_playbook: wayland-desktop.ansible.yml
