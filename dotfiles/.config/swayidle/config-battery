@@ -13,5 +13,5 @@ timeout 1200 'systemctl suspend'
 # Lock before system sleep/suspend
 before-sleep 'swaylock -f'
 
-# Ensure display is on after resume
-after-resume 'hyprctl dispatch dpms on'
+# Ensure display management is handled by scripts, not swayidle
+after-resume 'sleep 1'

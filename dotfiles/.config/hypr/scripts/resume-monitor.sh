@@ -16,15 +16,19 @@ monitor_resume() {
     while true; do
         if [[ -f "$RESUME_TRIGGER" ]]; then
             log "Resume event detected"
+
+            # Remove trigger immediately to prevent multiple processing
             rm -f "$RESUME_TRIGGER" 2>/dev/null || log "Warning: Could not remove resume trigger file"
 
-            # Give the system a moment to stabilize
-            sleep 2
+            # Give the system more time to stabilize
+            log "Waiting for system to stabilize after resume..."
+            sleep 5
 
             # Run the wake handler
             if [[ -x "$LID_SCRIPT" ]]; then
+                log "Executing wake handler..."
                 "$LID_SCRIPT" wake
-                log "Wake handler executed"
+                log "Wake handler executed successfully"
             else
                 log "Warning: Lid script not found or not executable: $LID_SCRIPT"
             fi

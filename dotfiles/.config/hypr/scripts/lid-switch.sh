@@ -17,11 +17,43 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | systemd-cat -t hypr-lid-switch
 }
 
+# Wait for Hyprland to be ready
+wait_for_hyprland() {
+    local max_attempts=20
+    local attempt=0
+
+    while [[ $attempt -lt $max_attempts ]]; do
+        if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] && hyprctl monitors >/dev/null 2>&1; then
+            return 0
+        fi
+
+        # Try to find and set the Hyprland signature
+        if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+            local signature
+            signature=$(find /tmp/hypr -name "*.lock" 2>/dev/null | head -1 | xargs basename -s .lock 2>/dev/null || true)
+            if [[ -n "$signature" ]]; then
+                export HYPRLAND_INSTANCE_SIGNATURE="$signature"
+            fi
+        fi
+
+        sleep 0.5
+        ((attempt++))
+    done
+
+    log "Warning: Hyprland not ready after $max_attempts attempts"
+    return 1
+}
+
 # Check if external monitors are connected (docked)
 is_docked() {
     local external_monitors
     # Look for specific external monitors using stable identifiers
-    external_monitors=$(hyprctl monitors -j | jq -r '.[] | select(.description | test("Samsung Electric Company|Acer Technologies")) | .name' 2>/dev/null || true)
+    # Include DisplayLink monitors (DVI-I-*) for USB-C dock support
+    external_monitors=$(hyprctl monitors -j | jq -r '.[] | select(.description | test("Samsung Electric Company|Acer Technologies|DisplayLink")) | .name' 2>/dev/null || true)
+    if [[ -z "$external_monitors" ]]; then
+        # Fallback: check for DVI-I interfaces which are typically DisplayLink
+        external_monitors=$(hyprctl monitors -j | jq -r '.[] | select(.name | test("DVI-I-")) | .name' 2>/dev/null || true)
+    fi
     [[ -n "$external_monitors" ]]
 }
 
@@ -88,6 +120,24 @@ handle_wake() {
         fi
     fi
     echo $$ >"$wake_lockfile"
+
+    # Wait for Hyprland to be ready before attempting any monitor commands
+    log "Waiting for Hyprland to be ready..."
+    if ! wait_for_hyprland; then
+        log "Error: Hyprland not ready, skipping wake handling"
+        rm -f "$wake_lockfile"
+        return 1
+    fi
+
+    # Additional wait for DisplayLink devices to stabilize
+    log "Waiting for DisplayLink devices to stabilize..."
+    sleep 3
+
+    # Check if DisplayLink service is running (for USB-C dock compatibility)
+    if systemctl is-active --quiet dlm.service 2>/dev/null; then
+        log "DisplayLink service detected, adding extra stabilization time"
+        sleep 2
+    fi
 
     # Wait for system to stabilize after wake
     sleep 2
