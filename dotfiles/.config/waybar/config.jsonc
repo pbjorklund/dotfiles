@@ -94,3 +94,4 @@
     "on-click-right": "hyprctl dispatch dpms off"
   }
 }
+// test comment
