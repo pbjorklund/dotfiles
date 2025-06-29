@@ -12,9 +12,14 @@
           - qemu-kvm # qemu-kvm - KVM/QEMU hypervisor
           - libvirt # libvirt - Virtualization management daemon
           - libvirt-daemon-kvm # libvirt-daemon-kvm - KVM support for libvirt
+          - libvirt-daemon-driver-qemu # libvirt-daemon-driver-qemu - QEMU driver for libvirt
           - virt-install # virt-install - CLI tool for creating VMs
           - virt-manager # virt-manager - GUI for managing VMs
         state: present
+
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
 
     - name: Start and enable libvirtd service
       ansible.builtin.systemd:
