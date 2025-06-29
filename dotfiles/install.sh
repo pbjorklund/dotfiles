@@ -80,6 +80,16 @@ for dotfile_dir in $dotfile_dirs; do
     ln -sf "$dir/.$dotfile_dir" ~/."$dotfile_dir"
 done
 
+# Handle local bin directory for custom scripts
+echo "Setting up local bin directory"
+mkdir -p ~/.local/bin
+if [ -e ~/.local/bin/pbproject ]; then
+    echo "Moving existing pbproject to $backup_dir"
+    mv ~/.local/bin/pbproject "$backup_dir/"
+fi
+echo "Creating symlink to pbproject script"
+ln -sf "$repo_root/bin/pbproject" ~/.local/bin/pbproject
+
 # Handle VS Code settings
 echo "Setting up VS Code settings"
 mkdir -p ~/.config/Code/User

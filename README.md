@@ -28,6 +28,8 @@ cd dotfiles && ./install.sh
   - SDDM display manager with custom theme
   - Optional components (hardware drivers, NAS, DNS)
 - **[dotfiles/](dotfiles/)** - Personal configuration files (bash, git, tmux)
+- **[bin/](bin/)** - Custom scripts and utilities
+  - `pbproject` - Project initialization tool with symlinked templates
 
 ## Features
 
