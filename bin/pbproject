@@ -8,7 +8,7 @@ DOTFILES_ROOT="$HOME/dotfiles"
 SCRIPT_NAME="$(basename "$0")"
 
 show_help() {
-    cat << EOF
+    cat <<EOF
 $SCRIPT_NAME - Project initialization and management tool
 
 USAGE:
@@ -47,6 +47,13 @@ BASE FILES:
     - AGENTS.md (AI agent instructions)
     - .roo/ (roo configuration directory)
     - .github/ (GitHub workflows and templates)
+
+TROUBLESHOOTING:
+    SSH Permission Denied when creating GitHub repository:
+    1. Check SSH key setup: ssh -T git@github.com
+    2. If needed, generate new SSH key: ssh-keygen -t ed25519 -C "your_email@example.com"
+    3. Add key to GitHub: gh ssh-key add ~/.ssh/id_ed25519.pub
+    4. Re-run: $SCRIPT_NAME newghrepo
 EOF
 }
 
@@ -67,12 +74,12 @@ check_dotfiles() {
     if [[ ! -d "$DOTFILES_ROOT" ]]; then
         error "Dotfiles directory not found at $DOTFILES_ROOT"
     fi
-    
+
     local missing_files=()
     [[ ! -f "$DOTFILES_ROOT/AGENTS.md" ]] && missing_files+=("AGENTS.md")
     [[ ! -d "$DOTFILES_ROOT/.roo" ]] && missing_files+=(".roo/")
     [[ ! -d "$DOTFILES_ROOT/.github" ]] && missing_files+=(".github/")
-    
+
     if [[ ${#missing_files[@]} -gt 0 ]]; then
         error "Missing base files in dotfiles: ${missing_files[*]}"
     fi
@@ -81,17 +88,17 @@ check_dotfiles() {
 init_project() {
     local project_name="$1"
     local project_path="${2:-$PWD/$project_name}"
-    
+
     if [[ -z "$project_name" ]]; then
         error "Project name is required"
     fi
-    
+
     check_dotfiles
-    
+
     info "Creating project directory: $project_path"
     mkdir -p "$project_path"
     cd "$project_path"
-    
+
     # Initialize git repository
     if [[ ! -d ".git" ]]; then
         info "Initializing git repository"
@@ -100,10 +107,10 @@ init_project() {
     else
         info "Git repository already exists"
     fi
-    
+
     # Create symlinks to base files
     info "Creating symlinks to base configuration files"
-    
+
     # AGENTS.md
     if [[ -f "AGENTS.md" ]] && [[ ! -L "AGENTS.md" ]]; then
         info "AGENTS.md already exists (not a symlink), skipping"
@@ -111,7 +118,7 @@ init_project() {
         ln -s "$DOTFILES_ROOT/AGENTS.md" "AGENTS.md"
         success "Symlinked AGENTS.md"
     fi
-    
+
     # .roo directory
     if [[ -d ".roo" ]] && [[ ! -L ".roo" ]]; then
         info ".roo/ already exists (not a symlink), skipping"
@@ -119,7 +126,7 @@ init_project() {
         ln -s "$DOTFILES_ROOT/.roo" ".roo"
         success "Symlinked .roo/"
     fi
-    
+
     # .github directory
     if [[ -d ".github" ]] && [[ ! -L ".github" ]]; then
         info ".github/ already exists (not a symlink), skipping"
@@ -127,10 +134,10 @@ init_project() {
         ln -s "$DOTFILES_ROOT/.github" ".github"
         success "Symlinked .github/"
     fi
-    
+
     # Create basic project structure
     if [[ ! -f "README.md" ]]; then
-        cat > "README.md" << EOF
+        cat >"README.md" <<EOF
 # $project_name
 
 ## Description
@@ -144,10 +151,10 @@ TODO: Add development setup instructions
 EOF
         success "Created README.md"
     fi
-    
+
     # Add basic .gitignore if it doesn't exist
     if [[ ! -f ".gitignore" ]]; then
-        cat > ".gitignore" << EOF
+        cat >".gitignore" <<EOF
 # Dependencies
 node_modules/
 vendor/
@@ -177,7 +184,7 @@ Thumbs.db
 EOF
         success "Created .gitignore"
     fi
-    
+
     success "Project '$project_name' initialized at $project_path"
     info "Use '$SCRIPT_NAME detach' in the project directory when you need to customize base files"
 }
@@ -185,15 +192,15 @@ EOF
 detach_project() {
     local project_path="${1:-$PWD}"
     cd "$project_path"
-    
+
     if [[ ! -d ".git" ]]; then
         error "Not in a git repository. Run this command in a project directory."
     fi
-    
+
     info "Detaching symlinked files in $project_path"
-    
+
     local detached_files=()
-    
+
     # Check and detach AGENTS.md
     if [[ -L "AGENTS.md" ]]; then
         local target=$(readlink "AGENTS.md")
@@ -201,7 +208,7 @@ detach_project() {
         cp "$target" "AGENTS.md"
         detached_files+=("AGENTS.md")
     fi
-    
+
     # Check and detach .roo directory
     if [[ -L ".roo" ]]; then
         local target=$(readlink ".roo")
@@ -209,7 +216,7 @@ detach_project() {
         cp -r "$target" ".roo"
         detached_files+=(".roo/")
     fi
-    
+
     # Check and detach .github directory
     if [[ -L ".github" ]]; then
         local target=$(readlink ".github")
@@ -217,7 +224,7 @@ detach_project() {
         cp -r "$target" ".github"
         detached_files+=(".github/")
     fi
-    
+
     if [[ ${#detached_files[@]} -eq 0 ]]; then
         info "No symlinked base files found to detach"
     else
@@ -229,19 +236,19 @@ detach_project() {
 show_status() {
     local project_path="${1:-$PWD}"
     cd "$project_path"
-    
+
     if [[ ! -d ".git" ]]; then
         error "Not in a git repository. Run this command in a project directory."
     fi
-    
+
     info "Project status for: $project_path"
     echo
-    
+
     local base_files=("AGENTS.md" ".roo" ".github")
     local symlinked=()
     local copied=()
     local missing=()
-    
+
     for file in "${base_files[@]}"; do
         if [[ -L "$file" ]]; then
             symlinked+=("$file")
@@ -251,7 +258,7 @@ show_status() {
             missing+=("$file")
         fi
     done
-    
+
     if [[ ${#symlinked[@]} -gt 0 ]]; then
         echo "🔗 Symlinked (shared with dotfiles):"
         for file in "${symlinked[@]}"; do
@@ -259,7 +266,7 @@ show_status() {
         done
         echo
     fi
-    
+
     if [[ ${#copied[@]} -gt 0 ]]; then
         echo "📁 Copied (independent):"
         for file in "${copied[@]}"; do
@@ -267,7 +274,7 @@ show_status() {
         done
         echo
     fi
-    
+
     if [[ ${#missing[@]} -gt 0 ]]; then
         echo "❓ Missing:"
         for file in "${missing[@]}"; do
@@ -275,7 +282,7 @@ show_status() {
         done
         echo
     fi
-    
+
     if [[ ${#symlinked[@]} -gt 0 ]]; then
         info "Run '$SCRIPT_NAME detach' to make copies you can customize"
     fi
@@ -284,80 +291,80 @@ show_status() {
 migrate_folder() {
     local folder_name="$1"
     local source_path="${2:-$PWD}"
-    
+
     if [[ -z "$folder_name" ]]; then
         error "Folder name is required"
     fi
-    
+
     # Handle special cases for current directory
     if [[ "$folder_name" == "." ]]; then
         local current_dir=$(basename "$PWD")
         local parent_dir=$(dirname "$PWD")
-        
+
         info "Migrating current directory '$current_dir' to new project"
-        
+
         # Create the new project in parent directory
         cd "$parent_dir"
         init_project "$current_dir" "$parent_dir/$current_dir-migrated"
-        
+
         # Copy all files except git directory to new project
         info "Copying files to new project"
         cp -r "$current_dir"/* "$current_dir-migrated/" 2>/dev/null || true
         cp -r "$current_dir"/.[^.]* "$current_dir-migrated/" 2>/dev/null || true
-        
+
         # Remove the .git directory from the copy and reinitialize
         rm -rf "$current_dir-migrated/.git"
         cd "$current_dir-migrated"
         git init
         git add .
         git commit -m "Initial commit - migrated from $current_dir"
-        
+
         success "Migrated current directory to $parent_dir/$current_dir-migrated"
         return
     fi
-    
+
     # Normalize source path
     source_path=$(realpath "$source_path")
     local source_folder="$source_path/$folder_name"
-    
+
     if [[ ! -d "$source_folder" ]]; then
         error "Folder '$folder_name' not found in '$source_path'"
     fi
-    
+
     # Check for git repository in source
     if [[ ! -d "$source_path/.git" ]]; then
         error "Source path '$source_path' is not a git repository"
     fi
-    
+
     # Create new project directory at current location
     local new_project_path="$PWD/$folder_name"
-    
+
     if [[ -e "$new_project_path" ]]; then
         error "Directory '$new_project_path' already exists"
     fi
-    
+
     info "Migrating folder '$folder_name' from '$source_path' to new project"
-    
+
     # Initialize new project
     init_project "$folder_name" "$new_project_path"
-    
+
     # Copy folder contents to new project
     info "Copying folder contents to new project"
     cp -r "$source_folder"/* "$new_project_path/" 2>/dev/null || true
     cp -r "$source_folder"/.[^.]* "$new_project_path/" 2>/dev/null || true
-    
+
     # Add and commit files
     cd "$new_project_path"
     git add .
     git commit -m "Initial commit - migrated from $source_path/$folder_name"
-    
+
     # Remove original folder from source project
     info "Removing original folder from source project"
     cd "$source_path"
     rm -rf "$folder_name"
     git add "$folder_name"
     git commit -m "Migrate $folder_name to standalone project" || true
-    
+
     success "Successfully migrated '$folder_name' to '$new_project_path'"
     info "Original folder removed from source project"
     info "New project location: $new_project_path"
@@ -366,42 +373,97 @@ migrate_folder() {
 create_github_repo() {
     local project_path="${1:-$PWD}"
     cd "$project_path"
-    
+
     if [[ ! -d ".git" ]]; then
         error "Not in a git repository. Run this command in a project directory."
     fi
-    
+
     # Check if gh CLI is installed
-    if ! command -v gh &> /dev/null; then
+    if ! command -v gh &>/dev/null; then
         error "GitHub CLI (gh) is not installed. Install it with: dnf install gh"
     fi
-    
+
     # Check if user is authenticated
-    if ! gh auth status &> /dev/null; then
+    if ! gh auth status &>/dev/null; then
         error "Not authenticated with GitHub. Run: gh auth login"
     fi
-    
-    # Get current remote origin
-    local current_remote=""
-    if git remote get-url origin &> /dev/null; then
-        current_remote=$(git remote get-url origin)
-        info "Current remote origin: $current_remote"
-        
-        if [[ "$current_remote" == *"github.com"* ]]; then
-            info "GitHub repository already configured"
-            return
-        fi
-    fi
-    
+
     # Get project name from directory
     local project_name=$(basename "$project_path")
-    
+
+    # Get current remote origin
+    local current_remote=""
+    if git remote get-url origin &>/dev/null; then
+        current_remote=$(git remote get-url origin)
+        info "Current remote origin: $current_remote"
+
+        if [[ "$current_remote" == *"github.com"* ]]; then
+            # Check if this is our expected repository
+            local username=$(gh api user --jq .login)
+            local expected_remote="git@github.com:$username/$project_name.git"
+            local expected_https="https://github.com/$username/$project_name.git"
+
+            if [[ "$current_remote" == "$expected_remote" ]] || [[ "$current_remote" == "$expected_https" ]]; then
+                info "GitHub repository already configured correctly"
+                # Try to push if there are unpushed commits
+                if git log origin/$(git branch --show-current) 2>/dev/null; then
+                    info "Repository is up to date"
+                else
+                    info "Attempting to push unpushed commits"
+                    if git push origin $(git branch --show-current); then
+                        success "Successfully pushed to existing repository"
+                    else
+                        error "Failed to push to existing repository. Check SSH keys or run manually: git push origin $(git branch --show-current)"
+                    fi
+                fi
+                return
+            else
+                info "Different GitHub repository already configured: $current_remote"
+                return
+            fi
+        fi
+    fi
+
+    # Check if repository already exists on GitHub
+    local username=$(gh api user --jq .login)
+    if gh repo view "$username/$project_name" &>/dev/null; then
+        info "Repository $username/$project_name already exists on GitHub"
+
+        # Add remote if not already configured
+        if [[ -z "$current_remote" ]]; then
+            info "Adding remote origin"
+            git remote add origin "git@github.com:$username/$project_name.git"
+            success "Added remote origin"
+        fi
+
+        # Try to push
+        info "Attempting to push to existing repository"
+        if git push -u origin $(git branch --show-current); then
+            success "Successfully pushed to existing repository"
+            success "Repository URL: https://github.com/$username/$project_name"
+        else
+            error "Failed to push to repository. Check SSH keys or run manually: git push -u origin $(git branch --show-current)"
+        fi
+        return
+    fi
+
     info "Creating private GitHub repository: $project_name"
-    
-    # Create GitHub repository
-    if gh repo create "$project_name" --private --source=. --remote=origin --push; then
-        success "GitHub repository created and code pushed"
-        success "Repository URL: https://github.com/$(gh api user --jq .login)/$project_name"
+
+    # Create GitHub repository without immediate push
+    if gh repo create "$project_name" --private --source=. --remote=origin; then
+        success "GitHub repository created successfully"
+
+        # Try to push separately so we can handle failures gracefully
+        info "Pushing code to repository"
+        if git push -u origin $(git branch --show-current); then
+            success "Code pushed successfully"
+            success "Repository URL: https://github.com/$username/$project_name"
+        else
+            info "Repository created but push failed"
+            info "You can push manually later with: git push -u origin $(git branch --show-current)"
+            info "Check your SSH keys: ssh -T git@github.com"
+            success "Repository URL: https://github.com/$username/$project_name"
+        fi
     else
         error "Failed to create GitHub repository"
     fi
@@ -409,35 +471,35 @@ create_github_repo() {
 
 main() {
     case "${1:-}" in
-        "init")
-            shift
-            init_project "$@"
-            ;;
-        "detach")
-            shift
-            detach_project "$@"
-            ;;
-        "status")
-            shift
-            show_status "$@"
-            ;;
-        "migrate")
-            shift
-            migrate_folder "$@"
-            ;;
-        "newghrepo")
-            shift
-            create_github_repo "$@"
-            ;;
-        "--help"|"-h"|"help")
-            show_help
-            ;;
-        "")
-            error "No command specified. Use '$SCRIPT_NAME --help' for usage information."
-            ;;
-        *)
-            error "Unknown command: $1. Use '$SCRIPT_NAME --help' for usage information."
-            ;;
+    "init")
+        shift
+        init_project "$@"
+        ;;
+    "detach")
+        shift
+        detach_project "$@"
+        ;;
+    "status")
+        shift
+        show_status "$@"
+        ;;
+    "migrate")
+        shift
+        migrate_folder "$@"
+        ;;
+    "newghrepo")
+        shift
+        create_github_repo "$@"
+        ;;
+    "--help" | "-h" | "help")
+        show_help
+        ;;
+    "")
+        error "No command specified. Use '$SCRIPT_NAME --help' for usage information."
+        ;;
+    *)
+        error "Unknown command: $1. Use '$SCRIPT_NAME --help' for usage information."
+        ;;
     esac
 }
 

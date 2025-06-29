@@ -19,7 +19,7 @@ A project initialization and management tool that creates new projects with syml
 # Create new project with base configuration
 pbproject init my-new-project
 
-# Create project at specific location  
+# Create project at specific location
 pbproject init my-app ~/projects/my-app
 
 # Check current project status
@@ -31,7 +31,7 @@ pbproject detach
 # Migrate folder from existing project to new standalone project
 pbproject migrate batch_writer ~/Projects/cli-tool
 
-# Migrate current directory to new project  
+# Migrate current directory to new project
 pbproject migrate .
 
 # Create private GitHub repository for current project
@@ -43,7 +43,7 @@ pbproject newghrepo
 Projects are initialized with symlinks to these files from the dotfiles repository:
 
 - **AGENTS.md**: AI agent instructions and context
-- **.roo/**: Roo configuration directory  
+- **.roo/**: Roo configuration directory
 - **.github/**: GitHub workflows, templates, and repository configuration
 
 ### Workflow
@@ -56,6 +56,7 @@ Projects are initialized with symlinks to these files from the dotfiles reposito
 6. **Independent development**: Continue building with project-specific configuration
 
 This approach allows you to:
+
 - Rapidly prototype with consistent tooling
 - Keep small projects lightweight with shared configuration
 - Extract growing components from monorepos into standalone projects
