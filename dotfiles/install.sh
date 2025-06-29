@@ -28,7 +28,9 @@ system_config_dirs=""
 # List of dotfiles directories to symlink (containing multiple files)
 dotfile_dirs=""
 # System files that need to be copied (not symlinked) to system locations
-system_files_to_copy=".config/hypr/scripts/systemd-sleep-hook.sh:/lib/systemd/system-sleep/hyprland-lid-state"
+system_files_to_copy=".config/hypr/scripts/systemd-sleep-hook.sh:/lib/systemd/system-sleep/hyprland-lid-state .config/hypr/scripts/disable-usb-wakeup.sh:/usr/local/bin/disable-usb-wakeup.sh"
+# System service files that need to be installed
+system_services=".config/systemd/system/disable-usb-wakeup.service:/etc/systemd/system/disable-usb-wakeup.service"
 # VS Code settings file (user settings location)
 vscode_settings_file=".config/Code/User/settings.json"
 
@@ -120,6 +122,42 @@ for system_file_mapping in $system_files_to_copy; do
         sudo chmod +x "$dest_file"
     else
         echo "⚠ Warning: System file $source_file not found"
+    fi
+done
+
+# Install system service files
+for service_mapping in $system_services; do
+    source_service="${service_mapping%:*}"
+    dest_service="${service_mapping#*:}"
+
+    if [[ -f "$dir/$source_service" ]]; then
+        echo "Installing system service: $source_service -> $dest_service"
+        if [[ -f "$dest_service" ]]; then
+            echo "Moving existing $dest_service to $backup_dir"
+            sudo cp "$dest_service" "$backup_dir/"
+        fi
+        sudo cp "$dir/$source_service" "$dest_service"
+
+        # Extract service name from destination path
+        service_name=$(basename "$dest_service")
+        echo "Enabling and starting system service: $service_name"
+
+        if sudo systemctl daemon-reload; then
+            if sudo systemctl enable "$service_name"; then
+                echo "Enabled $service_name"
+                if sudo systemctl start "$service_name"; then
+                    echo "Started $service_name"
+                else
+                    echo "⚠ Warning: Failed to start $service_name"
+                fi
+            else
+                echo "⚠ Warning: Failed to enable $service_name"
+            fi
+        else
+            echo "⚠ Warning: Failed to reload systemd daemon"
+        fi
+    else
+        echo "⚠ Warning: System service file $source_service not found"
     fi
 done
 
