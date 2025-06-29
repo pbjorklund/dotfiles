@@ -1,0 +1,40 @@
+---
+- name: Enable minimal KVM/QEMU on Fedora 42
+  hosts: localhost
+  become: true
+  vars:
+    vm_user: "{{ ansible_env.SUDO_USER }}"
+
+  tasks:
+    - name: Install minimal KVM packages
+      ansible.builtin.dnf:
+        name:
+          - qemu-kvm # qemu-kvm - KVM/QEMU hypervisor
+          - libvirt # libvirt - Virtualization management daemon
+          - libvirt-daemon-kvm # libvirt-daemon-kvm - KVM support for libvirt
+          - virt-install # virt-install - CLI tool for creating VMs
+          - virt-manager # virt-manager - GUI for managing VMs
+        state: present
+
+    - name: Start and enable libvirtd service
+      ansible.builtin.systemd:
+        name: libvirtd
+        state: started
+        enabled: true
+
+    - name: Add user to virtualization groups
+      ansible.builtin.user:
+        name: "{{ vm_user }}"
+        groups: libvirt,kvm,qemu
+        append: true
+
+    - name: Enable nested virtualization for Intel (ThinkPad X1 Carbon Gen 11)
+      ansible.builtin.lineinfile:
+        path: /etc/modprobe.d/kvm.conf
+        line: "options kvm_intel nested=1"
+        create: true
+        mode: "0644"
+
+    - name: Setup complete notification
+      ansible.builtin.debug:
+        msg: "KVM setup complete! Log out and back in for group membership to take effect."
