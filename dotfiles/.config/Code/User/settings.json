@@ -30,7 +30,9 @@
   "workbench.activityBar.location": "bottom",
   "workbench.panel.defaultLocation": "left",
   "workbench.sideBar.location": "left",
-  ".menuBarVisibility": "toggle",
+  "window.titleBarStyle": "custom",
+  "window.commandCenter": false,
+  "window.layoutControl.enabled": true,
   "breadcrumbs.enabled": false,
   "workbench.statusBar.visible": true,
   "terminal.integrated.fontFamily": "'FiraCode Nerd Font', 'Fira Code', 'Inter', monospace",
@@ -131,5 +133,8 @@
       "name": "Soft Teal",
       "value": "#8fb3b3"
     }
-  ]
+  ],
+  "window.menuBarVisibility": "compact",
+  "workbench.navigationControl.enabled": false,
+  "workbench.layoutControl.enabled": false
 }

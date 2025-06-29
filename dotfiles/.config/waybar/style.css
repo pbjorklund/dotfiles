@@ -4,8 +4,8 @@
  */
 
 * {
-    font-family: 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-    font-size: 10px;
+    font-family: 'Inter', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
+    font-size: 13px;
 }
 
 @keyframes blink {
@@ -19,7 +19,6 @@ window#waybar {
     background-color: transparent;
     border: none;
     box-shadow: none;
-    color: #e0e0e0;
 }
 
 /* Floating pill style for modules */
@@ -40,7 +39,7 @@ window#waybar {
 #idle_inhibitor,
 #scratchpad,
 #power-profiles-daemon,
-#mpd {
+#mpris {
     background-color: transparent;
     color: #e0e0e0;
     padding: 0 14px;

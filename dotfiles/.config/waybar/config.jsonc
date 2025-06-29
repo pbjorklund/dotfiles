@@ -4,16 +4,18 @@
 {
   "height": 32,
   "spacing": 0,
-  "modules-left": ["hyprland/workspaces"],
-  "modules-center": [],
+  "modules-left": ["hyprland/workspaces", "mpris"],
+  "modules-center": ["hyprland/window"],
   "modules-right": [
     "network",
-    "custom/language",
+    "hyprland/language",
     "pulseaudio",
     "cpu",
     "temperature",
     "battery",
     "clock",
+    "idle_inhibitor",
+    "power-profiles-daemon",
     "custom/power"
   ],
 
@@ -92,6 +94,64 @@
     "tooltip": "Sleep Computer",
     "on-click": "swaylock -f && systemctl suspend",
     "on-click-right": "hyprctl dispatch dpms off"
+  },
+
+  "hyprland/language": {
+    "format": "{}",
+    "format-en": "EN",
+    "format-sv": "SE",
+    "keyboard-name": "at-translated-set-2-keyboard"
+  },
+
+  "hyprland/window": {
+    "format": "{}",
+    "rewrite": {
+      "(.*) — Zen Browser": "$1",
+      "(.*) - (.*) - Visual Studio (.*)": "$2",
+      "(.*) - fish": "> [$1]",
+      "tmux": "> [$1]"
+    },
+    "separate-outputs": true
+  },
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "",
+      "deactivated": ""
+    }
+  },
+
+  "mpris": {
+    "format": "🎵 {artist} - {album} - {title}",
+    "format-paused": "🎵",
+    "player-icons": {
+      "default": "▶",
+      "mpv": "🎵"
+    },
+    "status-icons": {
+      "paused": "⏸"
+    },
+    "ignored-players": [
+      "firefox",
+      "chromium",
+      "brave",
+      "librewolf",
+      "qutebrowser",
+      "zen",
+      "zen-browser"
+    ]
+  },
+
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+    "tooltip": true,
+    "format-icons": {
+      "default": "",
+      "performance": "",
+      "balanced": "",
+      "power-saver": ""
+    }
   }
 }
-// test comment
