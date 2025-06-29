@@ -1,157 +1,184 @@
-// Waybar Configuration for Hyprland
-// Features: Workspaces, clock, system monitoring, keyboard layout, wifi selector
-// JSON with Comments format for better documentation
-{
-  "height": 32,
-  "spacing": 0,
-  "modules-left": ["hyprland/workspaces", "mpris"],
-  "modules-center": ["hyprland/window"],
-  "modules-right": [
-    "network",
-    "hyprland/language",
-    "pulseaudio",
-    "cpu",
-    "temperature",
-    "battery",
-    "clock",
-    "idle_inhibitor",
-    "power-profiles-daemon",
-    "custom/power"
-  ],
+// Waybar Configuration with Per-Monitor Setup
+// Primary monitor gets full bar, secondary monitors get workspace-only bars
+[
+  // Primary monitor configuration (full featured) - matches actual outputs
+  {
+    "output": [
+      "Dell Inc. DELL U2419HC F3T3KS2",
+      "Samsung Electric Company SE790C",
+      "Acer Technologies Acer XZ321QU 0x9372982E",
+      "eDP-1"
+    ],
+    "height": 32,
+    "spacing": 0,
+    "modules-left": ["hyprland/workspaces", "mpris"],
+    "modules-center": ["hyprland/window"],
+    "modules-right": [
+      "network",
+      "hyprland/language",
+      "pulseaudio",
+      "cpu",
+      "temperature",
+      "battery",
+      "clock",
+      "idle_inhibitor",
+      "power-profiles-daemon",
+      "custom/power"
+    ],
 
-  "hyprland/workspaces": {
-    "disable-scroll": false,
-    "all-outputs": false,
-    "format": "{name}"
-  },
-
-  "clock": {
-    "format": " {:%B %d %H:%M}",
-    "format-alt": " {:%Y-%m-%d}",
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-    "interval": 1
-  },
-
-  "cpu": {
-    "format": "󰻠 {usage}%",
-    "interval": 2,
-    "tooltip": false
-  },
-
-  "temperature": {
-    "critical-threshold": 60,
-    "format": " {temperatureC}°C",
-    "format-critical": " {temperatureC}°C !",
-    "interval": 5
-  },
-
-  "battery": {
-    "states": {
-      "warning": 30,
-      "critical": 15
+    "hyprland/workspaces": {
+      "disable-scroll": false,
+      "all-outputs": false,
+      "format": "{name}"
     },
-    "format": " {capacity}%",
-    "format-charging": "󰂄 {capacity}%",
-    "format-plugged": "󰚥 {capacity}%",
-    "format-full": "󰁹 {capacity}%",
-    "format-warning": "󰂃 {capacity}%",
-    "format-critical": "󰁺 {capacity}%",
-    "interval": 30,
-    "tooltip-format": "{timeTo}, {power}W"
-  },
 
-  "pulseaudio": {
-    "format": "󰕾 {volume}%",
-    "format-muted": "󰖁 muted",
-    "format-bluetooth": "󰂯 {volume}%",
-    "format-bluetooth-muted": "󰂲 muted",
-    "on-click": "pavucontrol",
-    "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
-    "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
-    "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
-    "scroll-step": 5,
-    "tooltip": true,
-    "tooltip-format": "Volume: {volume}%",
-    "interval": 5
-  },
-
-  "network": {
-    "format-wifi": "󰖩 {essid} ({signalStrength}%)",
-    "format-ethernet": "󰈀",
-    "format-linked": "󰈂 No IP",
-    "format-disconnected": "󰖪 Disconnected",
-    "format-alt": "{ifname}: {ipaddr}/{cidr}",
-    "tooltip-format": "{ifname} via {gwaddr}",
-    "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ifname}: {ipaddr}/{cidr}",
-    "tooltip-format-ethernet": "Ethernet: {ifname}\n{ipaddr}/{cidr}",
-    "tooltip-format-disconnected": "Disconnected",
-    "on-click": "nm-connection-editor",
-    "interval": 10
-  },
-
-  "custom/power": {
-    "format": "⏻",
-    "tooltip": "Sleep Computer",
-    "on-click": "swaylock -f && systemctl suspend",
-    "on-click-right": "hyprctl dispatch dpms off"
-  },
-
-  "hyprland/language": {
-    "format": "{}",
-    "format-en": "EN",
-    "format-sv": "SE",
-    "keyboard-name": "at-translated-set-2-keyboard"
-  },
-
-  "hyprland/window": {
-    "format": "{}",
-    "rewrite": {
-      "(.*) — Zen Browser": "$1",
-      "(.*) - (.*) - Visual Studio (.*)": "$2",
-      "(.*) - fish": "> [$1]",
-      "tmux": "> [$1]"
+    "clock": {
+      "format": " {:%B %d %H:%M}",
+      "format-alt": " {:%Y-%m-%d}",
+      "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+      "interval": 1
     },
-    "separate-outputs": true
-  },
 
-  "idle_inhibitor": {
-    "format": "{icon}",
-    "format-icons": {
-      "activated": "",
-      "deactivated": ""
+    "cpu": {
+      "format": "󰻠 {usage}%",
+      "interval": 2,
+      "tooltip": ["CPU Usage", "{usage}%"]
+    },
+
+    "temperature": {
+      "critical-threshold": 60,
+      "format": " {temperatureC}°C",
+      "format-critical": " {temperatureC}°C !",
+      "interval": 5
+    },
+
+    "battery": {
+      "states": {
+        "warning": 30,
+        "critical": 15
+      },
+      "format": " {capacity}%",
+      "format-charging": "󰂄 {capacity}%",
+      "format-plugged": "󰚥 {capacity}%",
+      "format-full": "󰁹 {capacity}%",
+      "format-warning": "󰂃 {capacity}%",
+      "format-critical": "󰁺 {capacity}%",
+      "interval": 30,
+      "tooltip-format": "{timeTo}, {power}W"
+    },
+
+    "pulseaudio": {
+      "format": "󰕾 {volume}%",
+      "format-muted": "󰖁 muted",
+      "format-bluetooth": "󰂯 {volume}%",
+      "format-bluetooth-muted": "󰂲 muted",
+      "on-click": "pavucontrol",
+      "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+      "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+      "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
+      "scroll-step": 5,
+      "tooltip": true,
+      "tooltip-format": "Volume: {volume}%",
+      "interval": 5
+    },
+
+    "network": {
+      "format-wifi": "󰖩 {essid} ({signalStrength}%)",
+      "format-ethernet": "󰈀",
+      "format-linked": "󰈂 No IP",
+      "format-disconnected": "󰖪 Disconnected",
+      "format-alt": "{ifname}: {ipaddr}/{cidr}",
+      "tooltip-format": "{ifname} via {gwaddr}",
+      "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ifname}: {ipaddr}/{cidr}",
+      "tooltip-format-ethernet": "Ethernet: {ifname}\n{ipaddr}/{cidr}",
+      "tooltip-format-disconnected": "Disconnected",
+      "on-click": "nm-connection-editor",
+      "interval": 10
+    },
+
+    "custom/power": {
+      "format": "⏻",
+      "tooltip": "Sleep Computer",
+      "on-click": "swaylock -f && systemctl suspend",
+      "on-click-right": "hyprctl dispatch dpms off"
+    },
+
+    "hyprland/language": {
+      "format": "{}",
+      "format-en": "EN",
+      "format-sv": "SE",
+      "keyboard-name": "at-translated-set-2-keyboard"
+    },
+
+    "hyprland/window": {
+      "format": "{}",
+      "rewrite": {
+        "(.*) — Zen Browser": "$1",
+        "(.*) - (.*) - Visual Studio (.*)": "$2",
+        "(.*) - fish": "> [$1]",
+        "tmux": "> [$1]"
+      },
+      "separate-outputs": true
+    },
+
+    "idle_inhibitor": {
+      "format": "{icon}",
+      "format-icons": {
+        "activated": "",
+        "deactivated": ""
+      }
+    },
+
+    "mpris": {
+      "format": "🎵 {artist} - {album} - {title}",
+      "format-paused": "🎵",
+      "player-icons": {
+        "default": "▶",
+        "mpv": "🎵"
+      },
+      "status-icons": {
+        "paused": "⏸"
+      },
+      "ignored-players": [
+        "firefox",
+        "chromium",
+        "brave",
+        "librewolf",
+        "qutebrowser",
+        "zen",
+        "zen-browser"
+      ]
+    },
+
+    "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+      "tooltip": true,
+      "format-icons": {
+        "default": "",
+        "performance": "",
+        "balanced": "",
+        "power-saver": ""
+      }
     }
   },
 
-  "mpris": {
-    "format": "🎵 {artist} - {album} - {title}",
-    "format-paused": "🎵",
-    "player-icons": {
-      "default": "▶",
-      "mpv": "🎵"
-    },
-    "status-icons": {
-      "paused": "⏸"
-    },
-    "ignored-players": [
-      "firefox",
-      "chromium",
-      "brave",
-      "librewolf",
-      "qutebrowser",
-      "zen",
-      "zen-browser"
-    ]
-  },
+  // Secondary monitors configuration (workspace-only) - matches your actual monitors
+  {
+    "output": [
+      "Samsung Electric Company S24F350 H4ZNA00867",
+      "Acer Technologies XV240Y P 0x944166C5"
+    ],
+    "height": 32,
+    "spacing": 0,
+    "modules-left": ["hyprland/workspaces"],
+    "modules-center": ["hyprland/window"],
+    "modules-right": [],
 
-  "power-profiles-daemon": {
-    "format": "{icon}",
-    "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
-    "tooltip": true,
-    "format-icons": {
-      "default": "",
-      "performance": "",
-      "balanced": "",
-      "power-saver": ""
+    "hyprland/workspaces": {
+      "disable-scroll": false,
+      "all-outputs": false,
+      "format": "{name}"
     }
   }
-}
+]
