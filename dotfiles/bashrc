@@ -15,9 +15,6 @@ HISTSIZE=10000        # Commands in memory
 HISTFILESIZE=20000    # Commands in history file
 shopt -s checkwinsize # Update window size after each command
 
-# Editor Configuration
-export EDITOR=nvim # Use neovim as default editor
-
 # Git branch detection function for prompt
 git_branch() {
     local branch
@@ -47,54 +44,59 @@ export MANPAGER='cat'                    # Use cat for manual pages
 alias systemctl='systemctl --no-pager'   # Force systemctl to not use pager
 alias journalctl='journalctl --no-pager' # Force journalctl to not use pager
 
-# Conditional Loading
-# Load additional configurations if they exist
-[[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
-[[ -f ~/.bash_local ]] && source ~/.bash_local
+if [[ $(whoami) != "vscode" ]]; then
+    echo "not vscode user, loading additional configurations..."
+    # Editor Configuration
+    export EDITOR=nvim # Use neovim as default editor
 
-# Created by `pipx` on 2025-06-16 12:33:17
-export PATH="$PATH:/home/pbjorklund/.local/bin"
-. "$HOME/.cargo/env"
-export PATH="$HOME/.cargo/bin:$PATH"
+    # Conditional Loading
+    # Load additional configurations if they exist
+    [[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
+    [[ -f ~/.bash_local ]] && source ~/.bash_local
 
-# Disable crash reporting
-export GNOME_DISABLE_CRASH_DIALOG=1
+    # Created by `pipx` on 2025-06-16 12:33:17
+    export PATH="$PATH:/home/pbjorklund/.local/bin"
+    . "$HOME/.cargo/env"
+    export PATH="$HOME/.cargo/bin:$PATH"
 
-# Reduce information leakage
-umask 077 # Restrictive file permissions by default
+    # Disable crash reporting
+    export GNOME_DISABLE_CRASH_DIALOG=1
 
-# Secure temporary files
-export TMPDIR="/tmp/$(whoami)"
-mkdir -p "$TMPDIR"
-chmod 700 "$TMPDIR"
+    # Reduce information leakage
+    umask 077 # Restrictive file permissions by default
 
-# npm configuration - use home directory for global packages to avoid permissions issues
-export NPM_CONFIG_PREFIX=~/.npm-global
-export PATH=~/.npm-global/bin:$PATH
+    # Secure temporary files
+    export TMPDIR="/tmp/$(whoami)"
+    mkdir -p "$TMPDIR"
+    chmod 700 "$TMPDIR"
 
-# 1Password integration - only for non-vscode users
-if [[ "$USER" != "vscode" ]]; then
+    # npm configuration - use home directory for global packages to avoid permissions issues
+    export NPM_CONFIG_PREFIX=~/.npm-global
+    export PATH=~/.npm-global/bin:$PATH
+
+    # 1Password integration - only for non-vscode users
     export SSH_AUTH_SOCK=~/.1password/agent.sock
     export OP_BIOMETRIC_UNLOCK_ENABLED=true
+
+    # GitHub token function - only loads when needed
+    gh_token() {
+        if [ -z "$GH_TOKEN" ]; then
+            export GH_TOKEN=$(op item get "GitHub Personal Access Token" --fields credential --reveal 2>/dev/null)
+        fi
+        echo "$GH_TOKEN"
+    }
+
+    # SSH wrapper to handle terminal compatibility
+    ssh() {
+        # If current TERM is kitty-based, use xterm-256color for SSH
+        if [[ "$TERM" == *"kitty"* ]]; then
+            env TERM=xterm-256color command ssh "$@"
+        else
+            command ssh "$@"
+        fi
+    }
+
+    # opencode
+    export PATH=/home/pbjorklund/.opencode/bin:$PATH
+
 fi
-
-# GitHub token function - only loads when needed
-gh_token() {
-    if [ -z "$GH_TOKEN" ]; then
-        export GH_TOKEN=$(op item get "GitHub Personal Access Token" --fields credential --reveal 2>/dev/null)
-    fi
-    echo "$GH_TOKEN"
-}
-
-# SSH wrapper to handle terminal compatibility
-ssh() {
-    # If current TERM is kitty-based, use xterm-256color for SSH
-    if [[ "$TERM" == *"kitty"* ]]; then
-        env TERM=xterm-256color command ssh "$@"
-    else
-        command ssh "$@"
-    fi
-}
-
-# opencode
-export PATH=/home/pbjorklund/.opencode/bin:$PATH
