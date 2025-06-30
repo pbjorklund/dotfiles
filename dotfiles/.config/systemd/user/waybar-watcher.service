@@ -1,13 +1,19 @@
 [Unit]
 Description=Waybar config file watcher
-After=waybar.service
+After=waybar.service graphical-session.target
 Requires=waybar.service
+PartOf=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash -c "inotifywait -m -e modify,move,create,delete %h/.config/waybar/ --format='%%w%%f %%e' | while read file event; do if [[ \"$file\" =~ \\.(jsonc|css)$ ]]; then echo \"Config changed: $file ($event)\"; systemctl --user restart waybar.service; fi; done"
+# Import environment from the graphical session
+ExecStartPre=/bin/bash -c 'systemctl --user import-environment'
+# Use SIGUSR2 to reload waybar instead of restarting the service
+ExecStart=/bin/bash -c "inotifywait -m -e modify,move,create,delete %h/.config/waybar/ --format='%%w%%f %%e' | while read file event; do if [[ \"$file\" =~ \\.(jsonc|css)$ ]]; then echo \"Config changed: $file ($event)\"; pkill -SIGUSR2 waybar || systemctl --user reload waybar.service; fi; done"
 Restart=always
 RestartSec=3
+# Ensure we have access to the user session environment
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 
 [Install]
 WantedBy=graphical-session.target

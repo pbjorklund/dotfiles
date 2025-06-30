@@ -12,16 +12,13 @@
     "height": 32,
     "spacing": 0,
     "modules-left": ["hyprland/workspaces", "mpris"],
-    "modules-center": ["hyprland/window"],
+    "modules-center": ["clock"],
     "modules-right": [
       "network",
-      "bluetooth",
       "hyprland/language",
       "pulseaudio",
-      "cpu",
       "temperature",
       "battery",
-      "clock",
       "idle_inhibitor",
       "power-profiles-daemon",
       "custom/power"
@@ -38,12 +35,6 @@
       "format-alt": " {:%Y-%m-%d}",
       "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
       "interval": 1
-    },
-
-    "cpu": {
-      "format": "󰻠 {usage}%",
-      "interval": 2,
-      "tooltip": ["CPU Usage", "{usage}%"]
     },
 
     "temperature": {
@@ -84,7 +75,7 @@
     },
 
     "network": {
-      "format-wifi": "󰖩 {essid} ({signalStrength}%)",
+      "format-wifi": "󰖩  ({signalStrength}%)",
       "format-ethernet": "󰈀",
       "format-linked": "󰈂 No IP",
       "format-disconnected": "󰖪 Disconnected",
@@ -95,21 +86,6 @@
       "tooltip-format-disconnected": "Disconnected",
       "on-click": "nm-connection-editor",
       "interval": 10
-    },
-
-    "bluetooth": {
-      "format": "󰂯 {status}",
-      "format-disabled": "󰂲",
-      "format-off": "󰂲",
-      "format-on": "󰂯",
-      "format-connected": "󰂱 {device_alias}",
-      "format-connected-battery": "󰂱 {device_alias} ({device_battery_percentage}%)",
-      "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
-      "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
-      "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
-      "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t({device_battery_percentage}%)",
-      "on-click": "gnome-control-center bluetooth",
-      "on-click-right": "bluetoothctl power toggle"
     },
 
     "custom/power": {
@@ -126,17 +102,6 @@
       "keyboard-name": "at-translated-set-2-keyboard"
     },
 
-    "hyprland/window": {
-      "format": "{}",
-      "rewrite": {
-        "(.*) — Zen Browser": "$1",
-        "(.*) - (.*) - Visual Studio (.*)": "$2",
-        "(.*) - fish": "> [$1]",
-        "tmux": "> [$1]"
-      },
-      "separate-outputs": true
-    },
-
     "idle_inhibitor": {
       "format": "{icon}",
       "format-icons": {
@@ -146,7 +111,7 @@
     },
 
     "mpris": {
-      "format": "🎵 {artist} - {album} - {title}",
+      "format": "🎵 {artist} - {title}",
       "format-paused": "🎵",
       "player-icons": {
         "default": "▶",

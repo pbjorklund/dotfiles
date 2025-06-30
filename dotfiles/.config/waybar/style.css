@@ -5,7 +5,7 @@
 
 * {
     font-family: 'Inter', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 @keyframes blink {
@@ -21,8 +21,8 @@ window#waybar {
     box-shadow: none;
 }
 
+#clock { }
 /* Floating pill style for modules */
-#clock,
 #battery,
 #cpu,
 #memory,
@@ -39,7 +39,11 @@ window#waybar {
 #mode,
 #idle_inhibitor,
 #scratchpad,
-#power-profiles-daemon,
+#power-profiles-daemon
+{
+    margin: 0 10px 0 0;
+}
+
 #mpris {
     background-color: transparent;
     color: #e0e0e0;
@@ -49,17 +53,8 @@ window#waybar {
 
 /* Workspace styling for Hyprland */
 
-#workspaces button {
-    transition: all 0.2s ease;
-    font-size: 8px;
-    margin: 0 4px;
-    border: none;
-}
-
 #workspaces button.active {
-    color: #fff;
     background: rgba(80, 120, 140, 0.7);
-
 }
 
 #workspaces button.urgent {
@@ -67,18 +62,6 @@ window#waybar {
     color: #fff;
     border: none;
     animation: blink 1s infinite;
-}
-
-#workspaces button:hover {
-    background: rgba(120, 140, 160, 0.8);
-    color: #fff;
-    min-width: 14px;
-    min-height: 14px;
-}
-
-#workspaces button.visible {
-    background: rgba(80, 120, 140, 0.7);
-    color: #ddd;
 }
 
 /* Remove harsh colors from battery, cpu, etc. */
@@ -96,35 +79,7 @@ window#waybar {
     color: #222;
 }
 
-/* Bluetooth styling */
-#bluetooth {
-    color: #81a1c1;
-}
-
-#bluetooth.disabled,
-#bluetooth.off {
-    color: #888;
-}
-
-#bluetooth.connected {
-    color: #88c0d0;
-    background-color: rgba(136, 192, 208, 0.1);
-}
-
-#bluetooth:hover {
-    background: rgba(129, 161, 193, 0.2);
-    transition: background 0.3s ease;
-}
-
 /* Power button styling with right margin */
 #custom-power {
-    margin-right: 10px;
-    padding: 0 8px;
-    border-radius: 12px;
-    min-width: 20px;
-}
-
-#custom-power:hover {
-    background: rgba(80, 120, 140, 0.7);
-    transition: background 0.3s ease;
+    margin-right: 28px;
 }
