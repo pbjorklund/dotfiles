@@ -50,5 +50,5 @@
       become: true
       become_user: "{{ original_user }}"
 
-    # Note: Power management is now handled by Hyprland via swayidle
+    # Note: Power management is now handled by Hyprland via hypridle
     # See dotfiles/.config/hypr/conf/power.conf for idle/sleep configuration

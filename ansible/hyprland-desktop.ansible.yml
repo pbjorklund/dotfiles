@@ -28,7 +28,7 @@
           - wofi # Application launcher
           - mako # Notification daemon
           - swaylock # Screen locker
-          - swayidle # Idle management daemon
+          - hypridle # Idle management daemon for Hyprland
           - grim # Screenshot tool
           - slurp # Selection tool for screenshots
           - wf-recorder # Screen recording tool
