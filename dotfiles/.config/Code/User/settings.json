@@ -134,7 +134,7 @@
       "value": "#8fb3b3"
     }
   ],
-  "window.menuBarVisibility": "compact",
   "workbench.navigationControl.enabled": false,
-  "workbench.layoutControl.enabled": false
+  "workbench.layoutControl.enabled": false,
+  "chat.agent.maxRequests": 50
 }

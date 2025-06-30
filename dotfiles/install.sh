@@ -22,13 +22,13 @@ backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)" # temporary backup with
 # List of files to symlink in homedir (excluding directories and install script)
 files="bashrc gitconfig tmux.conf inputrc"
 # List of .config subdirectories to symlink
-config_dirs="hypr swaylock swayidle waybar zellij mako wofi systemd kitty gh nvim opencode niri"
+config_dirs="hypr waybar zellij mako wofi systemd kitty gh nvim opencode niri"
 # List of system config directories that need to be copied (not symlinked) to system locations
 system_config_dirs=""
 # List of dotfiles directories to symlink (containing multiple files)
 dotfile_dirs=""
 # System files that need to be copied (not symlinked) to system locations
-system_files_to_copy=".config/hypr/scripts/systemd-sleep-hook.sh:/lib/systemd/system-sleep/hyprland-lid-state .config/hypr/scripts/disable-usb-wakeup.sh:/usr/local/bin/disable-usb-wakeup.sh"
+system_files_to_copy=".config/hypr/scripts/disable-usb-wakeup.sh:/usr/local/bin/disable-usb-wakeup.sh"
 # System service files that need to be installed
 system_services=".config/systemd/system/disable-usb-wakeup.service:/etc/systemd/system/disable-usb-wakeup.service"
 # VS Code settings file (user settings location)
@@ -180,20 +180,6 @@ echo ""
 echo "Setting up systemd user services..."
 if systemctl --user daemon-reload; then
     echo "Reloaded systemd user daemon"
-
-    # Enable and start the resume monitor service if it exists
-    if [[ -f ~/.config/systemd/user/hyprland-resume-monitor.service ]]; then
-        if systemctl --user enable hyprland-resume-monitor.service; then
-            echo "Enabled hyprland-resume-monitor.service"
-            if systemctl --user start hyprland-resume-monitor.service; then
-                echo "Started hyprland-resume-monitor.service"
-            else
-                echo "⚠ Warning: Failed to start hyprland-resume-monitor.service"
-            fi
-        else
-            echo "⚠ Warning: Failed to enable hyprland-resume-monitor.service"
-        fi
-    fi
 
     # Enable and start the waybar watcher service if it exists
     if [[ -f ~/.config/systemd/user/waybar-watcher.service ]]; then

@@ -30,13 +30,13 @@ Smart docking-aware power management for ThinkPad X1 Carbon Gen 11.
 
 - **`hyprland.conf`**: Main configuration with lid switch bindings and Super+L lock keybinding
 - **`scripts/lid-switch.sh`**: Smart lid switch handler script
-- **`../swaylock/config`**: Screen locker configuration with minimal black theme
+- **`hyprlock.conf`**: Screen locker configuration with modern styling
 
 ## Prerequisites
 
 - `jq` - JSON parsing for monitor detection
 - `hyprctl` - Hyprland control utility
-- `swaylock` - Screen locker for Wayland
+- `hyprlock` - Screen locker for Hyprland
 - `systemctl` - System control for suspend
 
 ## Installation
@@ -44,7 +44,7 @@ Smart docking-aware power management for ThinkPad X1 Carbon Gen 11.
 ### Install Required Packages
 
 ```bash
-$ sudo dnf install -y jq swaylock
+$ sudo dnf install -y jq hyprlock
 ```
 
 The configuration is automatically active when using this dotfiles setup.
@@ -53,7 +53,7 @@ The configuration is automatically active when using this dotfiles setup.
 
 ### Manual Screen Lock
 
-- **Super+L**: Lock screen immediately using swaylock
+- **Super+L**: Lock screen immediately using hyprlock
 
 ### Automatic Behavior
 

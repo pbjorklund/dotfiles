@@ -1,7 +1,7 @@
 #!/bin/bash
-# Hyprland Lid Switch Handler - Smart docking-aware power management
-# Features: Detects external monitors, handles sleep/wake, display management
-# Usage: lid-switch.sh {close|open|wake}
+# Hyprland Lid Switch Handler - Smart display management for docking
+# Features: Detects external monitors, handles display enable/disable
+# Usage: lid-switch.sh {close|open}
 
 set -euo pipefail
 
@@ -44,12 +44,8 @@ handle_lid_close() {
         log "External monitors detected - disabling laptop display only"
         hyprctl keyword monitor "$LAPTOP_DISPLAY,disable"
     else
-        log "No external monitors - locking screen and suspending"
-        # Lock screen first
-        swaylock --daemonize
-        sleep 1
-        # Then suspend system
-        systemctl suspend
+        log "No external monitors - disabling laptop display (hypridle will handle sleep)"
+        hyprctl keyword monitor "$LAPTOP_DISPLAY,disable"
     fi
 }
 
@@ -62,26 +58,9 @@ handle_lid_open() {
     hyprctl keyword monitor "$LAPTOP_DISPLAY,$LAPTOP_RESOLUTION,$LAPTOP_POSITION,$LAPTOP_SCALE"
 }
 
-# Handle wake from sleep - check if lid is closed and docked
-handle_wake() {
-    log "System wake detected - checking lid and dock status"
-
-    if is_lid_closed && is_docked; then
-        log "Woke with lid closed and docked - keeping laptop display disabled"
-        hyprctl keyword monitor "$LAPTOP_DISPLAY,disable"
-    elif is_lid_closed && ! is_docked; then
-        log "Woke with lid closed and undocked - this shouldn't happen, enabling display"
-        hyprctl keyword monitor "$LAPTOP_DISPLAY,$LAPTOP_RESOLUTION,$LAPTOP_POSITION,$LAPTOP_SCALE"
-        save_lid_state "open"
-    else
-        log "Woke with lid open - ensuring laptop display is enabled"
-        hyprctl keyword monitor "$LAPTOP_DISPLAY,$LAPTOP_RESOLUTION,$LAPTOP_POSITION,$LAPTOP_SCALE"
-    fi
-}
-
 # Validate parameters
 [[ $# -eq 1 ]] || {
-    echo "Usage: $0 {close|open|wake}"
+    echo "Usage: $0 {close|open}"
     exit 1
 }
 
@@ -93,11 +72,8 @@ close)
 open)
     handle_lid_open
     ;;
-wake)
-    handle_wake
-    ;;
 *)
-    echo "Usage: $0 {close|open|wake}"
+    echo "Usage: $0 {close|open}"
     exit 1
     ;;
 esac
