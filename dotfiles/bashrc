@@ -44,14 +44,18 @@ export MANPAGER='cat'                    # Use cat for manual pages
 alias systemctl='systemctl --no-pager'   # Force systemctl to not use pager
 alias journalctl='journalctl --no-pager' # Force journalctl to not use pager
 
+# 1Password integration - only for non-vscode users
+export SSH_AUTH_SOCK=~/.1password/agent.sock
+export OP_BIOMETRIC_UNLOCK_ENABLED=true
+
+# Conditional Loading
+# Load additional configurations if they exist
+[[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
+[[ -f ~/.bash_local ]] && source ~/.bash_local
+
 if [[ $(whoami) != "vscode" ]]; then
     # Editor Configuration
     export EDITOR=nvim # Use neovim as default editor
-
-    # Conditional Loading
-    # Load additional configurations if they exist
-    [[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
-    [[ -f ~/.bash_local ]] && source ~/.bash_local
 
     # Created by `pipx` on 2025-06-16 12:33:17
     export PATH="$PATH:/home/pbjorklund/.local/bin"
@@ -72,10 +76,6 @@ if [[ $(whoami) != "vscode" ]]; then
     # npm configuration - use home directory for global packages to avoid permissions issues
     export NPM_CONFIG_PREFIX=~/.npm-global
     export PATH=~/.npm-global/bin:$PATH
-
-    # 1Password integration - only for non-vscode users
-    export SSH_AUTH_SOCK=~/.1password/agent.sock
-    export OP_BIOMETRIC_UNLOCK_ENABLED=true
 
     # GitHub token function - only loads when needed
     gh_token() {
