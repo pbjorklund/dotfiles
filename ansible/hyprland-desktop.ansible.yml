@@ -27,7 +27,7 @@
           - swaybg # Wallpaper daemon for Wayland compositors
           - wofi # Application launcher
           - mako # Notification daemon
-          - swaylock # Screen locker
+          - hyprlock # Screen locker
           - hypridle # Idle management daemon for Hyprland
           - grim # Screenshot tool
           - slurp # Selection tool for screenshots

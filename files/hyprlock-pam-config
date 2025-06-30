@@ -1,0 +1,9 @@
+# PAM configuration for hyprlock screen locker
+# Simple password-only config since fingerprint is handled by hyprlock directly
+
+auth        sufficient   pam_unix.so
+auth        required     pam_deny.so
+
+account     required     pam_unix.so
+
+session     required     pam_unix.so

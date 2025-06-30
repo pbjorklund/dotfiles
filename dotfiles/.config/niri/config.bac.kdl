@@ -180,7 +180,7 @@ binds {
     Mod+B { spawn "zen"; }
     Mod+D { spawn "code" "--new-window"; }
     Mod+N { spawn "flatpak" "run" "md.obsidian.Obsidian"; }
-    Mod+Alt+L { spawn "swaylock"; }
+    Mod+Alt+L { spawn "hyprlock"; }
     Mod+E { spawn "dolphin"; }
     Mod+R { spawn "fuzzel"; }
     Alt+Space { spawn "wofi" "--show" "drun"; }

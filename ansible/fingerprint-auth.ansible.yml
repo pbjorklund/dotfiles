@@ -53,22 +53,20 @@
         backup: true
       when: polkit_pam_stat.stat.exists
 
-    - name: Configure swaylock PAM for password-only authentication
+    - name: Configure hyprlock PAM for fingerprint or password authentication
       ansible.builtin.copy:
-        dest: /etc/pam.d/swaylock
+        dest: /etc/pam.d/hyprlock
         backup: true
         content: |
-          # PAM configuration for swaylock screen locker
-          # Custom config to avoid fingerprint authentication issues in clamshell mode
-          # Uses password-only authentication for reliable unlock when fingerprint reader is inaccessible
+          # PAM configuration for hyprlock screen locker
+          # Simple password-only config since fingerprint is handled by hyprlock directly
 
-          auth       sufficient   pam_unix.so nullok
-          auth       required     pam_deny.so
+          auth        sufficient   pam_unix.so
+          auth        required     pam_deny.so
 
-          account    required     pam_unix.so
-          account    required     pam_permit.so
+          account     required     pam_unix.so
 
-          session    required     pam_unix.so
+          session     required     pam_unix.so
 
     - name: Display enrollment instructions
       ansible.builtin.debug:

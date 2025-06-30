@@ -53,7 +53,7 @@
       ansible.builtin.dnf:
         name:
           - fuzzel # Application launcher optimized for Wayland
-          - swaylock # Screen locker
+          - hyprlock # Screen locker
           - swaybg # Wallpaper daemon for Wayland compositors
           - grim # Screenshot tool
           - slurp # Selection tool for screenshots
