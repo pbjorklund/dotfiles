@@ -45,7 +45,6 @@ alias systemctl='systemctl --no-pager'   # Force systemctl to not use pager
 alias journalctl='journalctl --no-pager' # Force journalctl to not use pager
 
 if [[ $(whoami) != "vscode" ]]; then
-    echo "not vscode user, loading additional configurations..."
     # Editor Configuration
     export EDITOR=nvim # Use neovim as default editor
 
