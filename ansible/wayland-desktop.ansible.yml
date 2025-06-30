@@ -64,3 +64,38 @@
         - wireplumber.service
       become: false
       become_user: "{{ original_user }}"
+
+    # Waybar auto-start configuration
+    - name: "Ensure waybar systemd service exists in user config"
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=Waybar status bar
+          After=graphical-session.target
+          Wants=graphical-session.target
+          PartOf=graphical-session.target
+
+          [Service]
+          Type=simple
+          ExecStart=/usr/bin/waybar
+          ExecReload=/bin/kill -SIGUSR2 $MAINPID
+          Restart=on-failure
+          RestartSec=1
+          TimeoutStopSec=10
+
+          [Install]
+          WantedBy=graphical-session.target
+        dest: "{{ user_home }}/.config/systemd/user/waybar.service"
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+        mode: "0644"
+      become: false
+
+    - name: "Enable waybar service for current user"
+      ansible.builtin.systemd:
+        name: waybar.service
+        enabled: true
+        scope: user
+        daemon_reload: true
+      become: false
+      become_user: "{{ original_user }}"

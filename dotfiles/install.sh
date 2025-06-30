@@ -181,19 +181,21 @@ echo "Setting up systemd user services..."
 if systemctl --user daemon-reload; then
     echo "Reloaded systemd user daemon"
 
-    # Enable and start the waybar watcher service if it exists
-    if [[ -f ~/.config/systemd/user/waybar-watcher.service ]]; then
-        if systemctl --user enable waybar-watcher.service; then
-            echo "Enabled waybar-watcher.service"
-            if systemctl --user start waybar-watcher.service; then
-                echo "Started waybar-watcher.service"
+    # Enable waybar and waybar-watcher services if they exist
+    for service in waybar.service waybar-watcher.service; do
+        if [[ -f ~/.config/systemd/user/$service ]]; then
+            if systemctl --user enable "$service"; then
+                echo "Enabled $service"
+                if systemctl --user start "$service"; then
+                    echo "Started $service"
+                else
+                    echo "⚠ Warning: Failed to start $service"
+                fi
             else
-                echo "⚠ Warning: Failed to start waybar-watcher.service"
+                echo "⚠ Warning: Failed to enable $service"
             fi
-        else
-            echo "⚠ Warning: Failed to enable waybar-watcher.service"
         fi
-    fi
+    done
 else
     echo "⚠ Warning: Failed to reload systemd user daemon"
 fi
