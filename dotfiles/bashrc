@@ -72,9 +72,11 @@ chmod 700 "$TMPDIR"
 export NPM_CONFIG_PREFIX=~/.npm-global
 export PATH=~/.npm-global/bin:$PATH
 
-# 1Password integration
-export SSH_AUTH_SOCK=~/.1password/agent.sock
-export OP_BIOMETRIC_UNLOCK_ENABLED=true
+# 1Password integration - only for non-vscode users
+if [[ "$USER" != "vscode" ]]; then
+    export SSH_AUTH_SOCK=~/.1password/agent.sock
+    export OP_BIOMETRIC_UNLOCK_ENABLED=true
+fi
 
 # GitHub token function - only loads when needed
 gh_token() {

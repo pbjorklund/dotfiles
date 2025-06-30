@@ -17,11 +17,3 @@ status = auto
 added = yellow
 changed = green bold
 untracked = blue bold
-[credential "https://github.com"]
-helper = libsecret
-[credential "https://gist.github.com"]
-helper = libsecret
-[url "ssh://git@github.com/"]
-insteadOf = https://github.com/
-[url "ssh://git@gist.github.com/"]
-insteadOf = https://gist.github.com/

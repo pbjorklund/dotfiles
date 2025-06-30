@@ -8,20 +8,10 @@
     font-size: 12px;
 }
 
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 1; }
-    51% { opacity: 0.5; }
-    100% { opacity: 0.5; }
-}
-
 window#waybar {
     background-color: transparent;
-    border: none;
-    box-shadow: none;
 }
 
-#clock { }
 /* Floating pill style for modules */
 #battery,
 #cpu,
@@ -60,15 +50,12 @@ window#waybar {
 #workspaces button.urgent {
     background: #eb4d4b;
     color: #fff;
-    border: none;
-    animation: blink 1s infinite;
 }
 
 /* Remove harsh colors from battery, cpu, etc. */
 #battery.critical:not(.charging) {
     background-color: #f3bcbc;
     color: #222;
-    animation: none;
 }
 #pulseaudio.muted {
     color: #888;

@@ -86,7 +86,9 @@
         # Memory protection
         - { name: "kernel.dmesg_restrict", value: "1" }
         - { name: "kernel.kptr_restrict", value: "2" }
-        - { name: "kernel.yama.ptrace_scope", value: "1" }
+        # ptrace_scope set to 0 to allow SSH agent forwarding in dev containers
+        # Note: Setting to 1 breaks 1Password SSH agent forwarding in containers
+        - { name: "kernel.yama.ptrace_scope", value: "0" }
 
     # Secure shared memory
     - name: Secure shared memory
@@ -95,6 +97,90 @@
         line: "tmpfs /run/shm tmpfs defaults,noexec,nosuid 0 0"
         regexp: '^tmpfs\s+/run/shm'
         state: present
+
+    # SELinux configuration for container development
+    - name: Install SELinux management tools
+      ansible.builtin.dnf:
+        name:
+          - policycoreutils-python-utils # SELinux policy management tools
+          - setools-console # SELinux policy analysis tools
+        state: present
+
+    - name: Check current SELinux status
+      ansible.builtin.command: getenforce
+      register: selinux_status
+      changed_when: false
+
+    - name: Configure SELinux for container development
+      ansible.posix.seboolean:
+        name: "{{ item }}"
+        state: true
+        persistent: true
+      loop:
+        - container_manage_cgroup # Allow containers to manage cgroups
+        - virt_use_nfs # Allow containers to access NFS mounts
+        - virt_sandbox_use_audit # Allow container sandboxes to use audit
+      when: selinux_status.stdout == "Enforcing"
+
+    - name: Set SELinux context for Docker socket to allow dev container access
+      community.general.sefcontext:
+        target: "/run/docker.sock"
+        setype: container_runtime_exec_t
+        state: present
+        reload: true
+      when: selinux_status.stdout == "Enforcing"
+
+    - name: Set SELinux context for 1Password agent socket directory
+      community.general.sefcontext:
+        target: "/home/{{ original_user }}/.1password(/.*)?"
+        setype: user_home_t
+        state: present
+        reload: true
+      when: selinux_status.stdout == "Enforcing"
+
+    - name: Allow containers to access user home directory for SSH agent
+      ansible.posix.seboolean:
+        name: container_connect_any
+        state: true
+        persistent: true
+      when: selinux_status.stdout == "Enforcing"
+
+    - name: Create SELinux policy module for dev container SSH agent access
+      ansible.builtin.copy:
+        dest: /tmp/devcontainer_ssh.te
+        content: |
+          module devcontainer_ssh 1.0;
+
+          require {
+                  type container_t;
+                  type user_home_t;
+                  type ssh_agent_exec_t;
+                  class sock_file { read write };
+                  class unix_stream_socket { connectto };
+                  class file { read };
+                  class dir { search };
+          }
+
+          # Allow containers to access .1password directory and SSH agent socket
+          allow container_t user_home_t:dir search;
+          allow container_t user_home_t:sock_file { read write };
+          allow container_t ssh_agent_exec_t:unix_stream_socket connectto;
+          allow container_t user_home_t:file read;
+        mode: "0644"
+      when: selinux_status.stdout == "Enforcing"
+
+    - name: Compile and install SELinux policy module for dev containers
+      ansible.builtin.shell: |
+        cd /tmp
+        checkmodule -M -m -o devcontainer_ssh.mod devcontainer_ssh.te
+        semodule_package -o devcontainer_ssh.pp -m devcontainer_ssh.mod
+        semodule -i devcontainer_ssh.pp
+      when: selinux_status.stdout == "Enforcing"
+      changed_when: true
+
+    - name: Display SELinux dev container configuration status
+      ansible.builtin.debug:
+        msg: "SELinux configured for dev container SSH agent access. SELinux status: {{ selinux_status.stdout }}"
 
     # Update ClamAV signatures
     - name: Update ClamAV virus signatures
