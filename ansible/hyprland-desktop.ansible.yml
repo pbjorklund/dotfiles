@@ -69,3 +69,6 @@
 
 - name: "Import common Wayland desktop environment"
   import_playbook: wayland-desktop.ansible.yml
+
+- name: "Import Bluetooth integration"
+  import_playbook: bluetooth-hyprland.ansible.yml

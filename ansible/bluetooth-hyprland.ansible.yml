@@ -1,0 +1,81 @@
+---
+# Bluetooth Integration for Hyprland
+# Leverages existing GNOME Bluetooth setup and adds Hyprland-specific integration
+
+- name: "Configure Bluetooth Integration for Hyprland"
+  hosts: localhost
+  become: true
+  vars:
+    original_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id) }}"
+    user_home: "/home/{{ original_user }}"
+
+  tasks:
+    # Install minimal additional tools for Hyprland integration
+    # (BlueZ stack assumed to be already installed via GNOME)
+    - name: "Install additional Bluetooth tools for Hyprland"
+      ansible.builtin.dnf:
+        name:
+          - blueman # GUI manager that works well with tiling WMs
+        state: present
+
+    # Verify Bluetooth service is running (should already be enabled by GNOME)
+    - name: "Ensure Bluetooth service is running"
+      ansible.builtin.systemd:
+        name: bluetooth
+        state: started
+      check_mode: true
+      register: bluetooth_status
+
+    # Only add user to bluetooth group if not already present AND if group exists
+    - name: "Check if user is in bluetooth group"
+      ansible.builtin.command:
+        cmd: "groups {{ original_user }}"
+      register: user_groups
+      changed_when: false
+
+    - name: "Check if bluetooth group exists"
+      ansible.builtin.command:
+        cmd: "getent group bluetooth"
+      register: bluetooth_group_check
+      failed_when: false
+      changed_when: false
+
+    - name: "Add user to bluetooth group (if needed and group exists)"
+      ansible.builtin.user:
+        name: "{{ original_user }}"
+        groups: bluetooth
+        append: true
+      when:
+        - "'bluetooth' not in user_groups.stdout"
+        - bluetooth_group_check.rc == 0
+
+    # Create systemd user service for blueman-applet (for system tray)
+    - name: "Create blueman-applet systemd user service"
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=Blueman applet
+          After=graphical-session.target
+
+          [Service]
+          Type=simple
+          ExecStart=/usr/bin/blueman-applet
+          Restart=on-failure
+          RestartSec=3
+
+          [Install]
+          WantedBy=graphical-session.target
+        dest: "{{ user_home }}/.config/systemd/user/blueman-applet.service"
+        owner: "{{ original_user }}"
+        group: "{{ original_user }}"
+        mode: "0644"
+      become: false
+
+    - name: "Enable blueman-applet service for user"
+      ansible.builtin.systemd:
+        name: blueman-applet.service
+        enabled: true
+        scope: user
+        daemon_reload: true
+      become: false
+      become_user: "{{ original_user }}"

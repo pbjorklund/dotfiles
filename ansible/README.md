@@ -38,6 +38,7 @@ ansible-playbook workstation-setup.ansible.yml --tags security,development
 ### Optional Components
 
 - **[`hyprland-desktop.ansible.yml`](hyprland-desktop.ansible.yml)** - Hyprland tiling window manager
+- **[`bluetooth-hyprland.ansible.yml`](bluetooth-hyprland.ansible.yml)** - Bluetooth integration for Hyprland (works with existing GNOME setup)
 - **[`hardware-displaylink.ansible.yml`](hardware-displaylink.ansible.yml)** - DisplayLink drivers for docking stations
 - **[`storage-nas.ansible.yml`](storage-nas.ansible.yml)** - NAS storage mounts and CIFS shares
 - **[`configure-local-dns.ansible.yml`](configure-local-dns.ansible.yml)** - Local DNS resolution with DNS-over-TLS

@@ -74,10 +74,11 @@ This will create symlinks from your home directory to these configuration files:
 - Custom device sensitivity settings (mouse configuration)
 - Application-specific window rules and focus behavior
 - Custom keybindings for window management and applications
+- Bluetooth management with quick toggle and device control
 
 ### Waybar Configuration
 
-- System monitoring modules (CPU, temperature, battery, audio)
+- System monitoring modules (CPU, temperature, battery, audio, Bluetooth)
 - Hyprland workspace integration
 - Modern floating pill design with transparency
 - Custom CSS styling with animations and hover effects

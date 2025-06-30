@@ -5,7 +5,7 @@
 
 * {
     font-family: 'Inter', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-    font-size: 13px;
+    font-size: 11px;
 }
 
 @keyframes blink {
@@ -30,6 +30,7 @@ window#waybar {
 #temperature,
 #backlight,
 #network,
+#bluetooth,
 #language,
 #pulseaudio,
 #wireplumber,
@@ -93,6 +94,26 @@ window#waybar {
 #network.disconnected {
     background-color: #f3bcbc;
     color: #222;
+}
+
+/* Bluetooth styling */
+#bluetooth {
+    color: #81a1c1;
+}
+
+#bluetooth.disabled,
+#bluetooth.off {
+    color: #888;
+}
+
+#bluetooth.connected {
+    color: #88c0d0;
+    background-color: rgba(136, 192, 208, 0.1);
+}
+
+#bluetooth:hover {
+    background: rgba(129, 161, 193, 0.2);
+    transition: background 0.3s ease;
 }
 
 /* Power button styling with right margin */
