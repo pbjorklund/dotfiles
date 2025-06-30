@@ -21,10 +21,19 @@
       ansible.builtin.systemd:
         daemon_reload: true
 
-    - name: Start and enable libvirtd service
+    - name: Enable and start libvirtd socket services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - libvirtd.socket
+        - libvirtd-ro.socket
+        - libvirtd-admin.socket
+
+    - name: Enable libvirtd service (socket-activated)
       ansible.builtin.systemd:
         name: libvirtd
-        state: started
         enabled: true
 
     - name: Add user to virtualization groups
