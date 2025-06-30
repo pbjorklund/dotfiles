@@ -57,7 +57,7 @@
   },
   "dotfiles.repository": "pbjorklund/dotfiles",
   "dotfiles.targetPath": "/home/vscode/dotfiles",
-  "dotfiles.installCommand": "/home/vscode/dotfiles/install.sh",
+  "dotfiles.installCommand": "/home/vscode/dotfiles/dotfiles/install.sh",
   "git.enableSmartCommit": true,
   "chat.editing.confirmEditRequestRetry": false,
   "chat.editing.confirmEditRequestRemoval": false,
