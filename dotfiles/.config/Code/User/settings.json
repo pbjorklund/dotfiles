@@ -31,7 +31,6 @@
   "workbench.panel.defaultLocation": "left",
   "workbench.sideBar.location": "left",
   "window.titleBarStyle": "custom",
-  "window.commandCenter": false,
   "window.layoutControl.enabled": true,
   "breadcrumbs.enabled": false,
   "workbench.statusBar.visible": true,
@@ -136,5 +135,7 @@
   ],
   "workbench.navigationControl.enabled": false,
   "workbench.layoutControl.enabled": false,
-  "chat.agent.maxRequests": 50
+  "chat.agent.maxRequests": 50,
+  "window.commandCenter": false,
+  "explorer.confirmPasteNative": false
 }

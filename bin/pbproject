@@ -4,8 +4,10 @@ set -euo pipefail
 # pbproject - Project initialization and management tool
 # Manages symlinked project templates from dotfiles
 
+# Global configuration
 DOTFILES_ROOT="$HOME/dotfiles"
 SCRIPT_NAME="$(basename "$0")"
+PROJECTS_DIR="$HOME/Projects"
 
 show_help() {
     cat <<EOF
@@ -296,33 +298,6 @@ migrate_folder() {
         error "Folder name is required"
     fi
 
-    # Handle special cases for current directory
-    if [[ "$folder_name" == "." ]]; then
-        local current_dir=$(basename "$PWD")
-        local parent_dir=$(dirname "$PWD")
-
-        info "Migrating current directory '$current_dir' to new project"
-
-        # Create the new project in parent directory
-        cd "$parent_dir"
-        init_project "$current_dir" "$parent_dir/$current_dir-migrated"
-
-        # Copy all files except git directory to new project
-        info "Copying files to new project"
-        cp -r "$current_dir"/* "$current_dir-migrated/" 2>/dev/null || true
-        cp -r "$current_dir"/.[^.]* "$current_dir-migrated/" 2>/dev/null || true
-
-        # Remove the .git directory from the copy and reinitialize
-        rm -rf "$current_dir-migrated/.git"
-        cd "$current_dir-migrated"
-        git init
-        git add .
-        git commit -m "Initial commit - migrated from $current_dir"
-
-        success "Migrated current directory to $parent_dir/$current_dir-migrated"
-        return
-    fi
-
     # Normalize source path
     source_path=$(realpath "$source_path")
     local source_folder="$source_path/$folder_name"
@@ -336,14 +311,17 @@ migrate_folder() {
         error "Source path '$source_path' is not a git repository"
     fi
 
-    # Create new project directory at current location
-    local new_project_path="$PWD/$folder_name"
+    # Create new project directory in ~/Projects/
+    local new_project_path="$PROJECTS_DIR/$folder_name"
 
     if [[ -e "$new_project_path" ]]; then
         error "Directory '$new_project_path' already exists"
     fi
 
-    info "Migrating folder '$folder_name' from '$source_path' to new project"
+    info "Migrating folder '$folder_name' from '$source_path' to '$new_project_path'"
+
+    # Ensure Projects directory exists
+    mkdir -p "$PROJECTS_DIR"
 
     # Initialize new project
     init_project "$folder_name" "$new_project_path"
@@ -358,12 +336,39 @@ migrate_folder() {
     git add .
     git commit -m "Initial commit - migrated from $source_path/$folder_name"
 
+    # Create GitHub repository and push
+    info "Creating GitHub repository"
+    create_github_repo "$new_project_path"
+
+    # Copy repository URL to clipboard
+    local username=$(gh api user --jq .login 2>/dev/null || echo "unknown")
+    local repo_url="https://github.com/$username/$folder_name"
+
+    if command -v wl-copy &>/dev/null; then
+        echo "$repo_url" | wl-copy
+        success "Repository URL copied to clipboard: $repo_url"
+    elif command -v xclip &>/dev/null; then
+        echo "$repo_url" | xclip -selection clipboard
+        success "Repository URL copied to clipboard: $repo_url"
+    else
+        success "Repository URL: $repo_url"
+        info "Install wl-copy or xclip to auto-copy URLs to clipboard"
+    fi
+
     # Remove original folder from source project
     info "Removing original folder from source project"
     cd "$source_path"
     rm -rf "$folder_name"
     git add "$folder_name"
-    git commit -m "Migrate $folder_name to standalone project" || true
+    if git diff --staged --quiet; then
+        info "No changes to commit in source project"
+    else
+        git commit -m "Remove $folder_name - migrated to standalone project
+
+Folder has been extracted to: $new_project_path
+GitHub repository: $repo_url"
+        success "Committed removal of $folder_name from source project"
+    fi
 
     success "Successfully migrated '$folder_name' to '$new_project_path'"
     info "Original folder removed from source project"
