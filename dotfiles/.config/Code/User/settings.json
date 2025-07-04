@@ -137,5 +137,6 @@
   "workbench.layoutControl.enabled": false,
   "chat.agent.maxRequests": 50,
   "window.commandCenter": false,
-  "explorer.confirmPasteNative": false
+  "explorer.confirmPasteNative": false,
+  "editor.accessibilitySupport": "off"
 }

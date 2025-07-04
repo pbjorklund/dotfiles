@@ -100,6 +100,16 @@ fi
 echo "Creating symlink to VS Code settings.json"
 ln -sf "$dir/$vscode_settings_file" ~/.config/Code/User/settings.json
 
+# Handle Claude settings
+echo "Setting up Claude settings"
+mkdir -p ~/.claude
+if [ -f ~/.claude/settings.json ]; then
+    echo "Moving existing Claude settings.json to $backup_dir"
+    mv ~/.claude/settings.json "$backup_dir/"
+fi
+echo "Creating symlink to Claude settings.json"
+ln -sf "$dir/.claude/settings.json" ~/.claude/settings.json
+
 # Handle system configuration files (requires sudo)
 echo "Setting up system configuration files"
 
