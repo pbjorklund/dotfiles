@@ -48,9 +48,14 @@ echo "...done"
 
 # move any existing dotfiles in homedir to backup directory, then create symlinks
 for file in $files; do
-    if [ -f ~/".$file" ]; then
+    if [ -f ~/."$file" ]; then
         echo "Moving existing .$file to $backup_dir"
-        mv ~/."$file" "$backup_dir/"
+        # Try to move, if it fails (busy), copy and remove
+        if ! mv ~/."$file" "$backup_dir/" 2>/dev/null; then
+            echo "File busy, copying instead of moving"
+            cp ~/."$file" "$backup_dir/"
+            rm -f ~/."$file"
+        fi
     fi
     echo "Creating symlink to $file in home directory."
     ln -sf "$dir/$file" ~/."$file"
@@ -64,7 +69,12 @@ mkdir -p ~/.config
 for config_dir in $config_dirs; do
     if [ -e ~/.config/"$config_dir" ]; then
         echo "Moving existing .config/$config_dir to $backup_dir"
-        mv ~/.config/"$config_dir" "$backup_dir/"
+        # Try to move, if it fails (busy), copy and remove
+        if ! mv ~/.config/"$config_dir" "$backup_dir/" 2>/dev/null; then
+            echo "Directory busy, copying instead of moving"
+            cp -r ~/.config/"$config_dir" "$backup_dir/"
+            rm -rf ~/.config/"$config_dir"
+        fi
     fi
     echo "Creating symlink to .config/$config_dir"
     ln -sf "$dir/.config/$config_dir" ~/.config/"$config_dir"
@@ -74,7 +84,12 @@ done
 for dotfile_dir in $dotfile_dirs; do
     if [ -e ~/."$dotfile_dir" ]; then
         echo "Moving existing .$dotfile_dir to $backup_dir"
-        mv ~/."$dotfile_dir" "$backup_dir/"
+        # Try to move, if it fails (busy), copy and remove
+        if ! mv ~/."$dotfile_dir" "$backup_dir/" 2>/dev/null; then
+            echo "Directory busy, copying instead of moving"
+            cp -r ~/."$dotfile_dir" "$backup_dir/"
+            rm -rf ~/."$dotfile_dir"
+        fi
     fi
     echo "Creating symlink to .$dotfile_dir"
     ln -sf "$dir/.$dotfile_dir" ~/."$dotfile_dir"
