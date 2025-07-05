@@ -54,7 +54,12 @@ for file in $files; do
         if ! mv ~/."$file" "$backup_dir/" 2>/dev/null; then
             echo "File busy, copying instead of moving"
             cp ~/."$file" "$backup_dir/"
-            rm -f ~/."$file"
+            # If removal fails, skip this symlink
+            if ! rm -f ~/."$file" 2>/dev/null; then
+                echo "⚠ Warning: Cannot remove busy file ~/.$file"
+                echo "⚠ Skipping symlink creation for $file (existing file left in place)"
+                continue
+            fi
         fi
     fi
     echo "Creating symlink to $file in home directory."
@@ -69,11 +74,21 @@ mkdir -p ~/.config
 for config_dir in $config_dirs; do
     if [ -e ~/.config/"$config_dir" ]; then
         echo "Moving existing .config/$config_dir to $backup_dir"
+        # Fix permissions if directory has restrictive permissions
+        if [ -d ~/.config/"$config_dir" ]; then
+            find ~/.config/"$config_dir" -type d -exec chmod 755 {} \; 2>/dev/null || true
+            find ~/.config/"$config_dir" -type f -exec chmod 644 {} \; 2>/dev/null || true
+        fi
         # Try to move, if it fails (busy), copy and remove
         if ! mv ~/.config/"$config_dir" "$backup_dir/" 2>/dev/null; then
             echo "Directory busy, copying instead of moving"
             cp -r ~/.config/"$config_dir" "$backup_dir/"
-            rm -rf ~/.config/"$config_dir"
+            # If removal fails due to busy directory, skip this symlink
+            if ! rm -rf ~/.config/"$config_dir" 2>/dev/null; then
+                echo "⚠ Warning: Cannot remove busy directory ~/.config/$config_dir"
+                echo "⚠ Skipping symlink creation for $config_dir (existing directory left in place)"
+                continue
+            fi
         fi
     fi
     echo "Creating symlink to .config/$config_dir"
@@ -88,7 +103,12 @@ for dotfile_dir in $dotfile_dirs; do
         if ! mv ~/."$dotfile_dir" "$backup_dir/" 2>/dev/null; then
             echo "Directory busy, copying instead of moving"
             cp -r ~/."$dotfile_dir" "$backup_dir/"
-            rm -rf ~/."$dotfile_dir"
+            # If removal fails due to busy directory, skip this symlink
+            if ! rm -rf ~/."$dotfile_dir" 2>/dev/null; then
+                echo "⚠ Warning: Cannot remove busy directory ~/.$dotfile_dir"
+                echo "⚠ Skipping symlink creation for $dotfile_dir (existing directory left in place)"
+                continue
+            fi
         fi
     fi
     echo "Creating symlink to .$dotfile_dir"
