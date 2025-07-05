@@ -222,27 +222,32 @@ echo "Backup files saved to: $backup_dir"
 echo ""
 
 # Post-installation setup for systemd user services
-echo "Setting up systemd user services..."
-if systemctl --user daemon-reload; then
-    echo "Reloaded systemd user daemon"
+# Skip in devcontainers or when systemd is not running
+if [[ "$USER" != "vscode" ]] && systemctl --user is-system-running &>/dev/null; then
+    echo "Setting up systemd user services..."
+    if systemctl --user daemon-reload; then
+        echo "Reloaded systemd user daemon"
 
-    # Enable waybar and waybar-watcher services if they exist
-    for service in waybar.service waybar-watcher.service; do
-        if [[ -f ~/.config/systemd/user/$service ]]; then
-            if systemctl --user enable "$service"; then
-                echo "Enabled $service"
-                if systemctl --user start "$service"; then
-                    echo "Started $service"
+        # Enable waybar and waybar-watcher services if they exist
+        for service in waybar.service waybar-watcher.service; do
+            if [[ -f ~/.config/systemd/user/$service ]]; then
+                if systemctl --user enable "$service"; then
+                    echo "Enabled $service"
+                    if systemctl --user start "$service"; then
+                        echo "Started $service"
+                    else
+                        echo "⚠ Warning: Failed to start $service"
+                    fi
                 else
-                    echo "⚠ Warning: Failed to start $service"
+                    echo "⚠ Warning: Failed to enable $service"
                 fi
-            else
-                echo "⚠ Warning: Failed to enable $service"
             fi
-        fi
-    done
+        done
+    else
+        echo "⚠ Warning: Failed to reload systemd user daemon"
+    fi
 else
-    echo "⚠ Warning: Failed to reload systemd user daemon"
+    echo "Skipping systemd user services setup (devcontainer or systemd not running)"
 fi
 
 echo ""
