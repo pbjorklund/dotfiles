@@ -85,6 +85,12 @@ for config_dir in $config_dirs; do
             find ~/.config/"$config_dir" -type d -exec chmod 755 {} \; 2>/dev/null || true
             find ~/.config/"$config_dir" -type f -exec chmod 644 {} \; 2>/dev/null || true
         fi
+        # Check if it's a mount point
+        if mountpoint -q ~/.config/"$config_dir" 2>/dev/null; then
+            echo "⚠ Warning: ~/.config/$config_dir is a mount point"
+            echo "⚠ Skipping symlink creation for $config_dir (mount point left in place)"
+            continue
+        fi
         # Try to move, if it fails (busy), copy and remove
         if ! mv ~/.config/"$config_dir" "$backup_dir/" 2>/dev/null; then
             echo "Directory busy, copying instead of moving"
