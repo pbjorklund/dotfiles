@@ -158,55 +158,57 @@ echo "Creating symlink to Claude settings.json"
 ln -sf "$dir/.claude/settings.json" ~/.claude/settings.json
 
 # Handle system configuration files (requires sudo)
-echo "Setting up system configuration files"
+# Skip all system configuration in devcontainers
+if [[ "$is_devcontainer" == "false" ]]; then
+    echo "Setting up system configuration files"
 
-# Install system config directories
-for system_config_dir in $system_config_dirs; do
-    if [[ -d "$dir/.config/$system_config_dir" ]]; then
-        echo "Installing system config directory: .config/$system_config_dir -> /etc/$system_config_dir"
-        if [[ -d "/etc/$system_config_dir" ]]; then
-            echo "Moving existing /etc/$system_config_dir to $backup_dir"
-            sudo cp -r "/etc/$system_config_dir" "$backup_dir/"
+    # Install system config directories
+    for system_config_dir in $system_config_dirs; do
+        if [[ -d "$dir/.config/$system_config_dir" ]]; then
+            echo "Installing system config directory: .config/$system_config_dir -> /etc/$system_config_dir"
+            if [[ -d "/etc/$system_config_dir" ]]; then
+                echo "Moving existing /etc/$system_config_dir to $backup_dir"
+                sudo cp -r "/etc/$system_config_dir" "$backup_dir/"
+            fi
+            sudo cp -r "$dir/.config/$system_config_dir" "/etc/"
+        else
+            echo "⚠ Warning: System config directory .config/$system_config_dir not found"
         fi
-        sudo cp -r "$dir/.config/$system_config_dir" "/etc/"
-    else
-        echo "⚠ Warning: System config directory .config/$system_config_dir not found"
-    fi
-done
+    done
 
-# Install system files (systemd sleep hooks, etc.)
-for system_file_mapping in $system_files_to_copy; do
-    source_file="${system_file_mapping%:*}"
-    dest_file="${system_file_mapping#*:}"
+    # Install system files (systemd sleep hooks, etc.)
+    for system_file_mapping in $system_files_to_copy; do
+        source_file="${system_file_mapping%:*}"
+        dest_file="${system_file_mapping#*:}"
 
-    if [[ -f "$dir/$source_file" ]]; then
-        echo "Installing system file: $source_file -> $dest_file"
-        if [[ -f "$dest_file" ]]; then
-            echo "Moving existing $dest_file to $backup_dir"
-            sudo cp "$dest_file" "$backup_dir/"
+        if [[ -f "$dir/$source_file" ]]; then
+            echo "Installing system file: $source_file -> $dest_file"
+            if [[ -f "$dest_file" ]]; then
+                echo "Moving existing $dest_file to $backup_dir"
+                sudo cp "$dest_file" "$backup_dir/"
+            fi
+            sudo mkdir -p "$(dirname "$dest_file")"
+            sudo cp "$dir/$source_file" "$dest_file"
+            sudo chmod +x "$dest_file"
+        else
+            echo "⚠ Warning: System file $source_file not found"
         fi
-        sudo cp "$dir/$source_file" "$dest_file"
-        sudo chmod +x "$dest_file"
-    else
-        echo "⚠ Warning: System file $source_file not found"
-    fi
-done
+    done
 
-# Install system service files
-for service_mapping in $system_services; do
-    source_service="${service_mapping%:*}"
-    dest_service="${service_mapping#*:}"
+    # Install system service files
+    for service_mapping in $system_services; do
+        source_service="${service_mapping%:*}"
+        dest_service="${service_mapping#*:}"
 
-    if [[ -f "$dir/$source_service" ]]; then
-        echo "Installing system service: $source_service -> $dest_service"
-        if [[ -f "$dest_service" ]]; then
-            echo "Moving existing $dest_service to $backup_dir"
-            sudo cp "$dest_service" "$backup_dir/"
-        fi
-        sudo cp "$dir/$source_service" "$dest_service"
+        if [[ -f "$dir/$source_service" ]]; then
+            echo "Installing system service: $source_service -> $dest_service"
+            if [[ -f "$dest_service" ]]; then
+                echo "Moving existing $dest_service to $backup_dir"
+                sudo cp "$dest_service" "$backup_dir/"
+            fi
+            sudo mkdir -p "$(dirname "$dest_service")"
+            sudo cp "$dir/$source_service" "$dest_service"
 
-        # Only enable/start services if not in devcontainer
-        if [[ "$is_devcontainer" == "false" ]]; then
             # Extract service name from destination path
             service_name=$(basename "$dest_service")
             echo "Enabling and starting system service: $service_name"
@@ -226,12 +228,12 @@ for service_mapping in $system_services; do
                 echo "⚠ Warning: Failed to reload systemd daemon"
             fi
         else
-            echo "Skipping service enable/start (devcontainer environment)"
+            echo "⚠ Warning: System service file $source_service not found"
         fi
-    else
-        echo "⚠ Warning: System service file $source_service not found"
-    fi
-done
+    done
+else
+    echo "Skipping system configuration files (devcontainer environment)"
+fi
 
 echo ""
 echo "Dotfiles installation complete!"
