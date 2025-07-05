@@ -34,6 +34,12 @@ system_services=".config/systemd/system/disable-usb-wakeup.service:/etc/systemd/
 # VS Code settings file (user settings location)
 vscode_settings_file=".config/Code/User/settings.json"
 
+# Detect if we're in a devcontainer or environment without systemd
+is_devcontainer=false
+if [[ "$USER" == "vscode" ]] || [[ -f "/.dockerenv" ]] || ! command -v systemctl >/dev/null 2>&1; then
+    is_devcontainer=true
+fi
+
 ##########
 
 # create backup directory in /tmp
@@ -193,23 +199,28 @@ for service_mapping in $system_services; do
         fi
         sudo cp "$dir/$source_service" "$dest_service"
 
-        # Extract service name from destination path
-        service_name=$(basename "$dest_service")
-        echo "Enabling and starting system service: $service_name"
+        # Only enable/start services if not in devcontainer
+        if [[ "$is_devcontainer" == "false" ]]; then
+            # Extract service name from destination path
+            service_name=$(basename "$dest_service")
+            echo "Enabling and starting system service: $service_name"
 
-        if sudo systemctl daemon-reload; then
-            if sudo systemctl enable "$service_name"; then
-                echo "Enabled $service_name"
-                if sudo systemctl start "$service_name"; then
-                    echo "Started $service_name"
+            if sudo systemctl daemon-reload; then
+                if sudo systemctl enable "$service_name"; then
+                    echo "Enabled $service_name"
+                    if sudo systemctl start "$service_name"; then
+                        echo "Started $service_name"
+                    else
+                        echo "⚠ Warning: Failed to start $service_name"
+                    fi
                 else
-                    echo "⚠ Warning: Failed to start $service_name"
+                    echo "⚠ Warning: Failed to enable $service_name"
                 fi
             else
-                echo "⚠ Warning: Failed to enable $service_name"
+                echo "⚠ Warning: Failed to reload systemd daemon"
             fi
         else
-            echo "⚠ Warning: Failed to reload systemd daemon"
+            echo "Skipping service enable/start (devcontainer environment)"
         fi
     else
         echo "⚠ Warning: System service file $source_service not found"
@@ -222,8 +233,8 @@ echo "Backup files saved to: $backup_dir"
 echo ""
 
 # Post-installation setup for systemd user services
-# Skip in devcontainers or when systemd is not running
-if [[ "$USER" != "vscode" ]] && systemctl --user is-system-running &>/dev/null; then
+# Skip in devcontainers or when systemd is not available
+if [[ "$is_devcontainer" == "false" ]]; then
     echo "Setting up systemd user services..."
     if systemctl --user daemon-reload; then
         echo "Reloaded systemd user daemon"
@@ -247,7 +258,7 @@ if [[ "$USER" != "vscode" ]] && systemctl --user is-system-running &>/dev/null; 
         echo "⚠ Warning: Failed to reload systemd user daemon"
     fi
 else
-    echo "Skipping systemd user services setup (devcontainer or systemd not running)"
+    echo "Skipping systemd user services setup (devcontainer environment)"
 fi
 
 echo ""
