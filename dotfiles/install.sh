@@ -20,7 +20,7 @@ dir=~/dotfiles/dotfiles                                  # dotfiles directory
 repo_root=~/dotfiles                                     # repository root directory
 backup_dir="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)" # temporary backup with timestamp
 # List of files to symlink in homedir (excluding directories and install script)
-files="bashrc gitconfig tmux.conf inputrc"
+files="bashrc zshrc gitconfig tmux.conf inputrc"
 # List of .config subdirectories to symlink
 config_dirs="hypr waybar zellij mako wofi systemd kitty gh nvim opencode niri"
 # List of system config directories that need to be copied (not symlinked) to system locations
