@@ -36,6 +36,7 @@ alias la='ls -A'               # All files except . and ..
 alias l='ls -CF'               # Compact listing with file types
 alias grep='grep --color=auto' # Colorized grep output
 alias ls='ls --color=auto'     # Colorized ls output
+alias c='claude --dangerously-skip-permissions'     # Yolo Claude, skip permissions
 
 # Disable pagers for better agent interaction
 export SYSTEMD_PAGER=''                  # Disable pager for systemctl
@@ -99,3 +100,4 @@ if [[ $(whoami) != "vscode" ]]; then
     export PATH=/home/pbjorklund/.opencode/bin:$PATH
 
 fi
+export PATH="$HOME/.cargo/bin:$PATH"
