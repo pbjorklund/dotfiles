@@ -69,7 +69,9 @@ local function check_file_changes()
 end
 
 local timer = vim.loop.new_timer()
-timer:start(2000, 2000, vim.schedule_wrap(check_file_changes))
+if timer then
+  timer:start(2000, 2000, vim.schedule_wrap(check_file_changes))
+end
 
 -- Notify when file changed on disk for modified buffers
 vim.api.nvim_create_autocmd("FileChangedShellPost", {
