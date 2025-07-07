@@ -101,3 +101,8 @@ if [[ $(whoami) != "vscode" ]]; then
 
 fi
 export PATH="$HOME/.cargo/bin:$PATH"
+
+# Ansible playbook aliases
+alias ap='ansible-playbook'
+alias apc='ansible-playbook --check'
+alias apv='ansible-playbook -v'
