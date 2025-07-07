@@ -159,6 +159,59 @@
       become_user: "{{ original_user }}"
       when: not lazydocker_installed.stat.exists and lazydocker_release is defined
 
+    # GitHub tools (lazygit)
+    - name: Check if lazygit is already installed
+      ansible.builtin.stat:
+        path: "/usr/local/bin/lazygit"
+      register: lazygit_installed
+
+    - name: Get lazygit latest release info
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+        method: GET
+        return_content: true
+      register: lazygit_release
+      when: not lazygit_installed.stat.exists
+
+    - name: Install lazygit (terminal UI for Git)
+      ansible.builtin.get_url:
+        url: "{{ lazygit_release.json.assets | selectattr('name', 'match', '.*Linux_x86_64\\.tar\\.gz$') | map(attribute='browser_download_url') | first }}"
+        dest: /tmp/lazygit.tar.gz
+        mode: "0644"
+      become: true
+      become_user: "{{ original_user }}"
+      when: not lazygit_installed.stat.exists and lazygit_release is defined
+
+    - name: Extract lazygit
+      ansible.builtin.unarchive:
+        src: /tmp/lazygit.tar.gz
+        dest: /tmp
+        remote_src: true
+      become: true
+      become_user: "{{ original_user }}"
+      when: not lazygit_installed.stat.exists and lazygit_release is defined
+
+    - name: Install lazygit binary
+      ansible.builtin.copy:
+        src: /tmp/lazygit
+        dest: /usr/local/bin/lazygit
+        mode: "0755"
+        owner: root
+        group: root
+        remote_src: true
+      when: not lazygit_installed.stat.exists and lazygit_release is defined
+
+    - name: Clean up lazygit installation files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/lazygit.tar.gz
+        - /tmp/lazygit
+      become: true
+      become_user: "{{ original_user }}"
+      when: not lazygit_installed.stat.exists and lazygit_release is defined
+
     - name: Check if rustup is already installed
       ansible.builtin.stat:
         path: "/home/{{ original_user }}/.cargo/bin/rustup"
