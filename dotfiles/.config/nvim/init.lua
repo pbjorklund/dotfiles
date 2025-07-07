@@ -41,7 +41,53 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.hlsearch = true
 vim.opt.autoread = true
-vim.opt.updatetime = 250
+
+-- More aggressive file watching
+vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
+  pattern = "*",
+  callback = function()
+    if vim.fn.mode() ~= "c" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+
+-- Force check every second using CursorHold trigger
+vim.opt.updatetime = 1000
+
+-- Additional timer for background checking
+local function check_file_changes()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_name(buf) ~= "" then
+      vim.api.nvim_buf_call(buf, function()
+        if vim.fn.mode() ~= "c" then
+          vim.cmd("silent! checktime")
+        end
+      end)
+    end
+  end
+end
+
+local timer = vim.loop.new_timer()
+timer:start(2000, 2000, vim.schedule_wrap(check_file_changes))
+
+-- Notify when file changed on disk for modified buffers
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  pattern = "*",
+  callback = function()
+    vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.INFO)
+  end,
+})
+
+-- Warn when file changed on disk for modified buffers
+vim.api.nvim_create_autocmd("FileChangedShell", {
+  pattern = "*",
+  callback = function()
+    if vim.bo.modified then
+      vim.notify("Warning: File has been changed on disk and buffer is modified!", vim.log.levels.WARN)
+    end
+  end,
+})
 
 
 -- Set leader key
@@ -69,7 +115,7 @@ vim.keymap.set("n", "<C-k>", "<C-w><Up>")
 vim.keymap.set("n", "<C-j>", "<C-w><Down>")
 vim.keymap.set("n", "<C-l>", "<C-w><Right>")
 vim.keymap.set("n", "<C-h>", "<C-w><Left>")
-vim.keymap.set("n", "<leader>v", ":e $MYVIMRC<CR>")
+vim.keymap.set("n", "<leader>v", ":e $MYVIMRC<CR>", { desc = "Edit config" })
 vim.keymap.set("n", "<F1>", ":lopen<CR>")
 vim.keymap.set("n", "<F2>", ":set invpaste paste?<CR>")
 
@@ -134,6 +180,7 @@ require("lazy").setup({
       vim.keymap.set("n", "<leader>fg", require("telescope.builtin").live_grep, {})
       vim.keymap.set("n", "<leader>fb", require("telescope.builtin").buffers, {})
       vim.keymap.set("n", "<leader>fh", require("telescope.builtin").help_tags, {})
+      vim.keymap.set("n", "<leader>fd", require("telescope.builtin").diagnostics, {})
       vim.keymap.set("n", "<C-g>", require("telescope.builtin").git_status, {})
     end,
   },
@@ -152,8 +199,29 @@ require("lazy").setup({
           changedelete = { text = "~" },
         },
       })
+
+      -- Git navigation keymaps
+      vim.keymap.set("n", "]c", function()
+        if vim.wo.diff then
+          vim.cmd("normal! ]c")
+        else
+          require("gitsigns").nav_hunk("next")
+        end
+      end, { desc = "Next git change" })
+
+      vim.keymap.set("n", "[c", function()
+        if vim.wo.diff then
+          vim.cmd("normal! [c")
+        else
+          require("gitsigns").nav_hunk("prev")
+        end
+      end, { desc = "Previous git change" })
+
+      vim.keymap.set("n", "<leader>gp", require("gitsigns").preview_hunk, { desc = "Preview git hunk" })
+      vim.keymap.set("n", "<leader>gr", require("gitsigns").reset_hunk, { desc = "Reset git hunk" })
     end,
   },
+
 
   -- LSP Configuration
   {
@@ -184,8 +252,17 @@ require("lazy").setup({
         capabilities = capabilities,
         settings = {
           Lua = {
+            runtime = {
+              version = "LuaJIT",
+            },
             diagnostics = {
               globals = { "vim" },
+            },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+            },
+            telemetry = {
+              enable = false,
             },
           },
         },
@@ -292,27 +369,26 @@ require("lazy").setup({
     end,
   },
 
-  -- GitHub Copilot
+  -- GitHub Copilot with Chat
   {
-    "github/copilot.vim",
+    "CopilotC-Nvim/CopilotChat.nvim",
+    branch = "main",
+    dependencies = {
+      { "github/copilot.vim" },
+      { "nvim-lua/plenary.nvim" },
+    },
     config = function()
-      -- Enable Copilot for all filetypes
-      vim.g.copilot_filetypes = {
-        ["*"] = true,
-      }
-
-      -- Key mappings for Copilot
-      vim.keymap.set("i", "<C-J>", 'copilot#Accept("\\<CR>")', {
-        expr = true,
-        replace_keycodes = false
+      require("CopilotChat").setup({
+        debug = false,
       })
-      vim.keymap.set("i", "<C-\\>", "<Plug>(copilot-suggest)")
-      vim.keymap.set("i", "<C-n>", "<Plug>(copilot-next)")
-      vim.keymap.set("i", "<C-p>", "<Plug>(copilot-previous)")
-      vim.keymap.set("i", "<C-x>", "<Plug>(copilot-dismiss)")
 
-      -- Disable default Tab mapping
-      vim.g.copilot_no_tab_map = true
+      -- Key mappings
+      vim.keymap.set("n", "<leader>cc", ":CopilotChat<CR>", { desc = "Open Copilot Chat" })
+      vim.keymap.set("v", "<leader>cc", ":CopilotChatVisual<CR>", { desc = "Copilot Chat with selection" })
+      vim.keymap.set("n", "<leader>ce", ":CopilotChatExplain<CR>", { desc = "Explain code" })
+      vim.keymap.set("n", "<leader>cf", ":CopilotChatFix<CR>", { desc = "Fix code" })
+      vim.keymap.set("n", "<leader>co", ":CopilotChatOptimize<CR>", { desc = "Optimize code" })
+      vim.keymap.set("n", "<leader>ct", ":CopilotChatTests<CR>", { desc = "Generate tests" })
     end,
   },
 
@@ -325,7 +401,7 @@ require("lazy").setup({
     },
     config = function()
       local wk = require("which-key")
-      
+
       -- Add keybinding descriptions
       wk.add({
         { "<leader>f", group = "Find" },
@@ -333,14 +409,24 @@ require("lazy").setup({
         { "<leader>fg", desc = "Live Grep" },
         { "<leader>fb", desc = "Buffers" },
         { "<leader>fh", desc = "Help Tags" },
+        { "<leader>fd", desc = "Diagnostics" },
         { "<leader>e", desc = "Toggle File Tree" },
-        { "<leader>v", desc = "Edit Vimrc" },
-        { "<leader>c", group = "LSP" },
+        { "<leader>v", desc = "Edit config" },
+        { "<leader>c", group = "Code/Copilot" },
         { "<leader>ca", desc = "Code Action" },
+        { "<leader>cc", desc = "Copilot Chat" },
+        { "<leader>ce", desc = "Explain code" },
+        { "<leader>cf", desc = "Fix code" },
+        { "<leader>co", desc = "Optimize code" },
+        { "<leader>ct", desc = "Generate tests" },
         { "<leader>r", group = "LSP" },
         { "<leader>rn", desc = "Rename" },
         { "<leader>g", group = "Git" },
         { "<leader>gg", desc = "LazyGit" },
+        { "<leader>gp", desc = "Preview git hunk" },
+        { "<leader>gr", desc = "Reset git hunk" },
+        { "]c", desc = "Next git change" },
+        { "[c", desc = "Previous git change" },
         { "<leader>h", function() wk.show({ global = true }) end, desc = "Show All Keybindings" },
         { "<C-g>", desc = "Git Status" },
         { "<F1>", desc = "Location List" },
