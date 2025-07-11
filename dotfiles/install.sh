@@ -13,7 +13,7 @@ readonly IS_DEVCONTAINER=$([[ "$USER" == "vscode" ]] || [[ -f "/.dockerenv" ]] |
 
 # Files and directories to link
 readonly HOME_FILES=(shell/bashrc shell/zshrc git/gitconfig tmux/tmux.conf shell/inputrc)
-readonly CONFIG_DIRS=(hypr waybar zellij mako wofi systemd terminal/kitty gh editor/nvim opencode niri)
+readonly CONFIG_DIRS=(hypr waybar zellij mako wofi systemd terminal/kitty gh nvim opencode niri)
 
 # System files (only on real systems)
 declare -A SYSTEM_FILES=(
