@@ -12,13 +12,13 @@ readonly BACKUP_DIR="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 readonly IS_DEVCONTAINER=$([[ "$USER" == "vscode" ]] || [[ -f "/.dockerenv" ]] || ! command -v systemctl >/dev/null 2>&1 && echo true || echo false)
 
 # Files and directories to link
-readonly HOME_FILES=(bashrc zshrc gitconfig tmux.conf inputrc)
-readonly CONFIG_DIRS=(hypr waybar zellij mako wofi systemd kitty gh nvim opencode niri)
+readonly HOME_FILES=(shell/bashrc shell/zshrc git/gitconfig tmux/tmux.conf shell/inputrc)
+readonly CONFIG_DIRS=(hypr waybar zellij mako wofi systemd terminal/kitty gh editor/nvim opencode niri)
 
 # System files (only on real systems)
 declare -A SYSTEM_FILES=(
-    [".config/hypr/scripts/disable-usb-wakeup.sh"]="/usr/local/bin/disable-usb-wakeup.sh"
-    [".config/systemd/system/disable-usb-wakeup.service"]="/etc/systemd/system/disable-usb-wakeup.service"
+    ["hypr/scripts/disable-usb-wakeup.sh"]="/usr/local/bin/disable-usb-wakeup.sh"
+    ["systemd/system/disable-usb-wakeup.service"]="/etc/systemd/system/disable-usb-wakeup.service"
 )
 
 # Logging functions
@@ -70,12 +70,12 @@ main() {
     # Link .config directories
     mkdir -p ~/.config
     for dir in "${CONFIG_DIRS[@]}"; do
-        [[ -d "$DOTFILES_DIR/.config/$dir" ]] && backup_and_link "$DOTFILES_DIR/.config/$dir" "$HOME/.config/$dir"
+        [[ -d "$DOTFILES_DIR/$dir" ]] && backup_and_link "$DOTFILES_DIR/$dir" "$HOME/.config/$dir"
     done
     
     # Link special files
-    backup_and_link "$DOTFILES_DIR/.config/Code/User/settings.json" "$HOME/.config/Code/User/settings.json"
-    backup_and_link "$DOTFILES_DIR/.claude/settings.json" "$HOME/.claude/settings.json"
+    backup_and_link "$DOTFILES_DIR/Code/User/settings.json" "$HOME/.config/Code/User/settings.json"
+    backup_and_link "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json"
     
     # Link local bin
     mkdir -p ~/.local/bin
