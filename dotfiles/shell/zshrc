@@ -26,11 +26,15 @@ export OP_BIOMETRIC_UNLOCK_ENABLED=true
 [[ -f ~/.zsh_local ]] && source ~/.zsh_local
 
 if [[ $(whoami) == "vscode" ]]; then
-  DISABLE_AUTO_UPDATE=true
-  DISABLE_UPDATE_PROMPT=true
+    export ZSH="$HOME/.oh-my-zsh"
+    ZSH_THEME="devcontainers"
+    source $ZSH/oh-my-zsh.sh
+    plugins=(git)
+    DISABLE_AUTO_UPDATE=true
+    DISABLE_UPDATE_PROMPT=true
 else
-  # Editor Configuration
-  export EDITOR=nvim # Use neovim as default editor
+    # Editor Configuration
+    export EDITOR=nvim # Use neovim as default editor
 
     # Created by `pipx` on 2025-06-16 12:33:17
     export PATH="$PATH:/home/pbjorklund/.local/bin"
@@ -54,10 +58,10 @@ else
 
     # GitHub token function - only loads when needed
     gh_token() {
-      if [ -z "$GH_TOKEN" ]; then
-        export GH_TOKEN=$(op item get "GitHub Personal Access Token" --fields credential --reveal 2>/dev/null)
-      fi
-      echo "$GH_TOKEN"
+        if [ -z "$GH_TOKEN" ]; then
+            export GH_TOKEN=$(op item get "GitHub Personal Access Token" --fields credential --reveal 2>/dev/null)
+        fi
+        echo "$GH_TOKEN"
     }
 
     # opencode
@@ -65,15 +69,15 @@ else
 
 fi
 
-  # SSH wrapper to handle terminal compatibility
-  ssh() {
-    # If current TERM is kitty-based, use xterm-256color for SSH
-    if [[ "$TERM" == *"kitty"* ]]; then
-      env TERM=xterm-256color command ssh "$@"
-    else
-      command ssh "$@"
-    fi
-  }
+# SSH wrapper to handle terminal compatibility
+ssh() {
+  # If current TERM is kitty-based, use xterm-256color for SSH
+  if [[ "$TERM" == *"kitty"* ]]; then
+    env TERM=xterm-256color command ssh "$@"
+  else
+    command ssh "$@"
+  fi
+}
 
 # Ansible playbook aliases
 alias ap='ansible-playbook'
