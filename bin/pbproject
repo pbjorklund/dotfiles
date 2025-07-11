@@ -78,9 +78,9 @@ check_dotfiles() {
     fi
 
     local missing_files=()
-    [[ ! -f "$DOTFILES_ROOT/AGENTS.md" ]] && missing_files+=("AGENTS.md")
-    [[ ! -d "$DOTFILES_ROOT/.roo" ]] && missing_files+=(".roo/")
-    [[ ! -d "$DOTFILES_ROOT/.github" ]] && missing_files+=(".github/")
+    [[ ! -f "$DOTFILES_ROOT/project-templates/AGENTS.md" ]] && missing_files+=("AGENTS.md")
+    [[ ! -d "$DOTFILES_ROOT/project-templates/.roo" ]] && missing_files+=(".roo/")
+    [[ ! -d "$DOTFILES_ROOT/project-templates/.github" ]] && missing_files+=(".github/")
 
     if [[ ${#missing_files[@]} -gt 0 ]]; then
         error "Missing base files in dotfiles: ${missing_files[*]}"
@@ -117,7 +117,7 @@ init_project() {
     if [[ -f "AGENTS.md" ]] && [[ ! -L "AGENTS.md" ]]; then
         info "AGENTS.md already exists (not a symlink), skipping"
     elif [[ ! -e "AGENTS.md" ]]; then
-        ln -s "$DOTFILES_ROOT/AGENTS.md" "AGENTS.md"
+        ln -s "$DOTFILES_ROOT/project-templates/AGENTS.md" "AGENTS.md"
         success "Symlinked AGENTS.md"
     fi
 
@@ -125,7 +125,7 @@ init_project() {
     if [[ -d ".roo" ]] && [[ ! -L ".roo" ]]; then
         info ".roo/ already exists (not a symlink), skipping"
     elif [[ ! -e ".roo" ]]; then
-        ln -s "$DOTFILES_ROOT/.roo" ".roo"
+        ln -s "$DOTFILES_ROOT/project-templates/.roo" ".roo"
         success "Symlinked .roo/"
     fi
 
@@ -133,7 +133,7 @@ init_project() {
     if [[ -d ".github" ]] && [[ ! -L ".github" ]]; then
         info ".github/ already exists (not a symlink), skipping"
     elif [[ ! -e ".github" ]]; then
-        ln -s "$DOTFILES_ROOT/.github" ".github"
+        ln -s "$DOTFILES_ROOT/project-templates/.github" ".github"
         success "Symlinked .github/"
     fi
 
