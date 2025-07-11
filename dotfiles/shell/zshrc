@@ -33,6 +33,8 @@ if [[ $(whoami) == "vscode" ]]; then
     DISABLE_AUTO_UPDATE=true
     DISABLE_UPDATE_PROMPT=true
     export PATH=/home/vscode/.opencode/bin:$PATH
+    export TERM=xterm-256color # Ensure terminal compatibility for non-vscode
+    export COLORTERM=truecolor # Enable true color support
 else
     # Editor Configuration
     export EDITOR=nvim # Use neovim as default editor
