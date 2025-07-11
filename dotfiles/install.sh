@@ -64,7 +64,7 @@ main() {
     
     # Link home files
     for file in "${HOME_FILES[@]}"; do
-        backup_and_link "$DOTFILES_DIR/$file" "$HOME/.$file"
+        backup_and_link "$DOTFILES_DIR/$file" "$HOME/.$(basename "$file")"
     done
     
     # Link .config directories

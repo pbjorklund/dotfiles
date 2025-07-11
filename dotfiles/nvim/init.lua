@@ -172,7 +172,6 @@ require("lazy").setup({
         },
         pickers = {
           find_files = {
-            search_dirs = { ".devcontainer", ".github", ".vscode", "ansible", "dotfiles", "scripts" },
             hidden = true
           }
         }
