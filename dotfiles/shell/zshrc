@@ -32,6 +32,7 @@ if [[ $(whoami) == "vscode" ]]; then
     plugins=(git)
     DISABLE_AUTO_UPDATE=true
     DISABLE_UPDATE_PROMPT=true
+    export PATH=/home/vscode/.opencode/bin/opencode:$PATH
 else
     # Editor Configuration
     export EDITOR=nvim # Use neovim as default editor
@@ -66,7 +67,6 @@ else
 
     # opencode
     export PATH=/home/pbjorklund/.opencode/bin:$PATH
-
 fi
 
 # SSH wrapper to handle terminal compatibility
