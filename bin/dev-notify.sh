@@ -41,9 +41,10 @@ elif echo "$message" | grep -qi "error\|fail"; then
     icon="dialog-error"
     timeout=8000
 elif echo "$message" | grep -qi "complete\|done\|success"; then
-    urgency="low"
+    # Enhanced notification for completions - more prominent
+    urgency="normal"  # More visible than "low"
     icon="dialog-information"
-    timeout=3000
+    timeout=8000  # Longer display time
 elif [ "$urgency" = "critical" ]; then
     icon="dialog-error"
     timeout=8000
@@ -66,15 +67,6 @@ notify-send "$title" "$message" \
     -t "$timeout" \
     -a "claude-opencode" \
     -c "development"
-
-# Trigger tmux bell if we're in a tmux session and this is a session completion
-if [ -n "$TMUX" ] && echo "$message" | grep -qi "complete\|done\|success\|finished"; then
-    # Send bell character to terminal
-    echo -ne '\a'
-    
-    # Also try sending it via tmux
-    tmux send-keys -t $(tmux display -p '#S:#I.#P') 'C-g' 2>/dev/null || true
-fi
 
 # Log the notification for debugging (optional)
 if [ "${CLAUDE_NOTIFY_DEBUG:-}" = "1" ]; then
