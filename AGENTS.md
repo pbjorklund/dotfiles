@@ -1,30 +1,26 @@
 # AGENTS.md - Dotfiles Repository Guide
 
-## Build/Test Commands
-- Run Ansible playbook: `ansible-playbook ansible/workstation-setup.ansible.yml`
-- Syntax check: `ansible-playbook --syntax-check ansible/<playbook>.ansible.yml`
-- Lint Ansible: `ansible-lint ansible/<playbook>.ansible.yml`
-- Shell syntax check: `bash -n <script>.sh`
-- Install dotfiles: `cd dotfiles && ./install.sh`
+## Core Principles
+- **Modular by design**: Each ansible playbook targets specific functionality for selective execution
+- **Security first**: Public configs contain no real credentials - protects against accidental exposure
+- **Idempotent automation**: Safe to run repeatedly without breaking existing setups
+- **Lint-enforced quality**: All code must pass automated validation for reliability
 
-## File Structure
-- Ansible playbooks: `ansible/*.ansible.yml` (use `.yml` not `.yaml`)
-- Shell scripts: `bin/*.sh` (must be executable)
-- Config files: `dotfiles/` directory organized by application
-- Templates: `project-templates/` for reusable configurations
+## File Organization (WHY this structure)
+- `ansible/*.ansible.yml` - Clear namespace prevents confusion with other YAML files
+- `bin/*.sh` - Executable utilities separate from config files for PATH management
+- `dotfiles/` by application - Logical grouping enables partial installations
+- `dotfiles/install.sh` installs and symlinks all dotfiles in correct paths on client
+- `project-templates/` - Reusable patterns reduce setup time for new projects
 
-## Code Style Guidelines
-- **Ansible**: MUST use FQCN (`ansible.builtin.dnf`), `state: present/latest`, pass ansible-lint
-- **Shell**: MUST use `#!/bin/bash`, `set -euo pipefail`, quote all variables `"${var}"`
-- **Config files**: MUST include header comments, use sections, no real personal data
-- **Security**: NO secrets, tokens, or real usernames in public configs
+## Code Standards (Preventing common failures)
+- **Ansible FQCN required** - `ansible.builtin.dnf` prevents module resolution issues
+- **Shell strict mode** - `set -euo pipefail` catches errors early and prevents silent failures
+- **Variable quoting** - `"${var}"` prevents word splitting and path issues
+- **Placeholder data only** - Prevents accidental credential commits in public repos
 
-## Key Rules from .roo/rules/
-- Be direct and honest - disagree when user is wrong, don't validate bad ideas
-- Ansible files must be idempotent and lint-clean
-- Use absolute paths, validate file existence before operations
-- All shell scripts need error handling and meaningful messages
-
-## File Naming
-- Ansible: `name.ansible.yml` in `ansible/` directory
-- Use placeholder values for personal data: "Your Name", "your.email@example.com"
+## Development Rules
+- Run validation workflow before every commit (prevents broken deployments)
+- Use absolute paths (avoids dependency on working directory)
+- Test file existence before operations (prevents cryptic error messages)
+- Modular, tagged playbooks enable users to install only what they need

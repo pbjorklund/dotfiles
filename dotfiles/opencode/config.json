@@ -10,9 +10,9 @@
         {
           "command": [
             "/home/pbjorklund/dotfiles/bin/dev-notify.sh",
-            "OpenCode Session Complete",
-            "Session finished successfully",
-            "low"
+            "opencode - Session Complete",
+            "Session done.",
+            "normal"
           ]
         }
       ]
