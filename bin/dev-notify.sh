@@ -67,6 +67,15 @@ notify-send "$title" "$message" \
     -a "claude-opencode" \
     -c "development"
 
+# Trigger tmux bell if we're in a tmux session and this is a session completion
+if [ -n "$TMUX" ] && echo "$message" | grep -qi "complete\|done\|success\|finished"; then
+    # Send bell character to terminal
+    echo -ne '\a'
+    
+    # Also try sending it via tmux
+    tmux send-keys -t $(tmux display -p '#S:#I.#P') 'C-g' 2>/dev/null || true
+fi
+
 # Log the notification for debugging (optional)
 if [ "${CLAUDE_NOTIFY_DEBUG:-}" = "1" ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') [$hook_event] $title: $message" >> ~/.claude/notifications.log

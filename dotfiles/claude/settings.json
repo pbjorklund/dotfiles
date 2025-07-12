@@ -1055,7 +1055,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/pbjorklund/dotfiles/bin/claude-notify.sh"
+            "command": "/home/pbjorklund/dotfiles/bin/dev-notify.sh"
           }
         ]
       }

@@ -30,7 +30,7 @@ cd dotfiles && ./install.sh
 - **[dotfiles/](dotfiles/)** - Personal configuration files (bash, git, tmux)
 - **[bin/](bin/)** - Custom scripts and utilities
   - `pbproject` - Project initialization tool with symlinked templates
-  - `claude-notify.sh` - Universal notification system for Claude Code and OpenCode
+  - `dev-notify.sh` - Universal notification system for development tools (Claude Code, OpenCode)
   - `tmux-global-indicators.sh` - Enhanced tmux activity/bell monitoring
 
 ## Features
