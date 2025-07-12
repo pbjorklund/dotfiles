@@ -82,6 +82,16 @@ main() {
     backup_and_link "$DOTFILES_DIR/../bin/pbproject" "$HOME/.local/bin/pbproject"
     backup_and_link "$DOTFILES_DIR/../bin/256colors" "$HOME/.local/bin/256colors"
     
+    # Setup tmux plugins
+    log "Setting up tmux plugins"
+    if [[ ! -d ~/.tmux/plugins/tpm ]]; then
+        log "Installing Tmux Plugin Manager (TPM)"
+        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+        log "TPM installed. Run 'prefix + I' in tmux to install plugins"
+    else
+        log "TPM already installed"
+    fi
+    
     # Handle system files (only on real systems)
     if [[ "$IS_DEVCONTAINER" == "false" ]]; then
         log "Installing system files"
