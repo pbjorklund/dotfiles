@@ -30,6 +30,8 @@ cd dotfiles && ./install.sh
 - **[dotfiles/](dotfiles/)** - Personal configuration files (bash, git, tmux)
 - **[bin/](bin/)** - Custom scripts and utilities
   - `pbproject` - Project initialization tool with symlinked templates
+  - `claude-notify.sh` - Universal notification system for Claude Code and OpenCode
+  - `tmux-global-indicators.sh` - Enhanced tmux activity/bell monitoring
 
 ## Features
 
@@ -38,6 +40,7 @@ cd dotfiles && ./install.sh
 - **Idempotent**: Safe to run repeatedly, only applies necessary changes
 - **Secure by Default**: SSH-based Git auth, 1Password integration, privacy hardening
 - **Modern Desktop**: Hyprland with advanced workspace/monitor management, SDDM with custom theme
+- **Development Notifications**: Integrated notification system for Claude Code and OpenCode with mako desktop alerts
 - **Hardware Support**: ThinkPad fingerprint auth, DisplayLink drivers
 
 ## Requirements

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "theme": "material",
+  "autoupdate": true,
+  "model": "github-copilot/claude-sonnet-4",
+  "log_level": "INFO",
+  "experimental": {
+    "hook": {
+      "file_edited": {
+        "**/*": [
+          {
+            "command": [
+              "/home/pbjorklund/dotfiles/bin/claude-notify.sh",
+              "OpenCode File Edit",
+              "A file has been modified",
+              "normal"
+            ]
+          }
+        ]
+      },
+      "session_completed": [
+        {
+          "command": [
+            "/home/pbjorklund/dotfiles/bin/claude-notify.sh",
+            "OpenCode Session Complete",
+            "Session finished successfully",
+            "low"
+          ]
+        },
+        {
+          "command": [
+            "/home/pbjorklund/dotfiles/bin/trigger-tmux-bell.sh"
+          ]
+        }
+      ]
+    }
+  }
+}
