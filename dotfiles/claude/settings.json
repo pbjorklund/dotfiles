@@ -1040,7 +1040,7 @@
     ]
   },
   "defaultMode": "bypassPermissions",
-  "env": { 
+  "env": {
     "DISABLE_ERROR_REPORTING": "1",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "OTEL_METRICS_EXPORTER": "prometheus",

@@ -2,6 +2,13 @@
 
 Automated Fedora workstation setup using modular Ansible playbooks and dotfiles. **This is a personal configuration** - fork and adapt to your needs.
 
+> [!IMPORTANT]
+> **After running install or ansible**: Search and replace hardcoded paths for your username:
+> 1. Open in nvim: `nvim` (or any file)
+> 2. Search and replace: `,fg` then search `/home/pbjorklund` and replace with your path
+>
+> Many tools don't properly expand `~` so we use absolute paths. Update these to match your system. I could fix, but to lazy.
+
 ## My Development Workflow
 
 **Primary Setup**: Kitty terminal + tmux + CLI-agentic-coding-tools
