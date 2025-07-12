@@ -5,7 +5,10 @@ set -euo pipefail
 # Manages symlinked project templates from dotfiles
 
 # Global configuration
-DOTFILES_ROOT="$HOME/dotfiles"
+# Auto-detect dotfiles root based on script location (resolve symlinks)
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+DOTFILES_ROOT="$(dirname "$SCRIPT_DIR")"
 SCRIPT_NAME="$(basename "$0")"
 PROJECTS_DIR="$HOME/Projects"
 
@@ -46,9 +49,11 @@ EXAMPLES:
 
 BASE FILES:
     The following files/directories will be symlinked from dotfiles:
-    - AGENTS.md (AI agent instructions)
-    - .roo/ (roo configuration directory)
-    - .github/ (GitHub workflows and templates)
+    - AGENTS.md (OpenCode instructions)  
+    - CLAUDE.md (Claude Desktop instructions)
+    - GEMINI.md (Gemini CLI instructions)
+    - .github/copilot-instructions.md (GitHub Copilot instructions)
+    - .roo/rules/00-general.md (Roo general rules)
 
 TROUBLESHOOTING:
     SSH Permission Denied when creating GitHub repository:
@@ -77,13 +82,9 @@ check_dotfiles() {
         error "Dotfiles directory not found at $DOTFILES_ROOT"
     fi
 
-    local missing_files=()
-    [[ ! -f "$DOTFILES_ROOT/project-templates/AGENTS.md" ]] && missing_files+=("AGENTS.md")
-    [[ ! -d "$DOTFILES_ROOT/project-templates/.roo" ]] && missing_files+=(".roo/")
-    [[ ! -d "$DOTFILES_ROOT/project-templates/.github" ]] && missing_files+=(".github/")
-
-    if [[ ${#missing_files[@]} -gt 0 ]]; then
-        error "Missing base files in dotfiles: ${missing_files[*]}"
+    # Check for llm-link script
+    if [[ ! -f "$DOTFILES_ROOT/bin/llm-link" ]]; then
+        error "llm-link script not found at $DOTFILES_ROOT/bin/llm-link"
     fi
 }
 
@@ -111,30 +112,20 @@ init_project() {
     fi
 
     # Create symlinks to base files
-    info "Creating symlinks to base configuration files"
-
-    # AGENTS.md
-    if [[ -f "AGENTS.md" ]] && [[ ! -L "AGENTS.md" ]]; then
-        info "AGENTS.md already exists (not a symlink), skipping"
-    elif [[ ! -e "AGENTS.md" ]]; then
-        ln -s "$DOTFILES_ROOT/project-templates/AGENTS.md" "AGENTS.md"
-        success "Symlinked AGENTS.md"
-    fi
-
-    # .roo directory
-    if [[ -d ".roo" ]] && [[ ! -L ".roo" ]]; then
-        info ".roo/ already exists (not a symlink), skipping"
-    elif [[ ! -e ".roo" ]]; then
-        ln -s "$DOTFILES_ROOT/project-templates/.roo" ".roo"
-        success "Symlinked .roo/"
-    fi
-
-    # .github directory
-    if [[ -d ".github" ]] && [[ ! -L ".github" ]]; then
-        info ".github/ already exists (not a symlink), skipping"
-    elif [[ ! -e ".github" ]]; then
-        ln -s "$DOTFILES_ROOT/project-templates/.github" ".github"
-        success "Symlinked .github/"
+    info "Setting up LLM instructions and configuration"
+    
+    # Use llm-link to set up all LLM instruction files
+    if command -v llm-link &>/dev/null; then
+        llm-link
+        success "LLM instructions configured"
+    else
+        # Fallback to PATH if not found
+        if [[ -x "$DOTFILES_ROOT/bin/llm-link" ]]; then
+            "$DOTFILES_ROOT/bin/llm-link"
+            success "LLM instructions configured"
+        else
+            error "llm-link command not found and not executable at $DOTFILES_ROOT/bin/llm-link"
+        fi
     fi
 
     # Create basic project structure
@@ -201,37 +192,16 @@ detach_project() {
 
     info "Detaching symlinked files in $project_path"
 
-    local detached_files=()
-
-    # Check and detach AGENTS.md
-    if [[ -L "AGENTS.md" ]]; then
-        local target=$(readlink "AGENTS.md")
-        rm "AGENTS.md"
-        cp "$target" "AGENTS.md"
-        detached_files+=("AGENTS.md")
-    fi
-
-    # Check and detach .roo directory
-    if [[ -L ".roo" ]]; then
-        local target=$(readlink ".roo")
-        rm ".roo"
-        cp -r "$target" ".roo"
-        detached_files+=(".roo/")
-    fi
-
-    # Check and detach .github directory
-    if [[ -L ".github" ]]; then
-        local target=$(readlink ".github")
-        rm ".github"
-        cp -r "$target" ".github"
-        detached_files+=(".github/")
-    fi
-
-    if [[ ${#detached_files[@]} -eq 0 ]]; then
-        info "No symlinked base files found to detach"
+    # Use llm-link to detach LLM instruction files
+    if command -v llm-link &>/dev/null; then
+        llm-link --detach
     else
-        success "Detached files: ${detached_files[*]}"
-        info "Base files are now independent copies that can be customized"
+        # Fallback to PATH if not found
+        if [[ -x "$DOTFILES_ROOT/bin/llm-link" ]]; then
+            "$DOTFILES_ROOT/bin/llm-link" --detach
+        else
+            error "llm-link command not found and not executable at $DOTFILES_ROOT/bin/llm-link"
+        fi
     fi
 }
 
@@ -246,47 +216,16 @@ show_status() {
     info "Project status for: $project_path"
     echo
 
-    local base_files=("AGENTS.md" ".roo" ".github")
-    local symlinked=()
-    local copied=()
-    local missing=()
-
-    for file in "${base_files[@]}"; do
-        if [[ -L "$file" ]]; then
-            symlinked+=("$file")
-        elif [[ -e "$file" ]]; then
-            copied+=("$file")
+    # Use llm-link to show LLM file status
+    if command -v llm-link &>/dev/null; then
+        llm-link --status
+    else
+        # Fallback to PATH if not found
+        if [[ -x "$DOTFILES_ROOT/bin/llm-link" ]]; then
+            "$DOTFILES_ROOT/bin/llm-link" --status
         else
-            missing+=("$file")
+            error "llm-link command not found and not executable at $DOTFILES_ROOT/bin/llm-link"
         fi
-    done
-
-    if [[ ${#symlinked[@]} -gt 0 ]]; then
-        echo "🔗 Symlinked (shared with dotfiles):"
-        for file in "${symlinked[@]}"; do
-            echo "   $file -> $(readlink "$file")"
-        done
-        echo
-    fi
-
-    if [[ ${#copied[@]} -gt 0 ]]; then
-        echo "📁 Copied (independent):"
-        for file in "${copied[@]}"; do
-            echo "   $file"
-        done
-        echo
-    fi
-
-    if [[ ${#missing[@]} -gt 0 ]]; then
-        echo "❓ Missing:"
-        for file in "${missing[@]}"; do
-            echo "   $file"
-        done
-        echo
-    fi
-
-    if [[ ${#symlinked[@]} -gt 0 ]]; then
-        info "Run '$SCRIPT_NAME detach' to make copies you can customize"
     fi
 }
 

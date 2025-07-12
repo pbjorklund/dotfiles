@@ -80,6 +80,7 @@ main() {
     # Link local bin
     mkdir -p ~/.local/bin
     backup_and_link "$DOTFILES_DIR/../bin/pbproject" "$HOME/.local/bin/pbproject"
+    backup_and_link "$DOTFILES_DIR/../bin/llm-link" "$HOME/.local/bin/llm-link"
     backup_and_link "$DOTFILES_DIR/../bin/256colors" "$HOME/.local/bin/256colors"
     
     # Setup tmux plugins

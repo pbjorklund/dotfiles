@@ -74,11 +74,15 @@ dotfiles/                   # Personal config files
 └── shell/                 # bash/zsh aliases, functions
 
 bin/                       # Custom scripts that go in PATH
-├── pbproject              # Project templates and initialization
+├── pbproject              # AI-optimized project initialization and templates
+├── llm-link               # Unified LLM instruction management across projects
 └── dev-notify.sh          # Notification bridge for AI coding tools
 
-project-templates/         # Starter configs for new projects
-└── .github/instructions/  # AI assistant context for different tools
+project-templates/         # Starter configs for new projects with AI support
+├── LLM_CORE_SYSTEM_PROMPT.md  # Unified system prompt for all AI tools
+├── AGENTS.md|CLAUDE.md|GEMINI.md  # Symlinks to core prompt for each tool
+├── github/instructions/   # GitHub Copilot context and workflow templates
+└── roo/rules/            # Roo AI assistant rules and configuration
 ```
 
 ## Key Features You Should Know About
@@ -98,10 +102,70 @@ project-templates/         # Starter configs for new projects
 - Scripts for moving workspaces between monitors
 - Keybinds for common window management tasks
 
-**Development Project Setup**
-- `pbproject` creates new projects from templates
-- Templates include proper .github/instructions for AI assistants
-- Consistent structure across all projects
+**AI-Optimized Project Setup**
+- `pbproject` creates new projects with shared LLM instructions
+- `llm-link` manages AI tool configurations across projects
+- Templates include proper context for Claude, OpenCode, Copilot, Roo, Gemini
+
+## Project Management Tools
+
+### pbproject - AI-Optimized Project Initialization
+
+Creates new projects with consistent structure and shared AI tool configurations.
+
+```bash
+# Create new project with LLM setup
+pbproject init my-new-project
+
+# Create project at specific location
+pbproject init my-app ~/projects/my-app
+
+# Check current project status
+pbproject status
+
+# Detach symlinks to create independent copies
+pbproject detach
+
+# Migrate folder from existing project to new standalone project
+pbproject migrate batch_writer ~/Projects/cli-tool
+
+# Create private GitHub repository for current project
+pbproject newghrepo
+```
+
+**What it provides:**
+- **Unified LLM instructions**: All AI tools share the same system prompt
+- **Auto-updating templates**: Symlinked configs get improvements automatically
+- **Easy customization**: Detach to independent copies when needed
+- **GitHub integration**: Automatic private repo creation and push
+
+### llm-link - Baseline AI Configuration Setup
+
+Symlinks in generic LLM instruction files across all supported AI coding tools. All based on the same core prompt. Can detach to create independent copies for customization.
+
+```bash
+# Set up LLM files in current directory
+llm-link
+
+# Check status of LLM files
+llm-link --status
+
+# Convert symlinks to independent copies for customization
+llm-link --detach
+```
+
+**Supported AI Tools:**
+- **OpenCode** (`AGENTS.md`) - CLI coding assistant
+- **Claude Desktop** (`CLAUDE.md`) - Desktop AI chat
+- **Gemini CLI** (`GEMINI.md`) - Google's AI assistant
+- **GitHub Copilot** (`.github/copilot-instructions.md`) - IDE integration. Also comes with custom instructions for a bunch of filetypes and langs.
+- **Roo** (`.roo/rules/00-general.md`) - AI pair programming Cline fork. Quite good.
+
+**Workflow:**
+1. **Start new project**: `pbproject init` creates project with symlinked LLM configs
+2. **Develop**: All AI tools share unified instructions and coding standards
+3. **Customize when needed**: `llm-link --detach` creates independent copies
+4. **Update shared configs**: Changes to templates automatically propagate to linked projects
 
 ## Customization (Making It Yours)
 
@@ -120,52 +184,14 @@ project-templates/         # Starter configs for new projects
 - Monitor configs in `dotfiles/hypr/conf/monitors.conf`
 - Power management might need tweaking for different laptops
 
-## Common Issues and Gotchas
-
-**First Run Problems**
-- Some playbooks need internet (they download packages)
-- 1Password CLI needs manual auth on first setup
-- DisplayLink requires a reboot to work properly
-
-**Desktop Environment Conflicts**
-- Don't run both GNOME and Hyprland tags together
-- SDDM will override GDM if both are installed
-- Some GNOME apps work weird under Hyprland
-
-**Development Tools**
-- VS Code extensions install automatically but need manual config
-- Docker needs your user in the docker group (logout/login required)
-- Some containers need SELinux tweaks on Fedora
-
-**File Permissions**
-- Scripts in `bin/` need to be executable
-- SSH keys need proper permissions (600)
-- Some systemd user services need manual enable
-
-## Testing Changes
-
-```bash
-# Always lint before running
-ansible-lint ansible/*.yml
-
-# Test syntax without making changes
-ansible-playbook --syntax-check ansible/workstation-setup.yml
-
-# Run specific parts
-ansible-playbook ansible/workstation-setup.yml --tags development --check
-
-# See what would change without doing it
-ansible-playbook ansible/workstation-setup.yml --check --diff
-```
-
 ## Why These Choices
 
 **Ansible over shell scripts**: Idempotent, handles errors, self-documenting
 **Hyprland over i3/sway**: Better multi-monitor, active development
-**tmux over screen**: Better scripting, mouse support, more features
-**Neovim over vim**: Lua config, built-in LSP, better plugin ecosystem
-**Kitty over alacritty**: Better font rendering, graphics support
-**mako over dunst**: Wayland native, better integration
+**tmux over screen/zellij**: Better scripting, mouse support, more features. But most of all I'm a grumpy old man set in his ways
+**Neovim over vim**: Lua config, built-in LSP, better plugin ecosystem. Kinda forced into it
+**Kitty over alacritty**: Better font rendering, graphics support they say. I don't really care, it works
+**mako over dunst**: It's just the first I went with
 
 ## Requirements
 
@@ -173,3 +199,4 @@ ansible-playbook ansible/workstation-setup.yml --check --diff
 - Ansible (`dnf install ansible`)
 - Internet connection for package downloads
 - Some patience for first run (takes 10-15 minutes)
+
