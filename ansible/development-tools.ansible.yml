@@ -45,6 +45,7 @@
           - tree # Directory structure viewer
           - htop # Process monitor
           - btop # Process monitor
+          - fastfetch # System information tool
           - ripgrep # Fast grep alternative
           - fd-find # Fast find alternative
           - bat # Cat with syntax highlighting
