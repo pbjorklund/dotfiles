@@ -85,9 +85,9 @@ project-templates/         # Starter configs for new projects with AI support
 └── roo/rules/            # Roo AI assistant rules and configuration
 ```
 
-## Key Features You Should Know About
+## Key Features
 
-**Notifications That Actually Work**
+**Notifications**
 - `dev-notify.sh` sends desktop notifications from Claude Code, OpenCode
 - Shows in mako (Wayland) with proper icons and persistence
 - No more missing that the AI finished your request
@@ -102,14 +102,12 @@ project-templates/         # Starter configs for new projects with AI support
 - Scripts for moving workspaces between monitors
 - Keybinds for common window management tasks
 
-**AI-Optimized Project Setup**
-- `pbproject` creates new projects with shared LLM instructions
+**Project Setup Tools**
+- `pbproject` creates new gh private repo projects with shared LLM instructions
 - `llm-link` manages AI tool configurations across projects
 - Templates include proper context for Claude, OpenCode, Copilot, Roo, Gemini
 
-## Project Management Tools
-
-### pbproject - AI-Optimized Project Initialization
+### pbproject - Project Bootstrapper
 
 Creates new projects with consistent structure and shared AI tool configurations.
 
@@ -134,8 +132,8 @@ pbproject newghrepo
 ```
 
 **What it provides:**
-- **Unified LLM instructions**: All AI tools share the same system prompt
-- **Auto-updating templates**: Symlinked configs get improvements automatically
+- **LLM instructions**: All AI tools share the same system prompt
+- **Symlinked**: Symlinked configs get improvements automatically
 - **Easy customization**: Detach to independent copies when needed
 - **GitHub integration**: Automatic private repo creation and push
 
@@ -166,23 +164,6 @@ llm-link --detach
 2. **Develop**: All AI tools share unified instructions and coding standards
 3. **Customize when needed**: `llm-link --detach` creates independent copies
 4. **Update shared configs**: Changes to templates automatically propagate to linked projects
-
-## Customization (Making It Yours)
-
-**Personal Data Placeholders**
-- Replace "Your Name" in git config
-- Update email addresses from example.com
-- Change SSH key paths in security configs
-
-**Color Schemes and Styling**
-- Consistent dark theme across kitty, tmux, VS Code
-- Modify `dotfiles/*/` configs for different colors
-- Hyprland uses custom wallpapers in `dotfiles/hypr/wallpapers/`
-
-**Hardware-Specific Stuff**
-- Skip hardware playbooks if you don't have ThinkPad/DisplayLink
-- Monitor configs in `dotfiles/hypr/conf/monitors.conf`
-- Power management might need tweaking for different laptops
 
 ## Why These Choices
 
