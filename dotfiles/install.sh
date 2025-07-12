@@ -12,7 +12,7 @@ readonly BACKUP_DIR="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 readonly IS_DEVCONTAINER=$([[ "$USER" == "vscode" ]] || [[ -f "/.dockerenv" ]] || ! command -v systemctl >/dev/null 2>&1 && echo true || echo false)
 
 # Files and directories to link
-readonly HOME_FILES=(shell/bashrc shell/zshrc git/gitconfig tmux/tmux.conf shell/inputrc)
+readonly HOME_FILES=(shell/bashrc shell/bash_profile shell/zshrc git/gitconfig tmux/tmux.conf shell/inputrc)
 readonly CONFIG_DIRS=(hypr waybar zellij mako wofi systemd terminal/kitty gh nvim opencode niri)
 
 # System files (only on real systems)
@@ -80,6 +80,7 @@ main() {
     # Link local bin
     mkdir -p ~/.local/bin
     backup_and_link "$DOTFILES_DIR/../bin/pbproject" "$HOME/.local/bin/pbproject"
+    backup_and_link "$DOTFILES_DIR/../bin/256colors" "$HOME/.local/bin/256colors"
     
     # Handle system files (only on real systems)
     if [[ "$IS_DEVCONTAINER" == "false" ]]; then
