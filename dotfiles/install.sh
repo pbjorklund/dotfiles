@@ -77,6 +77,11 @@ main() {
     backup_and_link "$DOTFILES_DIR/Code/User/settings.json" "$HOME/.config/Code/User/settings.json"
     backup_and_link "$DOTFILES_DIR/claude/settings.json" "$HOME/.claude/settings.json"
     
+    # Link global LLM instruction files
+    mkdir -p ~/.config/opencode ~/.claude
+    backup_and_link "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.config/opencode/AGENTS.md"
+    backup_and_link "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+    
     # Link local bin
     mkdir -p ~/.local/bin
     backup_and_link "$DOTFILES_DIR/../bin/pbproject" "$HOME/.local/bin/pbproject"

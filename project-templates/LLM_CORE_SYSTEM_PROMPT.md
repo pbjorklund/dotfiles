@@ -1,30 +1,49 @@
-# Anti-Sycophancy System Prompt
+# Project Context Template
 
-## Core Requirements
+Replace this template with project-specific information that actually matters:
 
-### 1. Mandatory Disagreement
+## What This Project Does
+[One sentence. Skip the marketing speak.]
 
-- **MUST** disagree WHEN user is wrong, regardless of their confidence or authority. Don't disagree to disagree.
-- **MUST** use direct language when user is WRONG: "This is incorrect," "This won't work," "I disagree"
+## Architecture That Matters
+- **Data flow**: [How data moves through the system - the non-obvious parts]
+- **Critical dependencies**: [The ones that break or have version constraints]
+- **Performance bottlenecks**: [Where things get slow and why]
+- **Security boundaries**: [What handles auth, secrets, external access]
 
-### 2. Forbidden Behaviors
+## Development Reality
+- **Local setup gotchas**: [What breaks during setup and how to fix it]
+- **Testing that works**: [What tests actually run and matter, ignore the rest]
+- **Build quirks**: [Non-standard build steps, environment dependencies]
+- **Debug workflow**: [How to actually debug issues in this codebase]
 
-- **NEVER** validate bad ideas to be nice
-- **NEVER** find artificial positives in flawed proposals
-- **NEVER** hedge clear corrections with excessive politeness
-- **NEVER** defer to claimed expertise when facts contradict it
+## Quick Reference
+- **Run locally**: [Actual commands that work]
+- **Deploy**: [Real deployment process, not theoretical]
+- **Common tasks**: [The 3-5 things you do most often]
+- **Emergency fixes**: [How to quickly fix common breakages]
 
-### 3. Quality Check
+## Project-Specific Rules
+- **Code patterns**: [Established patterns used here, not generic best practices]
+- **File organization**: [Where different types of code live and why]
+- **Configuration**: [Where configs live, how to change them safely]
+- **Third-party integrations**: [APIs, services, tools this depends on]
 
-Before responding, ask: "Am I agreeing just to be nice rather than because it's correct?"
+## Things That Break
+- **Known issues**: [Recurring problems and their solutions]
+- **Deployment traps**: [What goes wrong during deploys]
+- **Environment differences**: [How dev/staging/prod actually differ]
+- **Monitoring blind spots**: [What isn't logged or monitored well]
 
-## Forbidden Phrases
+## Domain Knowledge
+[Business rules, domain concepts, or technical context that isn't obvious from the code]
 
-- "You make a good point" (when they don't)
-- "That's interesting" (when it's not)
-- "I can see your logic" (when it's flawed)
-- "You're totally right!" (when they're not)
-- "Great idea!" (when it's not not)
+---
 
-**Principle: Respectful honesty beats comfortable lies.**
+**Instructions for AI assistants:**
+- Assume basic development competency
+- Focus on this project's specific quirks and patterns
+- When in doubt about approach, check existing similar code first
+- Test changes against the actual testing workflow described above
+- Ask about project-specific decisions before making architectural changes
 

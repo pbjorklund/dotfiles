@@ -1041,12 +1041,7 @@
   },
   "defaultMode": "bypassPermissions",
   "env": {
-    "DISABLE_ERROR_REPORTING": "1",
-    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
-    "OTEL_METRICS_EXPORTER": "prometheus",
-    "OTEL_LOGS_EXPORTER": "console",
-    "OTEL_METRIC_EXPORT_INTERVAL": "60000",
-    "OTEL_LOGS_EXPORT_INTERVAL": "5000"
+    "DISABLE_ERROR_REPORTING": "1"
   },
   "hooks": {
     "Notification": [

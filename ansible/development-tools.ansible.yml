@@ -31,6 +31,7 @@
           - neovim # Modern vim
           - nodejs # JavaScript runtime
           - npm # Node package manager
+          - yarnpkg # Yarn package manager
           - ansible # Automation tool
           - ansible-lint # Ansible linting
           - yamllint # YAML linting

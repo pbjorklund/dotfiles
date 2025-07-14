@@ -426,6 +426,9 @@ require("lazy").setup({
         { "<leader>gg", desc = "LazyGit" },
         { "<leader>gp", desc = "Preview git hunk" },
         { "<leader>gr", desc = "Reset git hunk" },
+        { "<leader>m", group = "Markdown" },
+        { "<leader>mp", desc = "Markdown Preview Start" },
+        { "<leader>ms", desc = "Markdown Preview Stop" },
         { "]c", desc = "Next git change" },
         { "[c", desc = "Previous git change" },
         { "<leader>h", function() wk.show({ global = true }) end, desc = "Show All Keybindings" },
@@ -466,6 +469,48 @@ require("lazy").setup({
     },
     config = function()
       vim.keymap.set("n", "<leader>gg", "<cmd>LazyGit<cr>", { desc = "LazyGit" })
+    end,
+  },
+
+  -- Markdown Preview
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    ft = { "markdown" },
+    build = "cd app && yarn install",
+    config = function()
+      vim.g.mkdp_auto_start = 0
+      vim.g.mkdp_auto_close = 1
+      vim.g.mkdp_refresh_slow = 0
+      vim.g.mkdp_command_for_global = 0
+      vim.g.mkdp_open_to_the_world = 0
+      vim.g.mkdp_open_ip = ""
+      vim.g.mkdp_browser = ""
+      vim.g.mkdp_echo_preview_url = 1
+      vim.g.mkdp_browserfunc = ""
+      vim.g.mkdp_preview_options = {
+        mkit = {},
+        katex = {},
+        uml = {},
+        maid = {},
+        disable_sync_scroll = 0,
+        sync_scroll_type = "middle",
+        hide_yaml_meta = 1,
+        sequence_diagrams = {},
+        flowchart_diagrams = {},
+        content_editable = false,
+        disable_filename = 0,
+        toc = {}
+      }
+      vim.g.mkdp_markdown_css = ""
+      vim.g.mkdp_highlight_css = ""
+      vim.g.mkdp_port = ""
+      vim.g.mkdp_page_title = "「${name}」"
+      vim.g.mkdp_theme = "dark"
+      
+      -- Key mappings
+      vim.keymap.set("n", "<leader>mp", "<cmd>MarkdownPreview<cr>", { desc = "Markdown Preview Start" })
+      vim.keymap.set("n", "<leader>ms", "<cmd>MarkdownPreviewStop<cr>", { desc = "Markdown Preview Stop" })
     end,
   },
 })
