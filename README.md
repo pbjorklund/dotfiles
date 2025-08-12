@@ -60,7 +60,7 @@ dotfiles/                   # Personal config files
 bin/                       # Custom scripts that go in PATH
 ├── pbproject              # AI-optimized project initialization and templates
 ├── llm-link               # Unified LLM instruction management across projects
-└── dev-notify.sh          # Notification bridge for AI coding tools
+└── dev-notify.sh          # Notification bridge (moved to ansible-fedora)
 
 project-templates/         # Starter configs for new projects with AI support
 ├── LLM_CORE_SYSTEM_PROMPT.md  # Unified system prompt for all AI tools
@@ -72,7 +72,7 @@ project-templates/         # Starter configs for new projects with AI support
 ## Key Features
 
 **Notifications**
-- `dev-notify.sh` sends desktop notifications from Claude Code, OpenCode
+- `dev-notify.sh` (now in ansible-fedora) sends desktop notifications from Claude Code, OpenCode
 - Shows in mako (Wayland) with proper icons and persistence
 - No more missing that the AI finished your request
 

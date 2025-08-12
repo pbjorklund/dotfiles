@@ -9,7 +9,7 @@
 ## Code Organization
 - **Key Directories**:
   - `dotfiles/` - Personal configuration files (.config directories, shell configs)
-  - `bin/` - Custom CLI tools (pbproject, llm-link, dev-notify.sh)
+  - `bin/` - Custom CLI tools (pbproject, llm-link) [dev-notify.sh moved to ansible-fedora]
   - `project-templates/` - LLM instruction templates and project scaffolding
   - `docs/` - Troubleshooting guides and technical documentation
 - **Entry Points**:
@@ -40,7 +40,7 @@
 - **AI Development Tools**: Unified LLM instruction system supporting Claude Code, OpenCode, GitHub Copilot, Roo, Gemini
 
 ### Unique Features
-- **dev-notify.sh**: Desktop notifications from AI coding tools (Claude Code, OpenCode)
+- **dev-notify.sh**: Desktop notifications from AI coding tools (now in ansible-fedora project)
 - **pbproject**: Creates new projects with shared LLM instruction templates
 - **llm-link**: Manages AI tool configurations across projects with symlink/detach workflow
 

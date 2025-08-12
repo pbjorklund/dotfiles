@@ -8,7 +8,7 @@
       "session_completed": [
         {
           "command": [
-            "/home/pbjorklund/dotfiles/bin/dev-notify.sh",
+            "/home/pbjorklund/Projects/ansible-fedora/bin/dev-notify.sh",
             "opencode - Session Complete",
             "Session done.",
             "normal"

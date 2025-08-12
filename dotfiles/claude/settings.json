@@ -1050,7 +1050,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/pbjorklund/dotfiles/bin/dev-notify.sh"
+            "command": "/home/pbjorklund/Projects/ansible-fedora/bin/dev-notify.sh"
           }
         ]
       }
