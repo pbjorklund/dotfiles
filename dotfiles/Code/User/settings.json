@@ -80,7 +80,6 @@
   },
   "vim.useCtrlKeys": false,
   "diffEditor.ignoreTrimWhitespace": false,
-  "ansible.python.interpreterPath": "/bin/python",
   "[nginx]": {
     "editor.defaultFormatter": "raynigon.nginx-formatter"
   },

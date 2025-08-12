@@ -10,7 +10,7 @@
 ## Technology Stack Analysis
 - [ ] Identify primary programming languages used (via file extensions and directory structure)
 - [ ] Determine frameworks, libraries, and tools from dependency files
-- [ ] Check for configuration files that indicate specific technologies (docker-compose.yml, ansible/, etc.)
+- [ ] Check for configuration files that indicate specific technologies (docker-compose.yml, CI/CD configs, etc.)
 - [ ] Identify build systems, test frameworks, and development tools
 - [ ] Note any special requirements or environment dependencies
 

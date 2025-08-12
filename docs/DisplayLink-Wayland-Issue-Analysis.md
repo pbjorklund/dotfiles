@@ -63,19 +63,8 @@ env = ELECTRON_OZONE_PLATFORM_HINT,x11
 flatpak override --user --env=ELECTRON_OZONE_PLATFORM_HINT=x11 --nosocket=wayland md.obsidian.Obsidian
 ```
 
-**3. Automated via Ansible**:
-Added to `ansible/desktop-applications.ansible.yml`:
-
-```ansible
-- name: Configure Obsidian DisplayLink compatibility (force X11 backend)
-  ansible.builtin.command: flatpak override --user --env=ELECTRON_OZONE_PLATFORM_HINT=x11 --nosocket=wayland md.obsidian.Obsidian
-  become: true
-  become_user: "{{ original_user }}"
-  changed_when: false
-  tags:
-    - displaylink
-    - electron
-```
+**3. Automated via System Setup**:
+See the [ansible-fedora](https://github.com/pbjorklund/ansible-fedora) repository for automated Flatpak configuration.
 
 ### ✅ Confirmed Working
 

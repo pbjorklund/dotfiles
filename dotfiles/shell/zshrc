@@ -1,6 +1,6 @@
 plugins=(git)
 
-export FORCE_COLOR=1  # Enable colored output for ansible-lint and other tools
+export FORCE_COLOR=1  # Enable colored output for tools
 
 # Essential Aliases
 alias ll='ls -alF'             # Long listing with file types
@@ -80,8 +80,3 @@ ssh() {
     command ssh "$@"
   fi
 }
-
-# Ansible playbook aliases
-alias ap='ansible-playbook'
-alias apc='ansible-playbook --check'
-alias apv='ansible-playbook -v'

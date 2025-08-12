@@ -28,4 +28,4 @@ MANDATORY requirements for all YAML files in this dotfiles repository.
 
 - `**/*.{yml,yaml}`
 - YAML configuration files
-- Files like [`ansible.cfg`](ansible/ansible.cfg:1) and other YAML configs
+- Configuration files like CI/CD configs and other YAML configs
