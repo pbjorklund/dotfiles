@@ -1,1 +1,1 @@
-/home/pbjorklund/dotfiles/dotfiles/claude/CLAUDE.md
+../../templates/GLOBAL_LLM_INSTRUCTIONS.md
