@@ -7,7 +7,7 @@ set -euo pipefail
 ############################
 
 # Configuration
-readonly DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/dotfiles" && pwd)"
 readonly BACKUP_DIR="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 readonly IS_DEVCONTAINER=$([[ "$USER" == "vscode" ]] || [[ -f "/.dockerenv" ]] || ! command -v systemctl >/dev/null 2>&1 && echo true || echo false)
 
@@ -81,12 +81,6 @@ main() {
     mkdir -p ~/.config/opencode ~/.claude
     backup_and_link "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.config/opencode/AGENTS.md"
     backup_and_link "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-    
-    # Link local bin
-    mkdir -p ~/.local/bin
-    backup_and_link "$DOTFILES_DIR/../bin/pbproject" "$HOME/.local/bin/pbproject"
-    backup_and_link "$DOTFILES_DIR/../bin/llm-link" "$HOME/.local/bin/llm-link"
-    backup_and_link "$DOTFILES_DIR/../bin/256colors" "$HOME/.local/bin/256colors"
     
     # Setup tmux plugins
     log "Setting up tmux plugins"

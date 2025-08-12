@@ -29,7 +29,7 @@ git clone https://github.com/pbjorklund/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
 # Install dotfiles (configuration files only)
-cd dotfiles && ./install.sh
+./install.sh
 ```
 
 > **For system automation**: See the separate [machine-setup](https://github.com/pbjorklund/machine-setup) repository for automated Fedora workstation setup.
