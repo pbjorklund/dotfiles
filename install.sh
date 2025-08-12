@@ -3,23 +3,16 @@ set -euo pipefail
 
 ############################
 # Simplified dotfiles installer
-# Links dotfiles and .config directories, handles system files on real systems
+# Links dotfiles and .config directories
 ############################
 
 # Configuration
 readonly DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/dotfiles" && pwd)"
 readonly BACKUP_DIR="/tmp/dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
-readonly IS_DEVCONTAINER=$([[ "$USER" == "vscode" ]] || [[ -f "/.dockerenv" ]] || ! command -v systemctl >/dev/null 2>&1 && echo true || echo false)
 
 # Files and directories to link
 readonly HOME_FILES=(shell/bashrc shell/bash_profile shell/zshrc git/gitconfig tmux/tmux.conf shell/inputrc)
-readonly CONFIG_DIRS=(hypr waybar zellij mako wofi systemd terminal/kitty gh nvim opencode niri)
-
-# System files (only on real systems)
-declare -A SYSTEM_FILES=(
-    ["hypr/scripts/disable-usb-wakeup.sh"]="/usr/local/bin/disable-usb-wakeup.sh"
-    ["systemd/system/disable-usb-wakeup.service"]="/etc/systemd/system/disable-usb-wakeup.service"
-)
+readonly CONFIG_DIRS=(hypr waybar zellij mako wofi terminal/kitty gh nvim opencode niri)
 
 # Logging functions
 log() { echo "→ $*"; }
@@ -90,41 +83,6 @@ main() {
         log "TPM installed. Run 'prefix + I' in tmux to install plugins"
     else
         log "TPM already installed"
-    fi
-    
-    # Handle system files (only on real systems)
-    if [[ "$IS_DEVCONTAINER" == "false" ]]; then
-        log "Installing system files"
-        for source in "${!SYSTEM_FILES[@]}"; do
-            local dest="${SYSTEM_FILES[$source]}"
-            if [[ -f "$DOTFILES_DIR/$source" ]]; then
-                sudo mkdir -p "$(dirname "$dest")"
-                [[ -f "$dest" ]] && sudo cp "$dest" "$BACKUP_DIR/"
-                sudo cp "$DOTFILES_DIR/$source" "$dest"
-                sudo chmod +x "$dest" 2>/dev/null || true
-                log "Installed $source → $dest"
-                
-                # Handle systemd services
-                if [[ "$dest" == *.service ]]; then
-                    local service_name="$(basename "$dest")"
-                    sudo systemctl daemon-reload
-                    sudo systemctl enable "$service_name" && log "Enabled $service_name"
-                    sudo systemctl start "$service_name" && log "Started $service_name"
-                fi
-            fi
-        done
-        
-        # Handle user systemd services
-        if systemctl --user daemon-reload 2>/dev/null; then
-            for service in waybar.service waybar-watcher.service; do
-                if [[ -f ~/.config/systemd/user/$service ]]; then
-                    systemctl --user enable "$service" 2>/dev/null && log "Enabled user $service"
-                    systemctl --user start "$service" 2>/dev/null && log "Started user $service"
-                fi
-            done
-        fi
-    else
-        log "Skipping system configuration (devcontainer)"
     fi
     
     log "Installation complete! Backup: $BACKUP_DIR"

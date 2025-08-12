@@ -97,8 +97,8 @@ cd ~/dotfiles
 
 ## Why These Choices
 
-**Hyprland over i3/sway**: Better multi-monitor support, active development, Wayland-native
-**tmux over screen/zellij**: Superior scripting, mouse support, extensive feature set (also: grumpy old man syndrome)
-**Neovim over vim**: Lua configuration, built-in LSP, modern plugin ecosystem
-**Kitty over alacritty**: Better font rendering, graphics protocol support
-**Application-centric organization**: Easier maintenance than filesystem mirroring
+- **Hyprland over i3/sway**: Better multi-monitor support, active development, Wayland-native
+- **tmux over screen/zellij**: Superior scripting, mouse support, extensive feature set (also: grumpy old man syndrome)
+- **Neovim over vim**: Lua configuration, built-in LSP, modern plugin ecosystem
+- **Kitty over alacritty**: Better font rendering, graphics protocol support
+- **Application-centric organization**: Easier maintenance than filesystem mirroring
