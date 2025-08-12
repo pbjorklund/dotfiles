@@ -106,11 +106,6 @@ export PATH="$HOME/.cargo/bin:$PATH"
 [[ -z "$TMUX" ]] && export TERM=xterm-256color
 export COLORTERM=truecolor # Enable true color support
 
-# Ansible playbook aliases
-alias ap='ansible-playbook'
-alias apc='ansible-playbook --check'
-alias apv='ansible-playbook -v'
-
 # Show system info and color test on new interactive shells (only if interactive)
 if [[ $- == *i* ]] >/dev/null 2>&1; then
     fastfetch -c paleofetch

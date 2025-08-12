@@ -67,7 +67,7 @@ echo 1 | sudo tee /sys/class/drm/card*/device/rescan
 ## Files
 
 - `dotfiles/.config/hypr/conf/environment.conf` - X11 force setting
-- `ansible/desktop-applications.ansible.yml` - Automated Flatpak overrides
+- System automation: See [ansible-fedora](https://github.com/pbjorklund/ansible-fedora) repository for automated Flatpak overrides
 - `docs/fix-monitors.sh` - Monitor fix helper
 - `docs/monitor-detection-helper.sh` - Monitor detection debug tool
 

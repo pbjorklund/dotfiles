@@ -13,7 +13,6 @@ MANDATORY behavioral requirements for LLMs working in this dotfiles repository.
 ## File Type Detection Requirements
 
 - **MUST** identify file types by extension AND directory location
-- **MUST** apply [`ansible.md`](.roo/rules/ansible.md:1) rules to `**/*.ansible.yml` and files in [`ansible/`](.roo/rules/ansible.md:73) directory
 - **MUST** apply [`config.md`](.roo/rules/config.md:1) rules to `**/{.*rc,.*conf,.*config}` files
 - **MUST** apply [`documentation.md`](.roo/rules/documentation.md:1) rules to `**/{README,CHANGELOG,LICENSE,*.md}` files
 - **MUST** apply [`git.md`](.roo/rules/git.md:1) rules to `**/{.gitconfig,.gitignore,.git*}` files
@@ -74,21 +73,21 @@ When rule violations are detected:
 
 ### Successful Operation
 ```
-Applied rules: ansible.md, yaml.md
+Applied rules: yaml.md, shell.md
 Validation status: PASSED
-- ansible.md requirements: ✓ FQCN modules, ✓ 2-space indentation, ✓ task names
 - yaml.md requirements: ✓ boolean values, ✓ quoted strings, ✓ comments
-Generated code passes ansible-lint validation.
+- shell.md requirements: ✓ error handling, ✓ set -euo pipefail, ✓ validation
+Generated code passes validation.
 ```
 
 ### Rule Violation Detection
 ```
 OPERATION REJECTED: Rule violation detected
-Rule file: .roo/rules/ansible.md
+Rule file: .roo/rules/yaml.md
 Section: Boolean and Value Requirements
 Requirement: "MUST use true/false (never yes/no)"
-Violation: Found 'become: yes' on line 15
-Correction: Change to 'become: true'
+Violation: Found 'enabled: yes' on line 15
+Correction: Change to 'enabled: true'
 ```
 
 ## Meta-Rule Requirements

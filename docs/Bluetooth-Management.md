@@ -13,16 +13,12 @@ Bluetooth integration for Hyprland that leverages your existing GNOME Bluetooth 
 
 ## Installation
 
-The Bluetooth integration is automatically installed when you run the Hyprland desktop playbook:
+The Bluetooth integration is part of the system automation setup. See the [ansible-fedora](https://github.com/pbjorklund/ansible-fedora) repository for automated installation:
 
 ```bash
-cd ansible
+# In the ansible-fedora project
 ansible-playbook hyprland-desktop.ansible.yml
-```
-
-Or install Bluetooth integration separately:
-
-```bash
+# Or install Bluetooth integration separately:
 ansible-playbook bluetooth-hyprland.ansible.yml
 ```
 

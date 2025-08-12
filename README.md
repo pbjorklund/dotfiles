@@ -1,13 +1,16 @@
 # Le Dotfiles
 
-Automated Fedora workstation setup using modular Ansible playbooks and dotfiles. **This is a personal configuration** - fork and adapt to your needs.
+Personal dotfiles for Linux development environments. Focused on terminal workflows with Kitty + tmux + Neovim and AI coding tools integration. **This is a personal configuration** - fork and adapt to your needs.
 
 > [!IMPORTANT]
-> **After running install or ansible**: Search and replace hardcoded paths for your username:
+> **After running install**: Search and replace hardcoded paths for your username:
 > 1. Open in nvim: `nvim` (or any file)
 > 2. Search and replace: `,fg` then search `/home/pbjorklund` and replace with your path
 >
 > Many tools don't properly expand `~` so we use absolute paths. Update these to match your system. I could fix, but to lazy.
+
+> [!NOTE]
+> **System automation moved**: Ansible playbooks for system setup have been moved to a [separate repository](https://github.com/pbjorklund/ansible-fedora). This repo now focuses purely on dotfiles and personal configurations.
 
 ## My Development Workflow
 
@@ -30,49 +33,23 @@ Automated Fedora workstation setup using modular Ansible playbooks and dotfiles.
 git clone https://github.com/pbjorklund/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
-# Full automated setup (recommended for new systems)
-ansible-playbook ansible/workstation-setup.ansible.yml
-
-# Selective setup - common tag combinations:
-ansible-playbook ansible/workstation-setup.ansible.yml --tags security,development
-ansible-playbook ansible/workstation-setup.ansible.yml --tags desktop,privacy
-
-# Configuration files only
+# Install dotfiles (configuration files only)
 cd dotfiles && ./install.sh
 ```
 
+> **For system automation**: See the separate [ansible-fedora](https://github.com/pbjorklund/ansible-fedora) repository for automated Fedora workstation setup.
+
 ## What This Provides
 
-**Core System** (`security`, `base`)
-- SSH key management, 1Password CLI, GitHub authentication
-- Essential development tools and system hardening
-
-**Development Toolbelt** (`development`)
+**Development Toolbelt**
 - **CLI Workflow**: Kitty + tmux + Neovim (file-watching, auto-reload)
 - **GUI Workflow**: VS Code with dark theme + extensions (roo/cline/copilot)
 - **AI Coding**: Claude Code → OpenCode workflow with notification integration
 - Containers, CLI utilities, development notifications via mako
 
-**Desktop Environment** (`desktop`, `hyprland`)
-- Hyprland with custom workspace management or GNOME fallback
-- SDDM display manager, styled consistently with terminal theme
-- Application suite, browser configuration
-
-**Hardware Support** (`hardware`)
-- ThinkPad fingerprint authentication setup (complex, now automated)
-- DisplayLink drivers configuration (notoriously difficult, now documented)
-- Power management and device-specific optimizations
-
 ## File Structure (What Goes Where)
 
 ```
-ansible/                    # System automation - run these to set up your machine
-├── workstation-setup.yml   # Master playbook that runs everything
-├── base-system.yml         # Core packages, users, basic config
-├── development-tools.yml   # Languages, editors, containers
-├── hyprland-desktop.yml    # Wayland desktop environment
-└── hardware-*.yml          # Device-specific stuff (fingerprint, displaylink)
-
 dotfiles/                   # Personal config files
 ├── install.sh             # Symlinks everything to ~/.config, ~/.*
 ├── nvim/                  # Neovim config with file watching
@@ -174,7 +151,6 @@ llm-link --detach
 
 ## Why These Choices
 
-**Ansible over shell scripts**: Idempotent, handles errors, self-documenting
 **Hyprland over i3/sway**: Better multi-monitor, active development
 **tmux over screen/zellij**: Better scripting, mouse support, more features. But most of all I'm a grumpy old man set in his ways
 **Neovim over vim**: Lua config, built-in LSP, better plugin ecosystem. Kinda forced into it
@@ -183,8 +159,7 @@ llm-link --detach
 
 ## Requirements
 
-- Fedora Linux with sudo access
-- Ansible (`dnf install ansible`)
-- Internet connection for package downloads
-- Some patience for first run (takes 10-15 minutes)
+- Linux environment (tested on Fedora)
+- Git for cloning and managing dotfiles
+- Basic shell utilities (bash/zsh)
 
