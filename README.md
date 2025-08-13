@@ -58,7 +58,7 @@ cd ~/dotfiles
 
 **AI Development Integration**
 - Unified instruction system for Claude Code, OpenCode, GitHub Copilot, Roo, Gemini
-- Desktop notifications for AI task completion (requires `dev-notify.sh` from machine-setup)
+- Desktop notifications for AI task completion (requires `dev-notify.sh` from machine-setup/machines/laptop-fedora/bin/)
 - Neovim auto-reloads when external AI tools modify files
 
 **Hyprland Workspace Management**
@@ -102,3 +102,7 @@ cd ~/dotfiles
 - **Neovim over vim**: Lua configuration, built-in LSP, modern plugin ecosystem
 - **Kitty over alacritty**: Better font rendering, graphics protocol support
 - **Application-centric organization**: Easier maintenance than filesystem mirroring
+
+## TODO
+
+- [ ] Use `dev-notify` from $PATH instead of hardcoded machine-setup paths

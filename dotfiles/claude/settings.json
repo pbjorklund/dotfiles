@@ -1050,7 +1050,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/pbjorklund/Projects/machine-setup/bin/dev-notify.sh"
+            "command": "/home/pbjorklund/Projects/machine-setup/machines/laptop-fedora/bin/dev-notify.sh"
           }
         ]
       }
