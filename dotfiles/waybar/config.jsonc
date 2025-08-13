@@ -5,12 +5,13 @@
   {
     "output": [
       "Dell Inc. DELL U2419HC F3T3KS2",
-      "Samsung Electric Company SE790C",
+      "Samsung Electric Company SE790C", 
       "Acer Technologies Acer XZ321QU 0x9372982E",
       "eDP-1"
     ],
     "height": 32,
     "spacing": 0,
+    "reload_style_on_change": false,
     "modules-left": ["hyprland/workspaces", "mpris"],
     "modules-center": ["clock"],
     "modules-right": [
