@@ -106,3 +106,8 @@ cd ~/dotfiles
 ## TODO
 
 - [ ] Use `dev-notify` from $PATH instead of hardcoded machine-setup paths
+- [ ] Replace hardcoded `/home/pbjorklund/` paths with `$HOME` or environment variables where possible
+- [ ] Add install script option to automatically replace username paths during installation  
+- [ ] Fix hypr monitor configuration to use proper monitor IDs instead of placeholder
+- [ ] Verify workspace window rules work correctly (currently marked as TODO in config)
+- [ ] Create template system for machine-specific configurations (laptop vs desktop vs server)
